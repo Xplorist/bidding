@@ -4,14 +4,60 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.foxconn.bidding.mapper.UserMapper">
     <!-- 通過用戶名查找用戶 -->
-    <select id="findUserByUsername" parameterType="String" resultType="com.foxconn.bidding.model.User">
+    <select id="findUserByUsername" parameterType="String" resultType="com.foxconn.bidding.model.USER_ACUNT_bean">
         select t.* from USER_ACUNT t where t.username = #{username}
     </select>
 
     <!-- 通過id查找用戶 -->
-    <select id="findUserById" parameterType="String" resultType="com.foxconn.bidding.model.User">
+    <select id="findUserById" parameterType="String" resultType="com.foxconn.bidding.model.USER_ACUNT_bean">
         select t.* from USER_ACUNT t where t.pkid = #{id}
     </select>
+
+    <!-- 新增用戶 -->
+    <insert id="addUser" parameterType="com.foxconn.bidding.model.USER_ACUNT_bean">
+        insert into USER_ACUNT t
+          (t.user_info_pkid, t.username, t.password)
+        values
+          (#{user_info_pkid}, #{username}, #{password})
+    </insert>
+
+    <!-- 新增用戶信息 -->
+    <insert id="addUserInfo" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
+        insert into USER_INFO t
+          (t.pkid,
+           t.username,
+           t.in_out_type,
+           t.send_recv_type,
+           t.belong_factory,
+           t.belong_group,
+           t.belong_office,
+           t.dept_name,
+           t.legal_person,
+           t.cost_code,
+           t.send_mnufc_range,
+           t.bank_acunt,
+           t.busis_mngr,
+           t.tel,
+           t.email,
+           t.summary)
+        values
+          (#{pkid},
+           #{username},
+           #{in_out_type},
+           #{send_recv_type},
+           #{belong_factory},
+           #{belong_group},
+           #{belong_office},
+           #{dept_name},
+           #{legal_person},
+           #{cost_code},
+           #{send_mnufc_range},
+           #{bank_acunt},
+           #{busis_mngr},
+           #{tel},
+           #{email},
+           #{summary})
+    </insert>
 
     <!-- 注釋template,在最後一行 -->
 </mapper>

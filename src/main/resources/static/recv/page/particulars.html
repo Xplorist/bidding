@@ -29,7 +29,7 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="./merchant/enter.html">
               商家入駐
             </a>
           </li>
@@ -43,7 +43,7 @@
     </section>
     <section class="logo">
       <div class="type-area logo-content">
-        <div class="logo-icon"></div>
+        <a href="../index.html"></a>
         <div class="search-box">
           <input type="text" class="search-text" placeholder="請輸入信息">
           <input type="submit" class="search-btn" value="搜索">
@@ -524,7 +524,8 @@
         </div>
       </div>
     </section>
-    <section class="alertBox" v-if="alertBoxFlag">
+    <!-- 彈窗 -->
+    <section class="alertBox" v-show="alertBoxFlag">
       <div class="content">
         <div class="wrapper">
           <div class="top">
@@ -574,8 +575,8 @@
             <!-- 表格2 -->
             <div class="listSec">
               <div class="info">
-                <div class="listName">報價清單: </div>
-                <div class="operation">
+                <div>報價清單: </div>
+                <div>
                   <div class="up-icon"></div>
                   <div class="up-text">批量上傳報價清單</div>
                   <div class="dow-text">下載模板</div>
@@ -615,16 +616,16 @@
               </div>
               <div class="add">
                 <div class="addIcon"></div>
-                <div class="addText">添 加</div>
+                <div>添 加</div>
               </div>
             </div>
             <!-- footer -->
             <div class="footer">
               <div class="agreement">
-                <input class="check" type="checkBox">
-                <span>
+                <label for="agree">
+                  <input id="agree" type="checkBox">
                   我已仔细阅读此竞标信息，并对我提交的信息负责。
-                </span>
+                </label>
               </div>
               <div class="startBtn">
                 開始競價

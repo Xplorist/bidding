@@ -18,9 +18,9 @@ new Vue({
         },
         // 所屬單位可選項【不傳】
         departmentList: {
-          partOne: ['成都', '深圳'],
-          partTwo: ['次集團', '集團'],
-          partThree: ['事業群'],
+          partOne: ['成都', '深圳', '鄭州'],
+          partTwo: ['A', 'B', 'C', 'D', 'D'],
+          partThree: ['SHZBG', 'PCEBG', 'CCPBG', 'CNSBG', 'NWING', 'CMMSG'],
           partFour: ['處'],
         },
         // 單位名稱

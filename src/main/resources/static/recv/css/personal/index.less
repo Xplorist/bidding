@@ -42,7 +42,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      .logo-icon {
+      a {
+        display: block;
         width: 127px;
         height: 50px;
         background: url(../../imgs/index/logo.png) no-repeat;
@@ -81,21 +82,15 @@
   >.content {
     // background: [background-color] [background-image] [background-repeat] [background-attachment] [background-position] / [ background-size] [background-origin] [background-clip];
     background: #12222E url(../../imgs/particulars/contentBG.png) no-repeat top center / contain;
-    .type-area {
-      border: 1px solid rgba(0, 0, 0, 0);
+    padding-top: 24px;
       >.main {
-        width: 100%;
-        // background: #566170;  //rgba(86,97,112,1);
-        // background: #0d1c29;
         background: rgba(13, 28, 42, 0.2);
-        margin-top: 24px;
-        border: 1px solid rgba(0, 0, 0, 0);
+        padding: 20px 0;
         >.warpper {
-          margin: 20px 20px 20px 20px;
+          margin: 0 20px;
           display: flex;
           justify-content: space-between;
           >.sideBar {
-            // height: 50px;
             background-color: #D3DFE7;
             width: 240px;
             display: flex;
@@ -448,7 +443,6 @@
           }
         }
       }
-    }
   }
 
   >.footer {

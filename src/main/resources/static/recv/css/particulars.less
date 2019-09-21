@@ -47,8 +47,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-
-      .logo-icon {
+      >a{
+        display: block;
         width: 127px;
         height: 50px;
         background: url(../imgs/index/logo.png) no-repeat;
@@ -99,7 +99,7 @@
         justify-content: flex-end;
         color: #627887;
         font-size: 14px;
-        margin-top: 10px;
+        padding-top: 10px;
 
         ul {
           li {
@@ -579,10 +579,10 @@
     background-color: rgba(0, 0, 0, 0.6);
 
     >.content {
-      position: absolute;
+      position: fixed;
       width: 1200px;
       // height: 800px;
-      top: 160px;
+      top: 60px;
       left: 50%;
       transform: translateX(-50%);
       background-color: #D3DFE7;
@@ -668,10 +668,10 @@
               display: flex;
               justify-content: space-between;
               align-items: center;
-              > .listName{
+              > div:nth-child(1){
                 color: #0096FF;
               }
-              > .operation{
+              > div:nth-child(2){
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
@@ -729,9 +729,6 @@
                 background: url(../imgs/particulars/add.png) no-repeat;
                 margin-right: 14px;
               }
-              > .addText{
-                line-height: 36px;
-              }
             }
           }
           > .footer{
@@ -744,10 +741,14 @@
               align-items: center;
               font-size: 14px;
               color: #212F3A;
-              > .check{
-                width: 16px;
+              label{
+                display: flex;
+                align-items: center;
+                input{
+                  width: 16px;
                 height: 16px;
                 margin-right: 5px;
+                }
               }
             }
             > .startBtn {

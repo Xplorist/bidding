@@ -42,7 +42,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      .logo-icon {
+      >a {
+        display: block;
         width: 127px;
         height: 50px;
         background: url(../../imgs/index/logo.png) no-repeat;
@@ -79,230 +80,223 @@
   }
 
   >.content {
-    // background: [background-color] [background-image] [background-repeat] [background-attachment] [background-position] / [ background-size] [background-origin] [background-clip];
     background: #12222E url(../../imgs/particulars/contentBG.png) no-repeat top center / contain;
-    .type-area {
-      border: 1px solid rgba(0, 0, 0, 0);
-      >.main {
-        width: 100%;
-        // background: #566170;  //rgba(86,97,112,1);
-        // background: #0d1c29;
-        background: rgba(13, 28, 42, 0.2);
-        margin-top: 24px;
-        border: 1px solid rgba(0, 0, 0, 0);
-        >.warpper {
-          margin: 20px 20px 20px 20px;
+    padding-top: 24px;
+    >.main {
+      background: rgba(13, 28, 42, 0.2);
+      padding: 20px 0;
+      >.warpper {
+        margin: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        >.sideBar {
+          // height: 50px;
+          background-color: #D3DFE7;
+          width: 240px;
           display: flex;
-          justify-content: space-between;
-          >.sideBar {
-            // height: 50px;
-            background-color: #D3DFE7;
-            width: 240px;
+          flex-direction: column;
+          align-items: center;
+          >.portrait {
+            margin-top: 55px;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background-color: #EEF4F7;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            >.portrait {
-              margin-top: 55px;
-              width: 130px;
-              height: 130px;
+            .porImg {
+              width: 120px;
+              height: 120px;
               border-radius: 50%;
-              background-color: #EEF4F7;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              .porImg {
-                width: 120px;
-                height: 120px;
-                border-radius: 50%;
-                background: url(../../imgs/personal/portrait.png) no-repeat center / cover;
-              }
+              background: url(../../imgs/personal/portrait.png) no-repeat center / cover;
             }
-            >.department {
-              margin-top: 18px;
-              font-size: 18px;
-              color: #212F3A;
-              display: flex;
-              align-items: center;
-              >.depIcon {
-                display: inline-block;
-                width: 14px;
-                height: 23px;
-                background: url(../../imgs/personal/depIcon.png) no-repeat;
-                margin-right: 6px;
-              }
+          }
+          >.department {
+            margin-top: 18px;
+            font-size: 18px;
+            color: #212F3A;
+            display: flex;
+            align-items: center;
+            >.depIcon {
+              display: inline-block;
+              width: 14px;
+              height: 23px;
+              background: url(../../imgs/personal/depIcon.png) no-repeat;
+              margin-right: 6px;
             }
-            >.navigate {
-              margin-top: 26px;
+          }
+          >.navigate {
+            margin-top: 26px;
+            width: 100%;
+            >a {
+              display: block;
               width: 100%;
-              >a {
-                display: block;
-                width: 100%;
-                height: 60px;
-                border-top: 1px solid #C0C8CF;
-                // background-color: #2E6E9E;
-                &.active,
-                &:hover {
-                  background-color: #2E6E9E;
-                  >div {
-                    color: #fff;
-                  }
-                }
+              height: 60px;
+              border-top: 1px solid #C0C8CF;
+              // background-color: #2E6E9E;
+              &.active,
+              &:hover {
+                background-color: #2E6E9E;
                 >div {
-                  width: 60%;
-                  height: 60px;
-                  margin: 0 auto;
-                  line-height: 60px;
-                  font-size: 16px;
-                  color: #12222E;
-                  >span {
-                    color: #E51313;
-                  }
+                  color: #fff;
+                }
+              }
+              >div {
+                width: 60%;
+                height: 60px;
+                margin: 0 auto;
+                line-height: 60px;
+                font-size: 16px;
+                color: #12222E;
+                >span {
+                  color: #E51313;
                 }
               }
             }
           }
+        }
 
-          >.mainPart {
-            width: 910px;
-            background-color: #D3DFE7;
-            >.panel {
-              margin: 30px;
-              >.title{
-                color: #12222E;
-                font-size: 18px;
-                padding-bottom: 20px;
-                margin-bottom: 20px;
-                border-bottom: 1px solid #AFC2CF;
-              }
-              /deep/ .el-form{
-                // margin-bottom: 150px;
-                // 單獨列
-                .el-form-item{
-                  display: flex;
-                  align-items: center;
-                  // label全局效果修改
-                  .el-form-item__label{
-                    width: 100px !important;
-                    text-align: left;
-                    font-size: 16px;
-                    color: #212F3A;
+        >.mainPart {
+          width: 910px;
+          background-color: #D3DFE7;
+          >.panel {
+            margin: 30px;
+            >.title {
+              color: #12222E;
+              font-size: 18px;
+              padding-bottom: 20px;
+              margin-bottom: 20px;
+              border-bottom: 1px solid #AFC2CF;
+            }
+            /deep/ .el-form {
+              // margin-bottom: 150px;
+              // 單獨列
+              .el-form-item {
+                display: flex;
+                align-items: center;
+                // label全局效果修改
+                .el-form-item__label {
+                  width: 100px !important;
+                  text-align: left;
+                  font-size: 16px;
+                  color: #212F3A;
+                }
+                // content全局效果修改
+                .el-form-item__content {
+                  font-size: 16px;
+                  color: #212F3A;
+                  margin-left: 10px !important;
+                  .el-input {
+                    input {
+                      background-color: #D3DFE7;
+                      border: 1px solid #AFC2CF;
+                      border-radius: 0px;
+                      width: 320px;
+                      &:focus {
+                        border-color: #0092FF;
+                      }
+                    }
                   }
-                  // content全局效果修改
-                  .el-form-item__content{
-                    font-size: 16px;
-                    color: #212F3A;
-                    margin-left: 10px !important;
-                    .el-input{
-                      input{
+                }
+                // 賬號屬性欄修改
+                &.properties {
+                  span {
+                    color: #0092FF;
+                  }
+                }
+                // 頭像欄修改
+                &.portrait {
+                  .el-form-item__content {
+                    display: flex;
+                    align-items: center;
+                    .el-image {
+                      border-radius: 50%;
+                      margin-right: 20px;
+                    }
+                    span {
+                      display: inline-block;
+                      margin: 0 auto;
+                      color: #0092FF;
+                      cursor: pointer;
+                    }
+                  }
+                }
+                // 所屬單位修改
+                &.department {
+                  .el-form-item__content {
+                    .el-select {
+                      .el-input {
+                        input {
+                          width: 100px;
+                        }
+                      }
+                    }
+                  }
+                }
+                // 費用代碼修改
+                // 加工範圍修改
+                // 銀行賬號修改
+                &.costCode,
+                &.processRange,
+                &.bankAccount {
+                  .operation {
+                    color: #0092FF;
+                    margin-left: 10px;
+                    cursor: pointer;
+                  }
+                }
+                // 聯繫電話
+                &.tel {
+                  .el-form-item__content {
+                    display: flex;
+                    align-items: center;
+                    .el-checkbox {
+                      margin-left: 20px;
+                      .el-checkbox__inner {
                         background-color: #D3DFE7;
-                        border: 1px solid #AFC2CF;
-                        border-radius: 0px;
+                        border: 1px dashed #AFC2CF;
+                        &:after {
+                          border-color: #0092FF;
+                        }
+                      }
+                      .el-checkbox__label {
+                        font-size: 16px;
+                        color: #212F3A;
+                      }
+                    }
+                  }
+                }
+                // email
+                &.email {
+                  .el-form-item__content {
+                    .el-input {
+                      input {
                         width: 320px;
-                        &:focus{
+                      }
+                    }
+                  }
+                }
+                // 簡介
+                &.intro {
+                  .el-form-item__content {
+                    .el-textarea {
+                      textarea {
+                        width: 700px;
+                        background-color: #D3DFE7;
+                        border-color: #AFC2CF;
+                        text-indent: 2rem;
+                        border-radius: 0px;
+                        &:focus {
                           border-color: #0092FF;
                         }
                       }
                     }
                   }
-                  // 賬號屬性欄修改
-                  &.properties{
-                    span{
-                      color: #0092FF;
-                    }
-                  }
-                  // 頭像欄修改
-                  &.portrait{
-                    .el-form-item__content{
-                      display: flex;
-                      align-items: center;
-                      .el-image{
-                        border-radius: 50%;
-                        margin-right: 20px;
-                      }
-                      span{
-                        display: inline-block;
-                        margin: 0 auto; 
-                        color: #0092FF;
-                        cursor: pointer;
-                      }
-                    }
-                  }
-                  // 所屬單位修改
-                  &.department{
-                    .el-form-item__content{
-                      .el-select{
-                        .el-input{
-                          input{
-                            width: 100px;
-                          }
-                        }
-                      }
-                    }
-                  }
-                  // 費用代碼修改
-                  // 加工範圍修改
-                  // 銀行賬號修改
-                  &.costCode,
-                  &.processRange,
-                  &.bankAccount{
-                    .operation{
-                      color: #0092FF;
-                      margin-left: 10px;
-                      cursor: pointer;
-                    }
-                  }
-                  // 聯繫電話
-                  &.tel{
-                    .el-form-item__content{
-                      display: flex;
-                      align-items: center;
-                      .el-checkbox{
-                        margin-left: 20px;
-                        .el-checkbox__inner{
-                          background-color: #D3DFE7;
-                          border: 1px dashed #AFC2CF;
-                          &:after{
-                            border-color: #0092FF;
-                          } 
-                        }
-                        .el-checkbox__label{
-                          font-size: 16px;
-                          color: #212F3A;
-                        }
-                      }
-                    }
-                  }
-                  // email
-                  &.email{
-                    .el-form-item__content{
-                      .el-input{
-                        input{
-                          width: 320px;
-                        }
-                      }
-                    }
-                  }
-                  // 簡介
-                  &.intro{
-                    .el-form-item__content{
-                      .el-textarea{
-                        textarea{
-                          width: 700px;
-                          background-color: #D3DFE7;
-                          border-color: #AFC2CF;
-                          text-indent: 2rem;
-                          border-radius: 0px;
-                          &:focus{
-                            border-color: #0092FF;
-                          }
-                        }
-                      }
-                    }
-                  }
-
-
-
                 }
+
+
+
               }
             }
           }

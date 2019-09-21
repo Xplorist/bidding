@@ -2,8 +2,7 @@ package com.foxconn.bidding.model;
 
 import lombok.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @RequiredArgsConstructor(staticName = "of")
 @AllArgsConstructor

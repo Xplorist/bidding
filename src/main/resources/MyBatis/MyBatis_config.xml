@@ -4,5 +4,8 @@
     <settings>
         <!-- 打印SQL语句到控制台 -->
         <setting name="logImpl" value="STDOUT_LOGGING" />
+
+        <!-- insert/update時值為空的數據類型設置 -->
+        <setting name="jdbcTypeForNull" value="NULL"/>
     </settings>
 </configuration>

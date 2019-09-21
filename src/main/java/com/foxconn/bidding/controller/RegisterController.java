@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
+@RequestMapping("register")
 public class RegisterController {
     @Autowired
     private RegisterService svc;

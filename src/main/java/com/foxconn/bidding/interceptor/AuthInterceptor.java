@@ -5,8 +5,9 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.foxconn.bidding.model.User;
+import com.foxconn.bidding.model.USER_ACUNT_bean;
 import com.foxconn.bidding.service.UserService;
+import com.foxconn.bidding.util.SimpleEncodeUtil;
 import com.foxconn.bidding.util.VerifyToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
@@ -50,13 +51,13 @@ public class AuthInterceptor implements HandlerInterceptor {
                     throw new RuntimeException("token非法，沒有userId！");
                 }
 
-                User user = userService.findUserById(userId);
+                USER_ACUNT_bean user = userService.findUserById(userId);
                 if(user == null) {
                     throw new RuntimeException("用戶不存在，請重新登錄！");
                 }
 
                 // 驗證token
-                JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(user.getPassword())).build();
+                JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(SimpleEncodeUtil.encode(user.getPassword()))).build();
 
                 try {
                     jwtVerifier.verify(token);
