@@ -14,6 +14,10 @@
 <div id="app">
     <input type="file" @change="update_file($event)">
     <img :src="img_src">
+    <div>
+        <a :href="img_src" style="color: red;">下載{{ file_origin_name }}</a>
+        <button @click="delete_file">刪除{{ file_origin_name }}</button>
+    </div>
 </div>
 </body>
 <!-- JS library -->

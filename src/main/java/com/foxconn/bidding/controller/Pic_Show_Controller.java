@@ -21,6 +21,8 @@ public class Pic_Show_Controller {
     private FTP_File_Util util;
 
     // 加載圖片(param中必須傳遞 file_save_path, file_save_name, file_origin_name)
+    // html中用<a href="/api/pic_show/load?file_save_path=xxx&file_save_name=yyy&file_origin_name=zzz"></a>來實現下載
+    // html中用<img src="/api/pic_show/load?file_save_path=xxx&file_save_name=yyy&file_origin_name=zzz"></img>來實現顯示
     @RequestMapping("/load")
     public void load(HttpServletRequest request, HttpServletResponse response) {
         String file_save_path = request.getParameter("file_save_path");

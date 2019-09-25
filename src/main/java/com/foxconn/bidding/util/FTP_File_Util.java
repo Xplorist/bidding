@@ -1,5 +1,6 @@
 package com.foxconn.bidding.util;
 
+import com.foxconn.bidding.model.FTP_File_Param;
 import com.foxconn.bidding.model.ResultParam;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
@@ -10,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -86,8 +89,12 @@ public class FTP_File_Util {
                 return new ResultParam("0", "上傳文件失敗", null);
             }
         }
+        FTP_File_Param ftp_file_param = new FTP_File_Param();
+        ftp_file_param.setFile_save_path(file_save_path);
+        ftp_file_param.setFile_save_name(file_save_name);
+        ftp_file_param.setFile_origin_name(file_origin_name);
 
-        return new ResultParam("1", "上傳文件成功", file_save_path + File.separator + file_save_name);
+        return new ResultParam("1", "上傳文件成功", ftp_file_param);
     }
 
     /**
@@ -128,7 +135,7 @@ public class FTP_File_Util {
             }
 
             is = ftp.retrieveFileStream(file_save_name);
-            ftp.logout();
+            //ftp.logout();// 必須把登出的代碼注釋掉，不然會導致大文件無法下載
         } catch (Exception e) {
             e.printStackTrace();
             return new ResultParam("0", "下載文件失敗", null);
@@ -144,5 +151,63 @@ public class FTP_File_Util {
         }
 
         return new ResultParam("1", "下載文件成功", is);
+    }
+
+    /**
+     * 文件刪除
+     * @param param param中必須包含 file_save_path, file_save_name
+     * @return
+     */
+    public ResultParam fileDelete(FTP_File_Param param) {
+        String file_save_path = null;
+        String file_save_name = null;
+        try {
+            file_save_path = URLDecoder.decode(param.getFile_save_path(), "UTF-8");
+            file_save_name = URLDecoder.decode(param.getFile_save_name(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        String FTP_Address = util.getAddress();
+        Integer FTP_Port = util.getPort();
+        String FTP_Username = util.getUsername();
+        String FTP_Password = util.getPassword();
+
+        FTPClient ftp = new FTPClient();
+        ftp.setControlEncoding("GBK");
+
+        try {
+            int replay;
+            ftp.connect(FTP_Address, FTP_Port);
+            ftp.login(FTP_Username, FTP_Password);
+            replay = ftp.getReplyCode();
+            if(!FTPReply.isPositiveCompletion(replay)) {
+                ftp.disconnect();
+                return new ResultParam("0", "刪除文件失敗", null);
+            }
+
+            ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
+            String file_url = file_save_path + File.separator + file_save_name;
+
+            boolean deleteFile_flag = ftp.deleteFile(file_url);
+            if(!deleteFile_flag) {
+                return new ResultParam("0", "刪除文件失敗", null);
+            }
+            //ftp.logout();// 必須把登出的代碼注釋掉，不然會導致大文件無法下載
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResultParam("0", "刪除文件失敗", null);
+        } finally {
+            try {
+                if(ftp.isConnected()) {
+                    ftp.disconnect();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return new ResultParam("0", "刪除文件失敗", null);
+            }
+        }
+
+        return new ResultParam("1", "刪除文件成功", null);
     }
 }
