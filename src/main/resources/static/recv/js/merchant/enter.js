@@ -4,7 +4,7 @@ new Vue({
     return {
       category:{
         // 選中項
-        checked: true, // recipients demanders
+        checked: true, // true: recipients false: demanders
         // 圖片地址
         recipients: {
           backgroundImage: "url('../../imgs/merchant/recipients.png')",

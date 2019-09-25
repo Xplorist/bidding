@@ -52,9 +52,26 @@ new Vue({
   },
   methods: {
     save() {
-
       console.log(this.form.intro);
       console.log('submit!');
+    },
+    // 點擊更換觸發input[type='file']的點擊事件
+    upImg(){
+      this.$refs.fileInp.dispatchEvent(new MouseEvent('click'))
+    },
+    getFile(){
+      // 獲取到 input 選中的文件信息
+      const inputFile = this.$refs.fileInp.files[0]
+      // window 对象的 URL 对象通過 createObjectURL() 将blob或者file读取成一个url。
+      const windowURl = window.URL || window.webkitURL
+      if (inputFile) {
+        if (inputFile.type !== 'image/jpeg' && inputFile.type !== 'image/png' && inputFile.type !== 'image/gif') {
+          alert('請選擇圖片文件')
+          return
+        }
+        const url = windowURl.createObjectURL(inputFile)
+        this.form.portraitUrl = url
+      }
     }
   }
 })

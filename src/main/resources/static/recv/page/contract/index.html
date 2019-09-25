@@ -1,16 +1,20 @@
-<!-- <!DOCTYPE html> -->
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
-"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!DOCTYPE html>
 <html lang="en">
+<!-- <?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"> -->
 
 <head>
   <meta charset="UTF-8">
   <title>Contract</title>
+  <!-- 引入公共样式 -->
   <link rel="stylesheet" href="../../lib/normalize.css">
-  <link rel="stylesheet" href="../../css/common.css">
-  <!-- 引入样式 -->
   <link rel="stylesheet" href="../../lib/element/index.css">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/module/top.css">
+  <!-- <link rel="stylesheet" href="../../css/module/logo.css"> -->
+  <link rel="stylesheet" href="../../css/module/footer.css">
+  
   <!-- 適配不支持H5的瀏覽器 -->
   <script src="../../lib/html5shiv.min.js"></script>
   <link rel="stylesheet" href="../../css/contract/index.css">
@@ -34,7 +38,7 @@
 
 <body>
   <div id="app" class="container">
-    <section class="top">
+    <section id="top">
       <div class="type-area top-nav">
         <a href="../../index.html">返回首頁</a>
         <ul>
@@ -61,7 +65,7 @@
         </ul>
       </div>
     </section>
-    <section class="content">
+    <section id="content">
       <div class="main type-area">
         <!-- svgBox 背景 -->
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1213" height="1991" viewBox="0 0 1213 1991">
@@ -154,9 +158,8 @@
         </div>
       </div>
     </section>
-    <section class="footer">
-      <div class="foo-content type-area">
-        <div class="foo-warpper">
+    <section id="footer">
+        <div class="foo-warpper type-area">
           <div class="technical">
             <div class="m-logo"></div>
             <div class="text">技術服務: 只能雲網絡開發成都分部</div>
@@ -191,7 +194,6 @@
             </div>
           </div>
         </div>
-      </div>
     </section>
   </div>
   <!-- 先引入 Vue -->

@@ -2,14 +2,20 @@ new Vue({
   el: '#app',
   data: function() {
     return {
+      // 評分信息
       rate: {
+        // 評價類型
+        type: 'received', // published
+        // 評分顏色
         color: ['#0096FF', '#0096FF', '#0096FF'],
+        // 評分類型、值、數量
         list: [
           { name: '出貨時效', value: 3.2, num: '48' },
           { name: '出貨質量', value: 5.0, num: '53' },
           { name: '服務態度', value: 4.5, num: '57' }
         ]
       },
+      // 評價類容
       comments: [{
           text: '与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。',
           date: '2019-08-29 17:22:37',

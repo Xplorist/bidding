@@ -1,24 +1,29 @@
-<!-- <!DOCTYPE html> -->
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
-"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!DOCTYPE html>
 <html lang="en">
+<!-- <?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"> -->
 
 <head>
   <meta charset="UTF-8">
   <title>InformationEntry</title>
+  <!-- 引入公共样式 -->
   <link rel="stylesheet" href="../../lib/normalize.css">
-  <link rel="stylesheet" href="../../css/common.css">
-  <!-- 引入样式 -->
   <link rel="stylesheet" href="../../lib/element/index.css">
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/module/top.css">
+  <link rel="stylesheet" href="../../css/module/logo.css">
+  <link rel="stylesheet" href="../../css/module/footer.css">
+
+  <link rel="stylesheet" href="../../css/merchant/informationEntry.css">
+  
   <!-- 適配不支持H5的瀏覽器 -->
   <script src="../../lib/html5shiv.min.js"></script>
-  <link rel="stylesheet" href="../../css/merchant/informationEntry.css">
 </head>
 
 <body>
   <div id="app" class="container">
-    <section class="top">
+    <section id="top">
       <div class="type-area top-nav">
         <ul>
           <li>
@@ -32,7 +37,7 @@
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="./enter.html">
               商家入駐
             </a>
           </li>
@@ -44,7 +49,7 @@
         </ul>
       </div>
     </section>
-    <section class="logo">
+    <section id="logo">
       <div class="type-area logo-content">
         <a href="../../index.html"></a>
         <div class="search-box">
@@ -53,45 +58,44 @@
         </div>
       </div>
     </section>
-    <section class="content">
+    <section id="content">
       <!-- 主體內容 -->
       <div class="main type-area">
-        <div class="warpper">
           <div class="general">
-            <!-- 頂部 -->
-            <div class="title">
-              <span>模治檢具订单信息服務平台【厂商入駐】</span>
-              <span>数据截至到2019-08-31 24:00:00</span>
-            </div>
-            <!-- 交易總額 -->
-            <div class="amount">
-              <span>平台交易總額</span>
-              <div class="number">
-                <span>￥</span>
-                <span>95,371,863</span>
-                <span>元</span>
+              <!-- 頂部 -->
+              <div class="gen_title">
+                <span>模治檢具订单信息服務平台【厂商入駐】</span>
+                <span>数据截至到2019-08-31 24:00:00</span>
               </div>
-              <div class="info">
-                <span>需求總量: 13,537個</span>
-                <span>加工廠商: 159個</span>
-                <span>需求廠商: 159個</span>
+              <!-- 交易總額 -->
+              <div class="gen_amount">
+                <span>平台交易總額</span>
+                <div class="gen_am_number">
+                  <span>￥</span>
+                  <span>95,371,863</span>
+                  <span>元</span>
+                </div>
+                <div class="gen_am_info">
+                  <span>需求總量: 13,537個</span>
+                  <span>加工廠商: 159個</span>
+                  <span>需求廠商: 159個</span>
+                </div>
               </div>
             </div>
-          </div>
           <!-- 標語 -->
           <div class="slogan">
             加入我们,让您遇见更好的伙伴
           </div>
-          <!-- 信息框 -->
+          <!-- 信息填寫框 -->
           <div class="formBox">
-            <div class="title">
+            <div class="form_title">
               <span>填寫資料</span>
-              <div>
-                <span>我是接單方</span>
+              <div class="tit_describe">
+                <span>我是{{category == 'recipients' ? '接單方':'需求方'}}</span>
                 <span>承接模治檢具加工、設計。</span>
               </div>
             </div>
-            <div class="info">
+            <div class="form_info">
               <!-- 左表單 -->
               <div class="formLeft">
                 <!-- form表單 -->
@@ -99,7 +103,8 @@
                   <!-- LOGO -->
                   <el-form-item label="LOGO:" class="logo">
                     <el-image style="width: 40px; height: 40px" :src="form.logoUrl" fit="cover"></el-image>
-                    <span>上傳</span>
+                    <span @click="upImg">上傳</span>
+                    <input ref="fileInp" type="file" class="dis_none" @change="getFile">
                     <span>200px*200px以上，不超過1M</span>
                   </el-form-item>
                   <!-- 賬號名稱 -->
@@ -125,7 +130,7 @@
                   <!-- 事業群 -->
                   <el-form-item label="事業群:" class="bussiness">
                     <el-select v-model="form.bussiness">
-                      <el-option label="SHZGB" value="SHZGB"></el-option>
+                      <el-option label="SHZBG" value="SHZBG"></el-option>
                       <el-option label="CCPBG" value="CCPBG"></el-option>
                       <el-option label="CNSBG" value="CNSBG"></el-option>
                     </el-select>
@@ -177,7 +182,7 @@
               </div>
             </div>
             <!-- 按鈕 -->
-            <div class="chooseBtn">
+            <div class="form_chooseBtn">
               <a href="#"> <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
                   <polygon points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5" style="fill:none;stroke:#0096FF;stroke-width:1"></polygon>
                   <rect x="2" y="2" width="261" height="61" style="fill:#0096FF;"></rect>
@@ -187,12 +192,10 @@
               </a>
             </div>
           </div>
-        </div>
       </div>
     </section>
-    <section class="footer">
-      <div class="foo-content type-area">
-        <div class="foo-warpper">
+    <section id="footer">
+        <div class="foo-warpper type-area">
           <div class="technical">
             <div class="m-logo"></div>
             <div class="text">技術服務: 只能雲網絡開發成都分部</div>
@@ -227,7 +230,6 @@
             </div>
           </div>
         </div>
-      </div>
     </section>
   </div>
   <!-- 先引入 Vue -->

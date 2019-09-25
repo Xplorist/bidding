@@ -14,3 +14,19 @@ a{
 	text-decoration: none;
 	color: #fff;
 }
+
+.dis_none {
+	display: none;
+}
+
+/*版心*/
+.type-area {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/*主體*/
+.container {
+  height: 100%;
+  position: relative;
+}
