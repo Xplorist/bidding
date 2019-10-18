@@ -5,7 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.foxconn.bidding.model.USER_ACUNT_bean;
+import com.foxconn.bidding.model.USER_INFO_bean;
 import com.foxconn.bidding.service.UserService;
 import com.foxconn.bidding.util.SimpleEncodeUtil;
 import com.foxconn.bidding.util.VerifyToken;
@@ -45,13 +45,13 @@ public class AuthInterceptor implements HandlerInterceptor {
                 // 獲取token中的userId
                 String userId;
                 try {
-                    userId= JWT.decode(token).getAudience().get(0);
+                    userId = JWT.decode(token).getAudience().get(0);
                 } catch (JWTDecodeException e) {
                     //e.printStackTrace();
                     throw new RuntimeException("token非法，沒有userId！");
                 }
 
-                USER_ACUNT_bean user = userService.findUserById(userId);
+                USER_INFO_bean user = userService.findUserById(userId);
                 if(user == null) {
                     throw new RuntimeException("用戶不存在，請重新登錄！");
                 }
@@ -65,6 +65,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                     //e.printStackTrace();
                     throw new RuntimeException("校驗token發生異常");
                 }
+                request.setAttribute("user_pkid", user.getPkid());
 
                 return true;
             }

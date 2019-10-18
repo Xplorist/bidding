@@ -127,7 +127,7 @@ public class FTP_File_Util {
             ftp.setFileType(FTPClient.BINARY_FILE_TYPE);
             String[] paths = file_save_path.split("\\\\");
             for(int i = 0; i < paths.length; i++) {
-                ftp.makeDirectory(paths[i]);
+                //ftp.makeDirectory(paths[i]);
                 boolean changeWorkingDirectory_flag = ftp.changeWorkingDirectory(paths[i]);
                 if(!changeWorkingDirectory_flag) {
                     return new ResultParam("0", "下載文件失敗", null);

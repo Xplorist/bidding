@@ -18,7 +18,7 @@ public class FTP_File_Controller {
     @Autowired
     private FTP_File_Util util;
 
-    // 上傳用戶頭像圖片
+    // 上傳文件
     @RequestMapping("/upload")
     public ResultParam upload(@RequestParam("file") MultipartFile file, @RequestParam("file_type") String file_type, HttpServletRequest request) {
         return util.fileUpload(file_type, file);

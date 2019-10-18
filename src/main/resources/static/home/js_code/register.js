@@ -5,15 +5,13 @@ var app = new Vue({
         password: '',
         confirmPSW: '',
         encodedPSW: '',
-        user_info: {
-            email: ''
-        }
+        email: ''
     },
     methods: {
         register: function() {
             var _self = this;
 
-            if(_self.username == "" || _self.password == "" || _self.user_info.email == "") {
+            if(_self.username == "" || _self.password == "" || _self.email == "") {
                 alert("用戶信息不能為空");
                 return;
             }
@@ -30,7 +28,7 @@ var app = new Vue({
                 data: {
                     username: _self.username,
                     password: _self.encodedPSW,
-                    user_info: _self.user_info
+                    email: _self.email
                 }
             }).then(function(response) {
                 var result = response.data;

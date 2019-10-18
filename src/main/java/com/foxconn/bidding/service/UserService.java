@@ -1,18 +1,23 @@
 package com.foxconn.bidding.service;
 
 import com.foxconn.bidding.model.ResultParam;
-import com.foxconn.bidding.model.USER_ACUNT_bean;
+import com.foxconn.bidding.model.USER_INFO_bean;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface UserService {
+    // 註冊提交前判斷用戶是否存在
+    ResultParam ck_user_is_exist(USER_INFO_bean param, HttpServletRequest request);
+
+    // 註冊
+    ResultParam register(USER_INFO_bean param, HttpServletRequest request);
+
+    // 登錄
+    ResultParam login(USER_INFO_bean param, HttpServletRequest request);
+
     // 通過id查找用戶
-    USER_ACUNT_bean findUserById(String id);
+    USER_INFO_bean findUserById(String id);
 
-    // 用戶登錄
-    ResultParam login(USER_ACUNT_bean param);
-
-    // 獲取用戶
-    ResultParam getUser(String username);
-
-    // 新增用戶
-    ResultParam addUser(USER_ACUNT_bean param);
+    // 登錄後查詢用戶信息
+    ResultParam login_user_info(USER_INFO_bean param, HttpServletRequest request);
 }

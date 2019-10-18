@@ -27,7 +27,7 @@ var app = new Vue({
                     document.cookie = result.t;
                     //window.location.href = "recv/index.html";
                 } else {
-                    alert("保存失敗:" + result.msg);
+                    alert("登錄失敗:" + result.msg);
                 }
             });
         },
@@ -35,9 +35,14 @@ var app = new Vue({
             var _self = this;
             var token = document.cookie.split(";")[0];
 
+            if(_self.username == '') {
+                alert("用戶名不能為空");
+                return;
+            }
+
             axios({
                 method: 'get',
-                url: '/user/getUser?username=11',
+                url: '/user/getUser?username=' + _self.username,
                 headers: {
                     'token': token
                 },
@@ -45,10 +50,10 @@ var app = new Vue({
             }).then(function(response) {
                 var result = response.data;
                 if(result.code == "1") {
-                    alert("登錄成功:" + result.msg);
+                    alert("驗證token成功:" + result.msg);
                     //window.location.href = "recv/index.html";
                 } else {
-                    alert("保存失敗:" + result.msg);
+                    alert("驗證token失敗:" + result.msg);
                 }
             });
         }

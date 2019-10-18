@@ -4,6 +4,7 @@ import com.foxconn.bidding.model.BaseInfoParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.service.BaseInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("api/baseInfo")
+@CrossOrigin
 public class BaseInfoController {
     @Autowired
     private BaseInfoService svc;
@@ -55,6 +57,4 @@ public class BaseInfoController {
 
         return result;
     }
-
-
 }
