@@ -20,4 +20,10 @@ public interface UserService {
 
     // 登錄後查詢用戶信息
     ResultParam login_user_info(USER_INFO_bean param, HttpServletRequest request);
+
+    // 根據用戶id查詢用戶信息
+    ResultParam query_user_info_by_pkid(USER_INFO_bean param, HttpServletRequest request);
+
+    // 更改用戶信息
+    ResultParam update_user_info(USER_INFO_bean param, HttpServletRequest request);
 }

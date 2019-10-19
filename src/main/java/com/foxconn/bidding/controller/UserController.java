@@ -1,5 +1,6 @@
 package com.foxconn.bidding.controller;
 
+import com.foxconn.bidding.model.RequestParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
 import com.foxconn.bidding.service.UserService;
@@ -43,5 +44,32 @@ public class UserController {
     @RequestMapping("/login_user_info")
     public ResultParam login_user_info(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
         return svc.login_user_info(param, request);
+    }
+
+    // 根據用戶id查詢用戶信息
+    @RequestMapping("/query_user_info_by_pkid")
+    public ResultParam query_user_info_by_pkid(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
+        ResultParam result = svc.query_user_info_by_pkid(param, request);
+
+        return result;
+    }
+
+    // 更改用戶信息
+    @VerifyToken
+    @RequestMapping("/update_user_info")
+    public ResultParam update_user_info(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
+        ResultParam result = svc.update_user_info(param, request);
+
+        return result;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+    // 模板,放在最後
+    @VerifyToken
+    @RequestMapping("/template")
+    public ResultParam template(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = ResultParam.of("", "");
+
+        return result;
     }
 }

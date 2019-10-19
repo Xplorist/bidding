@@ -93,4 +93,51 @@ public class UserServiceImpl implements UserService {
             return new ResultParam("1", "查詢用戶信息成功", user_info_bean);
         }
     }
+
+    @Override
+    public ResultParam query_user_info_by_pkid(USER_INFO_bean param, HttpServletRequest request) {
+        String pkid = param.getPkid();
+        USER_INFO_bean user_info_bean = mapper.findUserById(pkid);
+        if(user_info_bean == null) {
+            throw new RuntimeException("根據用戶id查詢用戶信息失敗");
+        }
+        String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
+        if(user_pic_file_pkid != null && !"".equals(user_pic_file_pkid)) {
+            USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file(user_pic_file_pkid);
+            user_info_bean.setUser_pic_file(user_pic_file_bean);
+        } else {
+            USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file("default");
+            user_info_bean.setUser_pic_file(user_pic_file_bean);
+        }
+
+        return new ResultParam("1", "根據用戶id查詢用戶信息成功", user_info_bean);
+    }
+
+    @Override
+    public ResultParam update_user_info(USER_INFO_bean param, HttpServletRequest request) {
+        String pkid = param.getPkid();
+        USER_PIC_FILE_bean user_pic_file = param.getUser_pic_file();
+        // 修改了用戶頭像文件，先刪除舊的文件信息，再保存新的文件信息
+        if(user_pic_file != null && user_pic_file.getFile_save_name() != null && !"".equals(user_pic_file.getFile_save_name())) {
+            USER_INFO_bean user_info_bean = mapper.findUserById(pkid);
+            String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
+            Integer f_delete_user_pic_file = mapper.delete_user_pic_file(user_pic_file_pkid);
+            /*if(f_delete_user_pic_file <= 0) {
+                throw new RuntimeException("刪除用戶頭像文件信息失敗");
+            }*/
+            user_pic_file.setPkid(user_pic_file_pkid);
+            Integer f_add_user_pic_file = mapper.add_USER_PIC_FILE(user_pic_file);
+            if(f_add_user_pic_file <= 0) {
+                throw new RuntimeException("保存用戶頭像文件信息失敗");
+            }
+        }
+
+        // 更新用戶主表信息
+        Integer f_update_user_info = mapper.update_user_info(param);
+        if(f_update_user_info <= 0) {
+            throw new RuntimeException("更新用戶主表信息失敗");
+        }
+
+        return new ResultParam("1", "更改用戶信息成功", null);
+    }
 }

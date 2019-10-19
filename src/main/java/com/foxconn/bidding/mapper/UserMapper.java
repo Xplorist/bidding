@@ -23,4 +23,10 @@ public interface UserMapper {
 
     // 查詢用戶頭像文件
     USER_PIC_FILE_bean query_user_pic_file(String user_pic_file_pkid);
+
+    // 刪除用戶頭像文件信息
+    Integer delete_user_pic_file(String user_pic_file_pkid);
+
+    // 更新用戶主表信息
+    Integer update_user_info(USER_INFO_bean param);
 }

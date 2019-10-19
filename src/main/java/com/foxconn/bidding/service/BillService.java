@@ -49,4 +49,25 @@ public interface BillService {
 
     // 測試時間格式轉換
     ResultParam test_time_parse(TEST_TIME_PARSE_bean param, HttpServletRequest request);
+
+    // 根據訂單id查詢報價信息
+    ResultParam query_give_price_by_bill_pkid(GIVE_PRICE_MSTR_bean param, HttpServletRequest request);
+
+    // 查詢發單方收到的評價list(分頁查詢)
+    ResultParam query_send_get_eval_list(RequestParam param, HttpServletRequest request);
+
+    // 查詢發單方做出的評價list(分頁查詢)
+    ResultParam query_send_make_eval_list(RequestParam param, HttpServletRequest request);
+
+    // 查詢接單方收到的評價list(分頁查詢)
+    ResultParam query_recv_get_eval_list(RequestParam param, HttpServletRequest request);
+
+    // 查詢接單方做出的評價list(分頁查詢)
+    ResultParam query_recv_make_eval_list(RequestParam param, HttpServletRequest request);
+
+    // 查詢發單方收到的評價平均分
+    ResultParam query_send_get_eval_avg(RequestParam param, HttpServletRequest request);
+
+    // 查詢接單方收到的評價平均分
+    ResultParam query_recv_get_eval_avg(RequestParam param, HttpServletRequest request);
 }

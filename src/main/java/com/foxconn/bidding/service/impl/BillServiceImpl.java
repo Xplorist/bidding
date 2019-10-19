@@ -499,4 +499,163 @@ public class BillServiceImpl implements BillService {
 
         return new ResultParam("1", "測試時間格式轉換成功", test_time_parse_bean);
     }
+
+    @Override
+    public ResultParam query_give_price_by_bill_pkid(GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        String recv_user_pkid = (String) request.getAttribute("user_pkid");
+        String bill_pkid = param.getBill_pkid();
+        // 根據訂單id和接單用戶id查詢報價信息
+        GIVE_PRICE_MSTR_bean give_price_mstr_bean = mapper.query_give_price_mstr(bill_pkid, recv_user_pkid);
+        if(give_price_mstr_bean == null) {
+            throw new RuntimeException("根據訂單id查詢報價信息失敗");
+        } else {
+            String give_price_slav_rel_id = give_price_mstr_bean.getGive_price_slav_rel_id();
+            // 根據報價從表關聯id查詢報價從表list(報價明細)
+            List<GIVE_PRICE_SLAV_bean> slav_list = mapper.query_give_price_slav_list(give_price_slav_rel_id);
+            give_price_mstr_bean.setSlav_list(slav_list);
+        }
+
+        return new ResultParam("1", "根據訂單id查詢報價信息成功", give_price_mstr_bean);
+    }
+
+    @Override
+    public ResultParam query_send_get_eval_list(RequestParam param, HttpServletRequest request) {
+        Integer pageSize = param.getPageSize();
+        String send_user_pkid = (String) request.getAttribute("user_pkid");
+        param.setSend_user_pkid(send_user_pkid);
+        // 查詢接單方收到的評價list(分頁查詢)
+        List<RECV_EVAL_bean> send_get_eval_list = mapper.query_send_get_eval_list(param);
+        // 計算總頁數
+        Integer page_total = 1;
+        Integer row_total = 0;
+        if(!send_get_eval_list.isEmpty()) {
+            RECV_EVAL_bean recv_eval_bean = send_get_eval_list.get(0);
+            row_total = recv_eval_bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+        for (int i = 0; i < send_get_eval_list.size(); i++) {
+            RECV_EVAL_bean recv_eval_bean = send_get_eval_list.get(i);
+            String recv_user_pkid = recv_eval_bean.getRecv_user_pkid();
+            USER_INFO_bean recv_user = userMapper.findUserById(recv_user_pkid);
+            recv_eval_bean.setRecv_user(recv_user);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("page_total", page_total);
+        map.put("row_total", row_total);
+        map.put("send_get_eval_list", send_get_eval_list);
+
+        return new ResultParam("1", "查詢發單方收到的評價list(分頁查詢)成功", map);
+    }
+
+    @Override
+    public ResultParam query_send_make_eval_list(RequestParam param, HttpServletRequest request) {
+        Integer pageSize = param.getPageSize();
+        String send_user_pkid = (String) request.getAttribute("user_pkid");
+        param.setSend_user_pkid(send_user_pkid);
+        // 查詢發單方做出的評價list(分頁查詢)
+        List<SEND_EVAL_bean> send_make_eval_list = mapper.query_send_make_eval_list(param);
+
+        // 計算總頁數
+        Integer page_total = 1;
+        Integer row_total = 0;
+        if(!send_make_eval_list.isEmpty()) {
+            SEND_EVAL_bean recv_eval_bean = send_make_eval_list.get(0);
+            row_total = recv_eval_bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+        for (int i = 0; i < send_make_eval_list.size(); i++) {
+            SEND_EVAL_bean send_eval_bean = send_make_eval_list.get(i);
+            String recv_user_pkid = send_eval_bean.getRecv_user_pkid();
+            USER_INFO_bean recv_user = userMapper.findUserById(recv_user_pkid);
+            send_eval_bean.setRecv_user(recv_user);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("page_total", page_total);
+        map.put("row_total", row_total);
+        map.put("send_make_eval_list", send_make_eval_list);
+
+        return new ResultParam("1", "查詢發單方做出的評價list(分頁查詢)成功", map);
+    }
+
+    @Override
+    public ResultParam query_recv_get_eval_list(RequestParam param, HttpServletRequest request) {
+        Integer pageSize = param.getPageSize();
+        String recv_user_pkid = (String) request.getAttribute("user_pkid");
+        param.setRecv_user_pkid(recv_user_pkid);
+        // 查詢接單方收到的評價list(分頁查詢)
+        List<SEND_EVAL_bean> recv_get_eval_list = mapper.query_recv_get_eval_list(param);
+
+        // 計算總頁數
+        Integer page_total = 1;
+        Integer row_total = 0;
+        if(!recv_get_eval_list.isEmpty()) {
+            SEND_EVAL_bean recv_eval_bean = recv_get_eval_list.get(0);
+            row_total = recv_eval_bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+        for (int i = 0; i < recv_get_eval_list.size(); i++) {
+            SEND_EVAL_bean send_eval_bean = recv_get_eval_list.get(i);
+            String send_user_pkid = send_eval_bean.getSend_user_pkid();
+            USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
+            send_eval_bean.setSend_user(send_user);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("page_total", page_total);
+        map.put("row_total", row_total);
+        map.put("recv_get_eval_list", recv_get_eval_list);
+
+        return new ResultParam("1", "查詢接單方收到的評價list(分頁查詢)成功", map);
+    }
+
+    @Override
+    public ResultParam query_recv_make_eval_list(RequestParam param, HttpServletRequest request) {
+        Integer pageSize = param.getPageSize();
+        String recv_user_pkid = (String) request.getAttribute("user_pkid");
+        param.setRecv_user_pkid(recv_user_pkid);
+        // 查詢接單方做出的評價list(分頁查詢)
+        List<RECV_EVAL_bean> recv_make_eval_list = mapper.query_recv_make_eval_list(param);
+
+        // 計算總頁數
+        Integer page_total = 1;
+        Integer row_total = 0;
+        if(!recv_make_eval_list.isEmpty()) {
+            RECV_EVAL_bean recv_eval_bean = recv_make_eval_list.get(0);
+            row_total = recv_eval_bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+        for (int i = 0; i < recv_make_eval_list.size(); i++) {
+            RECV_EVAL_bean recv_eval_bean = recv_make_eval_list.get(i);
+            String send_user_pkid = recv_eval_bean.getSend_user_pkid();
+            USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
+            recv_eval_bean.setSend_user(send_user);
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("page_total", page_total);
+        map.put("row_total", row_total);
+        map.put("recv_make_eval_list", recv_make_eval_list);
+
+        return new ResultParam("1", "查詢接單方做出的評價list(分頁查詢)成功", map);
+    }
+
+    @Override
+    public ResultParam query_send_get_eval_avg(RequestParam param, HttpServletRequest request) {
+        String send_user_pkid = (String) request.getAttribute("user_pkid");
+        // 查詢發單方收到的評價平均分
+        RECV_EVAL_bean recv_eval_bean = mapper.query_send_get_eval_avg(send_user_pkid);
+
+        return new ResultParam("1", "查詢發單方收到的評價平均分成功", recv_eval_bean);
+    }
+
+    @Override
+    public ResultParam query_recv_get_eval_avg(RequestParam param, HttpServletRequest request) {
+        String recv_user_pkid = (String) request.getAttribute("user_pkid");
+        // 查詢接單方收到的評價平均分
+        SEND_EVAL_bean send_eval_bean = mapper.query_recv_get_eval_avg(recv_user_pkid);
+
+        return new ResultParam("1", "查詢接單方收到的評價平均分成功", send_eval_bean);
+    }
 }

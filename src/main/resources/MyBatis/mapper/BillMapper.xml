@@ -437,5 +437,86 @@
         select t.* from TEST_TIME_PARSE t where t.pkid = #{pkid}
     </select>
 
+    <!-- 根據訂單id和接單用戶id查詢報價信息 -->
+    <select id="query_give_price_mstr" resultType="com.foxconn.bidding.model.GIVE_PRICE_MSTR_bean">
+        select t.*
+          from GIVE_PRICE_MSTR t
+         where t.bill_pkid = #{bill_pkid}
+           and t.recv_user_pkid = #{recv_user_pkid}
+    </select>
+
+    <!-- 根據報價從表關聯id查詢報價從表list(報價明細) -->
+    <select id="query_give_price_slav_list" parameterType="String" resultType="com.foxconn.bidding.model.GIVE_PRICE_SLAV_bean">
+        select t.*
+          from GIVE_PRICE_SLAV t
+         where t.give_price_slav_rel_id = #{give_price_slav_rel_id}
+         order by t.list_order asc
+    </select>
+
+    <!-- 查詢發單方收到的評價list(分頁查詢) -->
+    <select id="query_send_get_eval_list" parameterType="com.foxconn.bidding.model.RequestParam" resultType="com.foxconn.bidding.model.RECV_EVAL_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+                select t.*, count(*) over() row_total
+                  from RECV_EVAL t
+                 where t.send_user_pkid = #{send_user_pkid}
+                 order by t.create_date desc
+                 ) t1) t2
+             where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+             and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 查詢發單方做出的評價list(分頁查詢) -->
+    <select id="query_send_make_eval_list" parameterType="com.foxconn.bidding.model.RequestParam" resultType="com.foxconn.bidding.model.SEND_EVAL_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+		select t.*, count(*) over() row_total
+          from SEND_EVAL t
+         where t.send_user_pkid = #{send_user_pkid}
+         order by t.create_date desc
+		 ) t1) t2
+	 where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+	 and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 查詢接單方收到的評價list(分頁查詢) -->
+    <select id="query_recv_get_eval_list" parameterType="com.foxconn.bidding.model.RequestParam" resultType="com.foxconn.bidding.model.SEND_EVAL_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+                select t.*, count(*) over() row_total
+                  from SEND_EVAL t
+                 where t.recv_user_pkid = #{recv_user_pkid}
+                 order by t.create_date desc
+                 ) t1) t2
+             where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+             and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 查詢接單方做出的評價list(分頁查詢) -->
+    <select id="query_recv_make_eval_list" parameterType="com.foxconn.bidding.model.RequestParam" resultType="com.foxconn.bidding.model.RECV_EVAL_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+                select t.*, count(*) over() row_total
+                  from RECV_EVAL t
+                 where t.recv_user_pkid = #{recv_user_pkid}
+                 order by t.create_date desc
+                 ) t1) t2
+             where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+             and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 查詢發單方收到的評價平均分 -->
+    <select id="query_send_get_eval_avg" parameterType="String" resultType="com.foxconn.bidding.model.RECV_EVAL_bean">
+        select round(avg(t.pay_rate_score), 1) pay_rate_avg,
+               round(avg(t.svc_atitu_score), 1) svc_atitu_avg
+          from RECV_EVAL t
+         where t.send_user_pkid = #{send_user_pkid}
+    </select>
+
+    <!-- 查詢接單方收到的評價平均分 -->
+    <select id="query_recv_get_eval_avg" parameterType="String" resultType="com.foxconn.bidding.model.SEND_EVAL_bean">
+        select round(avg(t.out_rate_score)) out_rate_svg,
+               round(avg(t.out_qual_score)) out_qual_svg,
+               round(avg(t.svc_atitu_score)) svc_atitu_svg
+          from SEND_EVAL t
+         where t.recv_user_pkid = #{recv_user_pkid}
+    </select>
+
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

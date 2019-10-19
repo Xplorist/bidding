@@ -91,4 +91,28 @@ public interface BillMapper {
 
     // 測試查詢時間
     TEST_TIME_PARSE_bean query_TEST_TIME_PARSE_bean(String pkid);
+
+    // 根據訂單id和接單用戶id查詢報價信息
+    GIVE_PRICE_MSTR_bean query_give_price_mstr(@Param("bill_pkid") String bill_pkid, @Param("recv_user_pkid") String recv_user_pkid);
+
+    // 根據報價從表關聯id查詢報價從表list(報價明細)
+    List<GIVE_PRICE_SLAV_bean> query_give_price_slav_list(String give_price_slav_rel_id);
+
+    // 查詢發單方收到的評價list(分頁查詢)
+    List<RECV_EVAL_bean> query_send_get_eval_list(RequestParam param);
+
+    // 查詢發單方做出的評價list(分頁查詢)
+    List<SEND_EVAL_bean> query_send_make_eval_list(RequestParam param);
+
+    // 查詢接單方收到的評價list(分頁查詢)
+    List<SEND_EVAL_bean> query_recv_get_eval_list(RequestParam param);
+
+    // 查詢接單方做出的評價list(分頁查詢)
+    List<RECV_EVAL_bean> query_recv_make_eval_list(RequestParam param);
+
+    // 查詢發單方收到的評價平均分
+    RECV_EVAL_bean query_send_get_eval_avg(String send_user_pkid);
+
+    // 查詢接單方收到的評價平均分
+    SEND_EVAL_bean query_recv_get_eval_avg(String recv_user_pkid);
 }

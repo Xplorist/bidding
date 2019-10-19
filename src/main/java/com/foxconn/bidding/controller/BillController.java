@@ -150,6 +150,69 @@ public class BillController {
         return result;
     }
 
+    // 根據訂單id查詢報價信息
+    @VerifyToken
+    @RequestMapping("/query_give_price_by_bill_pkid")
+    public ResultParam query_give_price_by_bill_pkid(@RequestBody GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        ResultParam result = svc.query_give_price_by_bill_pkid(param, request);
+
+        return result;
+    }
+
+    // 查詢發單方收到的評價list(分頁查詢)
+    @VerifyToken
+    @RequestMapping("/query_send_get_eval_list")
+    public ResultParam query_send_get_eval_list(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_send_get_eval_list(param, request);
+
+        return result;
+    }
+
+    // 查詢發單方做出的評價list(分頁查詢)
+    @VerifyToken
+    @RequestMapping("/query_send_make_eval_list")
+    public ResultParam query_send_make_eval_list(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_send_make_eval_list(param, request);
+
+        return result;
+    }
+
+    // 查詢接單方收到的評價list(分頁查詢)
+    @VerifyToken
+    @RequestMapping("/query_recv_get_eval_list")
+    public ResultParam query_recv_get_eval_list(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_recv_get_eval_list(param, request);
+
+        return result;
+    }
+
+    // 查詢接單方做出的評價list(分頁查詢)
+    @VerifyToken
+    @RequestMapping("/query_recv_make_eval_list")
+    public ResultParam query_recv_make_eval_list(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_recv_make_eval_list(param, request);
+
+        return result;
+    }
+
+    // 查詢發單方收到的評價平均分
+    @VerifyToken
+    @RequestMapping("/query_send_get_eval_avg")
+    public ResultParam query_send_get_eval_avg(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_send_get_eval_avg(param, request);
+
+        return result;
+    }
+
+    // 查詢接單方收到的評價平均分
+    @VerifyToken
+    @RequestMapping("/query_recv_get_eval_avg")
+    public ResultParam query_recv_get_eval_avg(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_recv_get_eval_avg(param, request);
+
+        return result;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
     // 模板,放在最後
     @VerifyToken

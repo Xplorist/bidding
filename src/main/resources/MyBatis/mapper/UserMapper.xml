@@ -75,5 +75,33 @@
         select t.* from USER_PIC_FILE t where t.pkid = #{user_pic_file_pkid}
     </select>
 
+    <!-- 刪除用戶頭像文件信息 -->
+    <delete id="delete_user_pic_file" parameterType="String">
+        delete from USER_PIC_FILE where pkid = #{user_pic_file_pkid}
+    </delete>
+
+    <!-- 更新用戶主表信息 -->
+    <update id="update_user_info" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
+        update USER_INFO
+        set username         = #{username},
+            fctry_zone       = #{fctry_zone},
+            secn_cmpy        = #{secn_cmpy},
+            entrps_group     = #{entrps_group},
+            pd_office        = #{pd_office},
+            dept_name        = #{dept_name},
+            <if test='legal_person != null and legal_person != ""'>
+                legal_person     = #{legal_person},
+            </if>
+            cost_code        = #{cost_code},
+            <if test='recv_mnufc_range != null and recv_mnufc_range != ""'>
+                recv_mnufc_range = #{recv_mnufc_range},
+            </if>
+            busis_mngr       = #{busis_mngr},
+            tel              = #{tel},
+            email            = #{email},
+            summary          = #{summary}
+        where pkid = #{pkid}
+    </update>
+
     <!-- 注釋模板，放在最後一行 -->
 </mapper>
