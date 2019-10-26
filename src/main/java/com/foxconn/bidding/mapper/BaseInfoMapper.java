@@ -1,9 +1,6 @@
 package com.foxconn.bidding.mapper;
 
-import com.foxconn.bidding.model.ENTRPS_GROUP_bean;
-import com.foxconn.bidding.model.FCTRY_ZONE_bean;
-import com.foxconn.bidding.model.PD_OFFICE_bean;
-import com.foxconn.bidding.model.SECN_CMPY_bean;
+import com.foxconn.bidding.model.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +18,13 @@ public interface BaseInfoMapper {
 
     // 查詢產品處list
     List<PD_OFFICE_bean> query_PD_OFFICE_list(String entrps_group_pkid);
+
+    // 查詢交貨地點list
+    List<BaseInfoParam> query_deliver_address_list();
+
+    // 查詢開標範圍list
+    List<BaseInfoParam> query_bid_range_list();
+
+    // 查詢產品類型list
+    List<BaseInfoParam> query_pd_type_list();
 }

@@ -15,4 +15,8 @@ public class GIVE_PRICE_SLAV_bean {
     private Integer part_price_sum;//零件價格小計
     private Integer list_order;//列表序號
     private String create_date;//創建時間
+    private String part_doc_file_pkid;// 零件圖檔文件id
+
+    // 非表中字段
+    private PART_DOC_FILE_bean part_doc_file;// 零件圖檔文件
 }

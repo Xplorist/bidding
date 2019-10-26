@@ -1,6 +1,7 @@
 package com.foxconn.bidding.service.impl;
 
 import com.foxconn.bidding.mapper.UserMapper;
+import com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
 import com.foxconn.bidding.model.USER_PIC_FILE_bean;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,6 +34,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public ResultParam register(USER_INFO_bean param, HttpServletRequest request) {
+        String send_recv_type = param.getSend_recv_type();
+        if(send_recv_type == null || "".equals(send_recv_type)) {
+            throw new RuntimeException("發單方接單方類型不能為空");
+        }
+        // 保存用戶頭像文件
         String user_pic_file_pkid = "";
         USER_PIC_FILE_bean user_pic_file = param.getUser_pic_file();
         if(user_pic_file != null && user_pic_file.getFile_save_name() != null) {
@@ -41,6 +48,21 @@ public class UserServiceImpl implements UserService {
             Integer add_USER_PIC_FILE_flag = mapper.add_USER_PIC_FILE(user_pic_file);
             if(add_USER_PIC_FILE_flag <= 0) {
                 throw new RuntimeException("新增用戶頭像文件信息失敗");
+            }
+        }
+        // 保存接單方加工範圍
+        List<RECV_MNUFC_RANGE_bean> recv_range_list = param.getRecv_range_list();
+        if ("recv".equals(send_recv_type) && recv_range_list != null && !recv_range_list.isEmpty()) {
+            String recv_mnufc_range_rel_id = UUID_Util.getUUID32();
+            param.setRecv_mnufc_range_rel_id(recv_mnufc_range_rel_id);
+            for(int i = 0; i < recv_range_list.size(); i++) {
+                RECV_MNUFC_RANGE_bean range_bean = recv_range_list.get(i);
+                range_bean.setRecv_mnufc_range_rel_id(recv_mnufc_range_rel_id);
+                range_bean.setList_order(i + 1);
+                Integer f_add_recv_mnufc_range = mapper.add_recv_mnufc_range(range_bean);
+                if(f_add_recv_mnufc_range <= 0) {
+                    throw new RuntimeException("保存加工範圍失敗");
+                }
             }
         }
 
@@ -90,6 +112,13 @@ public class UserServiceImpl implements UserService {
                 USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file("default");
                 user_info_bean.setUser_pic_file(user_pic_file_bean);
             }
+
+            String recv_mnufc_range_rel_id = user_info_bean.getRecv_mnufc_range_rel_id();
+            if(recv_mnufc_range_rel_id != null && !"".equals(recv_mnufc_range_rel_id)) {
+                List<RECV_MNUFC_RANGE_bean> recv_range_list = mapper.query_recv_range_list(recv_mnufc_range_rel_id);
+                user_info_bean.setRecv_range_list(recv_range_list);
+            }
+
             return new ResultParam("1", "查詢用戶信息成功", user_info_bean);
         }
     }
@@ -109,18 +138,29 @@ public class UserServiceImpl implements UserService {
             USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file("default");
             user_info_bean.setUser_pic_file(user_pic_file_bean);
         }
+        String recv_mnufc_range_rel_id = user_info_bean.getRecv_mnufc_range_rel_id();
+        if(recv_mnufc_range_rel_id != null && !"".equals(recv_mnufc_range_rel_id)) {
+            List<RECV_MNUFC_RANGE_bean> recv_range_list = mapper.query_recv_range_list(recv_mnufc_range_rel_id);
+            user_info_bean.setRecv_range_list(recv_range_list);
+        }
 
         return new ResultParam("1", "根據用戶id查詢用戶信息成功", user_info_bean);
     }
 
     @Override
+    @Transactional
     public ResultParam update_user_info(USER_INFO_bean param, HttpServletRequest request) {
         String pkid = param.getPkid();
         USER_PIC_FILE_bean user_pic_file = param.getUser_pic_file();
+        USER_INFO_bean user_info_bean = mapper.findUserById(pkid);
+        String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
+        param.setUser_pic_file_pkid(user_pic_file_pkid);
         // 修改了用戶頭像文件，先刪除舊的文件信息，再保存新的文件信息
         if(user_pic_file != null && user_pic_file.getFile_save_name() != null && !"".equals(user_pic_file.getFile_save_name())) {
-            USER_INFO_bean user_info_bean = mapper.findUserById(pkid);
-            String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
+            if(user_pic_file_pkid == null || "".equals(user_info_bean)) {
+                user_pic_file_pkid = UUID_Util.getUUID32();
+            }
+            param.setUser_pic_file_pkid(user_pic_file_pkid);
             Integer f_delete_user_pic_file = mapper.delete_user_pic_file(user_pic_file_pkid);
             /*if(f_delete_user_pic_file <= 0) {
                 throw new RuntimeException("刪除用戶頭像文件信息失敗");
@@ -129,6 +169,28 @@ public class UserServiceImpl implements UserService {
             Integer f_add_user_pic_file = mapper.add_USER_PIC_FILE(user_pic_file);
             if(f_add_user_pic_file <= 0) {
                 throw new RuntimeException("保存用戶頭像文件信息失敗");
+            }
+        }
+        // 修改接單方加工範圍list,先刪除舊的接單方加工範圍，在保存新的接單方加工範圍
+        List<RECV_MNUFC_RANGE_bean> recv_range_list = param.getRecv_range_list();
+        String send_recv_type = param.getSend_recv_type();
+        if(send_recv_type == null || "".equals(send_recv_type)) {
+            throw new RuntimeException("發單接單類型不能為空");
+        }
+        if("recv".equals(send_recv_type) && !recv_range_list.isEmpty()) {
+            String recv_mnufc_range_rel_id = user_info_bean.getRecv_mnufc_range_rel_id();
+            Integer f_delete_recv_range_list = mapper.delete_recv_range_list(recv_mnufc_range_rel_id);
+            if(f_delete_recv_range_list <= 0) {
+                throw new RuntimeException("刪除接單方加工範圍失敗");
+            }
+            for(int i = 0; i < recv_range_list.size(); i++) {
+                RECV_MNUFC_RANGE_bean range_bean = recv_range_list.get(i);
+                range_bean.setRecv_mnufc_range_rel_id(recv_mnufc_range_rel_id);
+                range_bean.setList_order(i + 1);
+                Integer f_add_recv_mnufc_range = mapper.add_recv_mnufc_range(range_bean);
+                if(f_add_recv_mnufc_range <= 0) {
+                    throw new RuntimeException("新增接單方加工範圍失敗");
+                }
             }
         }
 

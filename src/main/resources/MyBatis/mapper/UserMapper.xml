@@ -22,13 +22,15 @@
            dept_name,
            legal_person,
            cost_code,
-           recv_mnufc_range,
+           recv_mnufc_range_rel_id,
            bank_name,
            bank_acunt,
            busis_mngr,
            tel,
            email,
            summary,
+           phone,
+           dept_code,
            user_pic_file_pkid)
         values
           (#{username},
@@ -42,22 +44,32 @@
            #{dept_name},
            #{legal_person},
            #{cost_code},
-           #{recv_mnufc_range},
+           #{recv_mnufc_range_rel_id},
            #{bank_name},
            #{bank_acunt},
            #{busis_mngr},
            #{tel},
            #{email},
            #{summary},
+           #{phone},
+           #{dept_code},
            #{user_pic_file_pkid})
     </insert>
 
-    <!-- 新增用戶頭像文件 -->
+    <!-- 新增用戶頭像文件信息 -->
     <insert id="add_USER_PIC_FILE" parameterType="com.foxconn.bidding.model.USER_PIC_FILE_bean">
         insert into USER_PIC_FILE
           (pkid, file_origin_name, file_save_name, file_save_path)
         values
           (#{pkid}, #{file_origin_name}, #{file_save_name}, #{file_save_path})
+    </insert>
+
+    <!-- 新增接單方加工範圍 -->
+    <insert id="add_recv_mnufc_range" parameterType="com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean">
+        insert into RECV_MNUFC_RANGE
+            (name, recv_mnufc_range_rel_id, list_order)
+        values
+            (#{name}, #{recv_mnufc_range_rel_id}, #{list_order})
     </insert>
 
     <!-- 通過用戶名查詢用戶 -->
@@ -93,15 +105,27 @@
                 legal_person     = #{legal_person},
             </if>
             cost_code        = #{cost_code},
-            <if test='recv_mnufc_range != null and recv_mnufc_range != ""'>
-                recv_mnufc_range = #{recv_mnufc_range},
-            </if>
             busis_mngr       = #{busis_mngr},
             tel              = #{tel},
             email            = #{email},
-            summary          = #{summary}
+            summary          = #{summary},
+            user_pic_file_pkid = #{user_pic_file_pkid}
         where pkid = #{pkid}
     </update>
+
+    <!-- 查詢接單方加工範圍 -->
+    <select id="query_recv_range_list" parameterType="String" resultType="com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean">
+        select t.*
+        from RECV_MNUFC_RANGE t
+        where t.recv_mnufc_range_rel_id = #{recv_mnufc_range_rel_id}
+        order by t.list_order asc
+    </select>
+
+    <!-- 刪除接單方加工範圍list -->
+    <delete id="delete_recv_range_list" parameterType="String">
+        delete from RECV_MNUFC_RANGE
+        where recv_mnufc_range_rel_id = #{recv_mnufc_range_rel_id}
+    </delete>
 
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

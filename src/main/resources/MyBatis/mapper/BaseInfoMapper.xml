@@ -13,7 +13,6 @@
     <select id="query_SECN_CMPY_list" parameterType="String" resultType="com.foxconn.bidding.model.SECN_CMPY_bean">
         select t.*
           from SECN_CMPY t
-         where t.fctry_zone_pkid = #{fctry_zone_pkid}
          order by t.order_in_fctry asc
     </select>
 
@@ -31,6 +30,21 @@
           from PD_OFFICE t
          where t.entrps_group_pkid = #{entrps_group_pkid}
          order by t.order_in_group asc
+    </select>
+
+    <!-- 查詢交貨地點list -->
+    <select id="query_deliver_address_list" resultType="com.foxconn.bidding.model.BaseInfoParam">
+        select t.* from DELIVER_ADDRESS t order by t.list_order asc
+    </select>
+
+    <!-- 查詢開標範圍list -->
+    <select id="query_bid_range_list" resultType="com.foxconn.bidding.model.BaseInfoParam">
+        select t.* from BID_RANGE t order by t.list_order asc
+    </select>
+
+    <!-- 查詢產品類型list -->
+    <select id="query_pd_type_list" resultType="com.foxconn.bidding.model.BaseInfoParam">
+        select t.*, t.rowid from PD_TYPE t order by t.list_order asc
     </select>
 
     <!-- 注釋模板，放在最後一行 -->

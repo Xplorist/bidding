@@ -14,6 +14,12 @@ public interface BillMapper {
     // 保存訂單主表數據
     Integer save_BILL(BILL_bean param);
 
+    // 查詢訂單單號關聯表中的訂單單號
+    String query_bill_no_from_rel(String bill_pkid);
+
+    // 更新訂單單號
+    Integer update_bill_no(@Param("bill_pkid") String bill_pkid, @Param("bill_no") String bill_no);
+
     // 查詢訂單是否存在
     Integer query_bill_is_exist(String bill_pkid);
 
@@ -25,6 +31,9 @@ public interface BillMapper {
 
     // 更新訂單主表的狀態
     Integer update_BILL_status(@Param("bill_pkid") String bill_pkid, @Param("bill_status") String bill_status);
+
+    // 發佈時更新主表的狀態和單號標誌
+    Integer update_bill_publish(BILL_bean param);
 
     // 未登錄查詢訂單list(分頁查詢)
     List<BILL_bean> query_bill_list_not_login(BILL_bean param);
@@ -71,6 +80,9 @@ public interface BillMapper {
     // 查詢訂單零件圖檔文件list
     List<PART_DOC_FILE_bean> query_bill_file_list(String part_doc_file_rel_id);
 
+    // 根據零件圖檔文件id查詢零件圖檔文件信息
+    PART_DOC_FILE_bean query_part_doc_file(String part_doc_file_pkid);
+
     // 根據單個文件pkid刪除訂單零件圖檔文件
     Integer delete_part_doc_file_by_pkid(String pkid);
 
@@ -115,4 +127,19 @@ public interface BillMapper {
 
     // 查詢接單方收到的評價平均分
     SEND_EVAL_bean query_recv_get_eval_avg(String recv_user_pkid);
+
+    // 根據訂單id查詢報價list（分頁查詢）
+    List<GIVE_PRICE_MSTR_bean> query_give_price_list_pagi(GIVE_PRICE_MSTR_bean param);
+
+    // 根據訂單id查詢報價list
+    List<GIVE_PRICE_MSTR_bean> query_give_price_list(String bill_pkid);
+
+    // 根據報價id查詢標價信息
+    GIVE_PRICE_MSTR_bean query_give_price_by_pkid(String pkid);
+
+    // 更新該報價數據為中標
+    Integer update_give_price_win_bid(String pkid);
+
+    // 更新訂單表為中標後狀態，更新中標接單用戶
+    Integer update_bill_win_bid(@Param("bill_pkid") String bill_pkid, @Param("recv_user_pkid") String recv_user_pkid);
 }

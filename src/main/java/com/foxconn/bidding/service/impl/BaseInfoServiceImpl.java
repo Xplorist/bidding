@@ -42,4 +42,27 @@ public class BaseInfoServiceImpl implements BaseInfoService {
         return new ResultParam("1", "success", list);
     }
 
+    // 【05】查詢交貨地點list
+    @Override
+    public ResultParam query_deliver_address_list(BaseInfoParam param, HttpServletRequest request) {
+        List<BaseInfoParam> list = mapper.query_deliver_address_list();
+
+        return new ResultParam("1", "查詢交貨地點list成功", list);
+    }
+
+    // 【06】查詢開標範圍list
+    @Override
+    public ResultParam query_bid_range_list(BaseInfoParam param, HttpServletRequest request) {
+        List<BaseInfoParam> list = mapper.query_bid_range_list();
+
+        return new ResultParam("1", "查詢開標範圍list成功", list);
+    }
+
+    // 【07】查詢產品類型list
+    @Override
+    public ResultParam query_pd_type_list(BaseInfoParam param, HttpServletRequest request) {
+        List<BaseInfoParam> list = mapper.query_pd_type_list();
+
+        return new ResultParam("1", "【07】查詢產品類型list成功", list);
+    }
 }

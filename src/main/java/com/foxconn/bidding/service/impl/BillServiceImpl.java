@@ -4,6 +4,7 @@ import com.foxconn.bidding.mapper.BillMapper;
 import com.foxconn.bidding.mapper.UserMapper;
 import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.BillService;
+import com.foxconn.bidding.service.GivePriceSortService;
 import com.foxconn.bidding.util.DateParseUtil;
 import com.foxconn.bidding.util.UUID_Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,18 @@ public class BillServiceImpl implements BillService {
     @Autowired
     private UserMapper userMapper;// 用戶mapper
 
+    @Autowired
+    private GivePriceSortService sortSVC;
+
     @Override
     @Transactional
     public ResultParam saveBill(BILL_bean param, HttpServletRequest request) {
+        String send_user_pkid = (String) request.getAttribute("user_pkid");
+        USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
+
         String bill_pkid = param.getPkid();
         if(bill_pkid == null || "".equals(bill_pkid))  {
             /* 新增保存 */
-            String send_user_pkid = (String) request.getAttribute("user_pkid");
             List<PART_DOC_FILE_bean> file_list = param.getFile_list();
             String part_doc_file_rel_id = UUID_Util.getUUID32();// 零件圖檔文件表關聯id
             /* 保存零件圖檔文件信息 */
@@ -45,15 +51,63 @@ public class BillServiceImpl implements BillService {
                 }
             }
 
+            // 保存開標範圍具體值
+            String bid_range = param.getBid_range();
+            if(bid_range == null || "".equals(bid_range)) {
+                throw new RuntimeException("開標範圍不能為空");
+            }
+            switch (bid_range) {
+                case "集團":
+                    param.setBid_range_value("all");
+                    break;
+                case "次集團":
+                    String secn_cmpy = send_user.getSecn_cmpy();
+                    param.setBid_range_value(secn_cmpy);
+                    break;
+                case "廠區":
+                    String fctry_zone = send_user.getFctry_zone();
+                    param.setBid_range_value(fctry_zone);
+                    break;
+                case "事業群":
+                    String entrps_group = send_user.getEntrps_group();
+                    param.setBid_range_value(entrps_group);
+                    break;
+                case "產品處":
+                    String pd_office = send_user.getPd_office();
+                    param.setBid_range_value(pd_office);
+                    break;
+            }
+
             /* 保存訂單主表數據 */
             bill_pkid = UUID_Util.getUUID32();
-            String bill_no = UUID_Util.getUUID32();
+            String bill_no = "尚未發佈暫無單號";
             String bill_status = "0";
             param.setPkid(bill_pkid);
             param.setBill_no(bill_no);
             param.setBill_status(bill_status);
             param.setSend_user_pkid(send_user_pkid);
             param.setPart_doc_file_rel_id(part_doc_file_rel_id);
+            // 設置類型編號
+            String pd_type = param.getPd_type();
+            String pd_type_no = "M";
+            switch (pd_type) {
+                case "模具":
+                    pd_type_no = "M";
+                    break;
+                case "治具":
+                    pd_type_no = "Z";
+                    break;
+                case "檢具":
+                    pd_type_no = "J";
+                    break;
+                case "沖具":
+                    pd_type_no = "C";
+                    break;
+                case "塑具":
+                    pd_type_no = "S";
+                    break;
+            }
+            param.setPd_type_no(pd_type_no);
 
             try {
                 param.setDeliver_date(DateParseUtil.gmtStrToJavaStyleStr(param.getDeliver_date()));
@@ -75,6 +129,56 @@ public class BillServiceImpl implements BillService {
             if(bill_is_exist <= 0) {
                 throw new RuntimeException("pkid為" + bill_pkid + "的訂單不存在");
             }
+
+            // 保存開標範圍具體值
+            String bid_range = param.getBid_range();
+            if(bid_range == null || "".equals(bid_range)) {
+                throw new RuntimeException("開標範圍不能為空");
+            }
+            switch (bid_range) {
+                case "集團":
+                    param.setBid_range_value("all");
+                    break;
+                case "次集團":
+                    String secn_cmpy = send_user.getSecn_cmpy();
+                    param.setBid_range_value(secn_cmpy);
+                    break;
+                case "廠區":
+                    String fctry_zone = send_user.getFctry_zone();
+                    param.setBid_range_value(fctry_zone);
+                    break;
+                case "事業群":
+                    String entrps_group = send_user.getEntrps_group();
+                    param.setBid_range_value(entrps_group);
+                    break;
+                case "產品處":
+                    String pd_office = send_user.getPd_office();
+                    param.setBid_range_value(pd_office);
+                    break;
+            }
+
+            // 設置類型編號
+            String pd_type = param.getPd_type();
+            String pd_type_no = "M";
+            switch (pd_type) {
+                case "模具":
+                    pd_type_no = "M";
+                    break;
+                case "治具":
+                    pd_type_no = "Z";
+                    break;
+                case "檢具":
+                    pd_type_no = "J";
+                    break;
+                case "沖具":
+                    pd_type_no = "C";
+                    break;
+                case "塑具":
+                    pd_type_no = "S";
+                    break;
+            }
+            param.setPd_type_no(pd_type_no);
+
             // 先刪除零件圖檔文件list，再新增
             String part_doc_file_rel_id = param.getPart_doc_file_rel_id();
             Integer delete_PART_DOC_FILE_list_f = mapper.delete_PART_DOC_FILE_list(part_doc_file_rel_id);
@@ -122,9 +226,23 @@ public class BillServiceImpl implements BillService {
         }
         String bill_pkid = (String) resultParam.getT();
         String bill_status = "1";
-        Integer update_bill_status_f = mapper.update_BILL_status(bill_pkid, bill_status);
-        if(update_bill_status_f <= 0) {
+        param.setPkid(bill_pkid);
+        param.setBill_status(bill_status);
+        param.setF_bill_no("1");
+        Integer f_update_bill_publish = mapper.update_bill_publish(param);
+        if(f_update_bill_publish <= 0) {
             throw new RuntimeException("發佈（提交）訂單時更新訂單狀態失敗");
+        }
+
+        // 查詢訂單單號關聯表中的訂單單號
+        String bill_no = mapper.query_bill_no_from_rel(bill_pkid);
+        if(bill_no == null || "".equals(bill_no)) {
+            throw new RuntimeException("查詢訂單單號關聯表中的訂單單號失敗");
+        }
+        // 更新訂單單號
+        Integer f_update_bill_no = mapper.update_bill_no(bill_pkid, bill_no);
+        if(f_update_bill_no <= 0) {
+            throw new RuntimeException("更新訂單單號失敗");
         }
 
         return new ResultParam("1","發佈(提交)訂單成功", null);
@@ -229,13 +347,17 @@ public class BillServiceImpl implements BillService {
         return new ResultParam("1", "發單用戶登錄查詢個狀態訂單list個數成功", map);
     }
 
+    // 接單用戶登錄個人中心的查詢訂單list(分頁查詢)
     @Override
     public ResultParam query_bill_list_recv_user(BILL_bean param, HttpServletRequest request) {
         String user_pkid = (String) request.getAttribute("user_pkid");
         USER_INFO_bean user = userMapper.findUserById(user_pkid);
-        String recv_mnufc_range = user.getRecv_mnufc_range();
-        param.setPd_type(recv_mnufc_range);
+        String recv_mnufc_range_rel_id = user.getRecv_mnufc_range_rel_id();
+        List<RECV_MNUFC_RANGE_bean> recv_range_list = userMapper.query_recv_range_list(recv_mnufc_range_rel_id);
+        //param.setPd_type(recv_mnufc_range);
+        param.setRecv_range_list(recv_range_list);
         param.setRecv_user_pkid(user_pkid);
+        param.setRecv_user(user);
         List<BILL_bean> bill_list = mapper.query_bill_list_recv_user(param);
 
         Integer page_total = 1;
@@ -266,9 +388,14 @@ public class BillServiceImpl implements BillService {
     public ResultParam query_status_num_recv_user(BILL_bean param, HttpServletRequest request) {
         String user_pkid = (String) request.getAttribute("user_pkid");
         USER_INFO_bean user = userMapper.findUserById(user_pkid);
-        String recv_mnufc_range = user.getRecv_mnufc_range();
-        param.setPd_type(recv_mnufc_range);
+        //String recv_mnufc_range = user.getRecv_mnufc_range();
+        String recv_mnufc_range_rel_id = user.getRecv_mnufc_range_rel_id();
+        List<RECV_MNUFC_RANGE_bean> recv_range_list = userMapper.query_recv_range_list(recv_mnufc_range_rel_id);
+        param.setRecv_range_list(recv_range_list);
+
+        //param.setPd_type(recv_mnufc_range);
         param.setRecv_user_pkid(user_pkid);
+        param.setRecv_user(user);
 
         param.setBill_status("all");
         Integer num_status_all = mapper.query_status_num_recv_user(param);
@@ -311,9 +438,13 @@ public class BillServiceImpl implements BillService {
     public ResultParam query_bill_list_recv_main(BILL_bean param, HttpServletRequest request) {
         String user_pkid = (String) request.getAttribute("user_pkid");
         USER_INFO_bean user = userMapper.findUserById(user_pkid);
-        String recv_mnufc_range = user.getRecv_mnufc_range();
-        param.setPd_type(recv_mnufc_range);
+        //String recv_mnufc_range = user.getRecv_mnufc_range();
+        String recv_mnufc_range_rel_id = user.getRecv_mnufc_range_rel_id();
+        List<RECV_MNUFC_RANGE_bean> recv_range_list = userMapper.query_recv_range_list(recv_mnufc_range_rel_id);
+        param.setRecv_range_list(recv_range_list);
+        //param.setPd_type(recv_mnufc_range);
         param.setRecv_user_pkid(user_pkid);
+        param.setRecv_user(user);
         List<BILL_bean> bill_list = mapper.query_bill_list_recv_main(param);
 
         Integer page_total = 1;
@@ -345,7 +476,7 @@ public class BillServiceImpl implements BillService {
         String give_price_slav_rel_id = UUID_Util.getUUID32();// 報價從表關聯id
         // 先保存報價從表數據（訂單明細）
         List<GIVE_PRICE_SLAV_bean> slav_list = param.getSlav_list();
-        if(slav_list.isEmpty()) {
+       if(slav_list.isEmpty()) {
             throw new RuntimeException("保存失敗，訂單明細(報價從表)不能為空");
         }
         for(int i = 0; i < slav_list.size(); i++) {
@@ -512,6 +643,13 @@ public class BillServiceImpl implements BillService {
             String give_price_slav_rel_id = give_price_mstr_bean.getGive_price_slav_rel_id();
             // 根據報價從表關聯id查詢報價從表list(報價明細)
             List<GIVE_PRICE_SLAV_bean> slav_list = mapper.query_give_price_slav_list(give_price_slav_rel_id);
+            for (int i = 0; i < slav_list.size(); i++) {
+                GIVE_PRICE_SLAV_bean give_price_slav_bean = slav_list.get(i);
+                String part_doc_file_pkid = give_price_slav_bean.getPart_doc_file_pkid();
+                // 根據零件圖檔文件id查詢零件圖檔文件信息
+                PART_DOC_FILE_bean part_doc_file_bean = mapper.query_part_doc_file(part_doc_file_pkid);
+                give_price_slav_bean.setPart_doc_file(part_doc_file_bean);
+            }
             give_price_mstr_bean.setSlav_list(slav_list);
         }
 
@@ -657,5 +795,78 @@ public class BillServiceImpl implements BillService {
         SEND_EVAL_bean send_eval_bean = mapper.query_recv_get_eval_avg(recv_user_pkid);
 
         return new ResultParam("1", "查詢接單方收到的評價平均分成功", send_eval_bean);
+    }
+
+    @Override
+    public ResultParam query_give_price_list(GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        List<GIVE_PRICE_MSTR_bean> give_price_list = null;
+        Integer pageSize = param.getPageSize();
+        String sort_way = param.getSort_way();
+        Integer row_total = 0;
+        Integer page_total = 1;
+
+        // 分頁查詢
+        if("complex".equals(sort_way)) {
+            give_price_list = sortSVC.query_give_price_list_complex(param);
+        } else {
+            give_price_list = mapper.query_give_price_list_pagi(param);
+        }
+        if(!give_price_list.isEmpty()) {
+            GIVE_PRICE_MSTR_bean give_price_mstr_bean = give_price_list.get(0);
+            row_total = give_price_mstr_bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+
+        // 查詢報價清單
+        for(int i = 0; i < give_price_list.size(); i++) {
+            GIVE_PRICE_MSTR_bean bean = give_price_list.get(i);
+            String give_price_slav_rel_id = bean.getGive_price_slav_rel_id();
+            List<GIVE_PRICE_SLAV_bean> slav_list = mapper.query_give_price_slav_list(give_price_slav_rel_id);
+            for(int j = 0; j < slav_list.size(); j++) {
+                GIVE_PRICE_SLAV_bean give_price_slav_bean = slav_list.get(j);
+                String part_doc_file_pkid = give_price_slav_bean.getPart_doc_file_pkid();
+                PART_DOC_FILE_bean part_doc_file_bean = mapper.query_part_doc_file(part_doc_file_pkid);
+                if(part_doc_file_bean != null) {
+                    give_price_slav_bean.setPart_doc_file(part_doc_file_bean);
+                }
+            }
+            bean.setSlav_list(slav_list);
+
+            // 查詢接單方信息
+            if(bean.getRecv_user() == null) {
+                String recv_user_pkid = bean.getRecv_user_pkid();
+                USER_INFO_bean recv_user = userMapper.findUserById(recv_user_pkid);
+                bean.setRecv_user(recv_user);
+            }
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("give_price_list", give_price_list);
+        map.put("row_total", row_total);
+        map.put("page_total", page_total);
+
+        return new ResultParam("1", "【22】根據訂單id查詢排序後報價list(分頁查詢)成功", map);
+    }
+
+    @Override
+    @Transactional
+    public ResultParam select_win_bid(GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        String pkid = param.getPkid();
+        // 根據報價id查詢標價信息
+        GIVE_PRICE_MSTR_bean give_price = mapper.query_give_price_by_pkid(pkid);
+        // 更新該報價數據為中標
+        Integer f_give_price_win_bid = mapper.update_give_price_win_bid(pkid);
+        if(f_give_price_win_bid <= 0) {
+            throw new RuntimeException("更新該報價數據為中標失敗");
+        }
+        String bill_pkid = give_price.getBill_pkid();
+        String recv_user_pkid = give_price.getRecv_user_pkid();
+        // 更新訂單表為中標後狀態，更新中標接單用戶
+        Integer f_bill_win_bid = mapper.update_bill_win_bid(bill_pkid, recv_user_pkid);
+        if(f_bill_win_bid <= 0) {
+            throw new RuntimeException("更新訂單表為中標後狀態，更新中標接單用戶失敗");
+        }
+
+        return new ResultParam("1", "【23】選定中標成功", null);
     }
 }

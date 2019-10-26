@@ -20,10 +20,10 @@ public class BILL_bean {
     private String deliver_address;//交貨地點
     private String tel;//聯繫電話
     private String f_show_tel;//顯示聯繫電話標誌（y:是，n:否）
-    private String total_price;//接受總價
+    private Integer total_price;//接受總價
     private String money_type;//幣別
     private String amount;//需求數量
-    private String bid_range;//開標範圍
+    private String bid_range;//開標範圍（類型）
     private String bid_start_date;//競價開始時間
     private String bid_end_date;//競價結束時間
     private String deliver_way;//交貨模式（物流費用）
@@ -34,6 +34,9 @@ public class BILL_bean {
     private String f_send_eval;// 發單評價標誌（Y：是，N：否）
     private String f_recv_eval;// 接單評價標誌（Y：是，N：否）
     private String publish_date;// 發佈時間
+    private String pd_type_no;// 用途編號（產品類型）
+    private String bid_range_value;// 開標範圍具體值
+    private String f_bill_no;// 單號標誌（發佈訂單時生成單號前先更新此字段）
 
     // 非表中字段
     private List<PART_DOC_FILE_bean> file_list;// 文件list
@@ -43,6 +46,7 @@ public class BILL_bean {
     private List<USER_INFO_bean> give_recv_user_list;// 參與報價的接單用戶list
     private SEND_EVAL_bean send_eval;// 發單方評價
     private RECV_EVAL_bean recv_eval;// 接單方評價
+    private List<RECV_MNUFC_RANGE_bean> recv_range_list;// 接單方加工範圍list
 
     // 分頁查詢中請求參數需要的字段
     private Integer pageIndex;// 頁碼

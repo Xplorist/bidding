@@ -1,0 +1,90 @@
+package com.foxconn.bidding.ztest;
+
+import com.foxconn.bidding.model.GIVE_PRICE_MSTR_bean;
+import org.springframework.beans.BeanUtils;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class Test {
+    public static void main(String[] args) {
+        // test();
+        test2();
+    }
+
+    public static void test2() {
+        List<GIVE_PRICE_MSTR_bean> zone = new ArrayList<>();
+        GIVE_PRICE_MSTR_bean bean_1 = new GIVE_PRICE_MSTR_bean();
+        bean_1.setBill_pkid("bean_1");
+        bean_1.setDeliver_date("2019-10-30 00:00:00");
+        GIVE_PRICE_MSTR_bean bean_2 = new GIVE_PRICE_MSTR_bean();
+        bean_2.setBill_pkid("bean_2");
+        bean_2.setDeliver_date("2019-10-22 00:00:00");
+        GIVE_PRICE_MSTR_bean bean_3 = new GIVE_PRICE_MSTR_bean();
+        bean_3.setBill_pkid("bean_3");
+        bean_3.setDeliver_date("2019-10-15 00:00:00");
+        GIVE_PRICE_MSTR_bean bean_4 = new GIVE_PRICE_MSTR_bean();
+        bean_4.setBill_pkid("bean_4");
+        bean_4.setDeliver_date("2019-10-20 00:00:00");
+        GIVE_PRICE_MSTR_bean bean_5 = new GIVE_PRICE_MSTR_bean();
+        bean_5.setBill_pkid("bean_5");
+        bean_5.setDeliver_date("2019-10-11 00:00:00");
+        GIVE_PRICE_MSTR_bean bean_6 = new GIVE_PRICE_MSTR_bean();
+        bean_6.setBill_pkid("bean_6");
+        bean_6.setDeliver_date("2019-10-31 00:00:00");
+
+        zone.add(bean_1);
+        zone.add(bean_2);
+        zone.add(bean_3);
+        zone.add(bean_4);
+        zone.add(bean_5);
+        zone.add(bean_6);
+
+        for(int i = 0; i < zone.size() - 1; i++) {
+            for(int j = i + 1; j < zone.size(); j++) {
+                GIVE_PRICE_MSTR_bean bean_i = zone.get(i);
+                GIVE_PRICE_MSTR_bean bean_j = zone.get(j);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date deliver_date_i = null;
+                Date deliver_date_j = null;
+                try {
+                    deliver_date_i = sdf.parse(bean_i.getDeliver_date());
+                    deliver_date_j = sdf.parse(bean_j.getDeliver_date());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                GIVE_PRICE_MSTR_bean i_bean = new GIVE_PRICE_MSTR_bean();
+                GIVE_PRICE_MSTR_bean j_bean = new GIVE_PRICE_MSTR_bean();
+                BeanUtils.copyProperties(bean_i, i_bean);
+                BeanUtils.copyProperties(bean_j, j_bean);
+
+                if(deliver_date_i.after(deliver_date_j)) {
+                    zone.set(i, j_bean);
+                    zone.set(j, i_bean);
+                } else {
+                    zone.set(i, i_bean);
+                    zone.set(j, j_bean);
+                }
+            }
+        }
+
+        for(int i = 0; i < zone.size(); i++) {
+            GIVE_PRICE_MSTR_bean bean = zone.get(i);
+            System.out.println(bean.getBill_pkid());
+        }
+    }
+
+    public static void test() {
+        Integer send_total_price = 5856;
+        Integer recv_total_price = 10086;
+        Float diff_ratio = 0.00f;
+        diff_ratio = (send_total_price - recv_total_price) / (float) send_total_price;
+        diff_ratio = Math.round(diff_ratio * 100) / (float) 100;
+
+        System.out.println(diff_ratio);
+        System.out.println(diff_ratio < -0.05);
+    }
+}

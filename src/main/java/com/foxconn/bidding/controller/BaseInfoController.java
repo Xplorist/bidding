@@ -18,14 +18,6 @@ public class BaseInfoController {
     @Autowired
     private BaseInfoService svc;
 
-    // 模板
-    @RequestMapping("/template")
-    public ResultParam template(@RequestBody BaseInfoParam param, HttpServletRequest request) {
-        ResultParam result = ResultParam.of("", "");
-
-        return result;
-    }
-
     // 查詢廠區list
     @RequestMapping("/query_factory_list")
     public ResultParam query_factory_list(@RequestBody BaseInfoParam param, HttpServletRequest request) {
@@ -54,6 +46,39 @@ public class BaseInfoController {
     @RequestMapping("/query_PD_OFFICE_list")
     public ResultParam query_PD_OFFICE_list(@RequestBody BaseInfoParam param, HttpServletRequest request) {
         ResultParam result = svc.query_PD_OFFICE_list(param, request);
+
+        return result;
+    }
+
+    // 【05】查詢交貨地點list
+    @RequestMapping("/query_deliver_address_list")
+    public ResultParam query_deliver_address_list(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_deliver_address_list(param, request);
+
+        return result;
+    }
+
+    // 【06】查詢開標範圍list
+    @RequestMapping("/query_bid_range_list")
+    public ResultParam query_bid_range_list(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_bid_range_list(param, request);
+
+        return result;
+    }
+
+    // 【07】查詢產品類型list
+    @RequestMapping("/query_pd_type_list")
+    public ResultParam query_pd_type_list(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_pd_type_list(param, request);
+
+        return result;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+    // 【】模板,放在最後
+    @RequestMapping("/template")
+    public ResultParam template(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = ResultParam.of("", "");
 
         return result;
     }

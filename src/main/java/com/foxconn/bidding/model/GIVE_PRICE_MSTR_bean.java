@@ -21,4 +21,16 @@ public class GIVE_PRICE_MSTR_bean {
 
     // 非表中字段
     private List<GIVE_PRICE_SLAV_bean> slav_list;// 報價明細list（從表list）
+    private String sort_way;// 排序方式（complex: 綜合排序，price: 報價排序，date: 交期排序）
+    private USER_INFO_bean recv_user;// 接單用戶
+
+    // 分頁查詢參數字段
+    private Integer pageIndex;// 分頁頁碼
+    private Integer pageSize;// 分頁每頁數據條數
+
+    // 分頁查詢返回字段
+    private Integer row_total;// 總行數
+
+    // 綜合排序字段
+    private Float diff_ratio;// 價差比
 }

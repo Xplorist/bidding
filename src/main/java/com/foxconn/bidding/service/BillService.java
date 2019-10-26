@@ -70,4 +70,10 @@ public interface BillService {
 
     // 查詢接單方收到的評價平均分
     ResultParam query_recv_get_eval_avg(RequestParam param, HttpServletRequest request);
+
+    // 【22】根據訂單id查詢排序後報價list(分頁查詢)
+    ResultParam query_give_price_list(GIVE_PRICE_MSTR_bean param, HttpServletRequest request);
+
+    // 【23】選定中標
+    ResultParam select_win_bid(GIVE_PRICE_MSTR_bean param, HttpServletRequest request);
 }

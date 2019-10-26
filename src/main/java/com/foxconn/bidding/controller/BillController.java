@@ -213,8 +213,26 @@ public class BillController {
         return result;
     }
 
+    // 【22】根據訂單id查詢排序後報價list(分頁查詢)
+    //@VerifyToken
+    @RequestMapping("/query_give_price_list")
+    public ResultParam query_give_price_list(@RequestBody GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        ResultParam result = svc.query_give_price_list(param, request);
+
+        return result;
+    }
+
+    // 【23】選定中標
+    @VerifyToken
+    @RequestMapping("/select_win_bid")
+    public ResultParam select_win_bid(@RequestBody GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
+        ResultParam result = svc.select_win_bid(param, request);
+
+        return result;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
-    // 模板,放在最後
+    // 【】模板,放在最後
     @VerifyToken
     @RequestMapping("/template")
     public ResultParam template(@RequestBody RequestParam param, HttpServletRequest request) {
