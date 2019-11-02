@@ -1,5 +1,5 @@
 <template>
-  <div id="postEva">
+  <div id="postEva" v-if="orderInfo">
     <!-- 主體內容 -->
     <!-- 頂部 -->
     <div class="back">
@@ -12,8 +12,8 @@
       <span>評價</span>
     </div>
     <div class="title">
-      <div class="tit_text">【模具】需求單號A3000028</div>
-      <div class="tit_time">交貨時間: 2019-09-30</div>
+      <div class="tit_text">【模具】需求單號{{orderInfo.bill_no}}</div>
+      <div class="tit_time">交貨時間: {{orderInfo.deliver_date.split("T")[0]}}</div>
     </div>
     <!-- evaluationBox -->
     <div class="evaluationBox">
@@ -21,7 +21,7 @@
       <div class="rate rate-comprehensive">
         <span>綜合評價:</span>
         <el-rate
-          v-model="rate.comprehensive"
+          v-model="rateList[0].val"
           :texts="rateData.texts"
           :colors="rateData.color"
           text-color="#212F3A"
@@ -34,14 +34,15 @@
         <el-input type="textarea" placeholder="请输入您對商家的評價" v-model="comments"></el-input>
         <!-- 匿名 -->
         <div class="anonymity">
-          <el-checkbox label="匿名評價" name="type" :checked="anonymityFlag"></el-checkbox>
+          <el-checkbox label="匿名評價" name="type" @change="anonymityFlag = !anonymityFlag" :checked="anonymityFlag"></el-checkbox>
           <div>匿名評價不會再個人主頁中展示昵称</div>
         </div>
       </div>
       <!--  -->
       <div class="rate" v-for="(item) in rateList" :key="item.id">
-        <span>{{item.name}}:</span>
+        <span v-if="item.ename != 'comprehensive'">{{item.name}}:</span>
         <el-rate
+          v-if="item.ename != 'comprehensive'"
           v-model="item.val"
           :texts="rateData.texts"
           :colors="rateData.color"
@@ -52,7 +53,7 @@
       </div>
     </div>
     <!-- 提交 -->
-    <div class="confirm">
+    <div class="confirm" @click="comfirm">
       <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <polygon
           points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
@@ -71,6 +72,8 @@
 </template>
 
 <script>
+import { query_bill_by_pkid, save_send_eval } from "@/api/order";
+
 export default {
   data: function() {
     return {
@@ -81,23 +84,66 @@ export default {
         texts: ["(非常差)", "(差)", "(一般)", "(好)", "(非常好)"],
         color: ["#0096FF", "#0096FF", "#0096FF"]
       },
-      //
+      // 評分列表
       rateList: [
-        { id: "1", name: "出貨時效", val: null },
-        { id: "2", name: "出貨質量", val: null },
-        { id: "3", name: "服務態度", val: null }
+        { id: "0", name: "綜合評價", ename: "comprehensive", val: null },
+        { id: "1", name: "出貨時效", ename: "speed", val: null },
+        { id: "2", name: "出貨質量", ename: "quality", val: null },
+        { id: "3", name: "服務態度", ename: "attitude", val: null }
       ],
-      rate: {
-        comprehensive: null,
-        payment: null,
-        quality: null,
-        attitude: null
-      },
+      // 是否匿名
       anonymityFlag: false,
-      comments: ""
+      // 評價
+      comments: "",
+      // 訂單信息
+      orderInfo: null
     };
   },
-  components: {
+  components: {},
+  methods: {
+    // 獲取訂單信息
+    getOrderInfo(pkid) {
+      query_bill_by_pkid(pkid).then(res => {
+        if (res.code === "1") {
+          this.orderInfo = res.t;
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
+        }
+      });
+    },
+
+    // 按鈕
+    comfirm() {
+      for (let item of this.rateList) {
+        if (!item.val) return this.$message.warning("評分未完成");
+      }
+      if(!this.comments) return this.$message.warning("評價未完成");
+      this.postEva();
+    },
+
+    // 發單方評價
+    postEva() {
+      const data = {
+        bill_pkid: this.orderInfo.pkid,
+        summary_score: this.rateList[0].val,
+        out_rate_score: this.rateList[1].val,
+        out_qual_score: this.rateList[2].val,
+        svc_atitu_score: this.rateList[3].val,
+        summary_text: this.comments,
+        f_anomus: (this.anonymityFlag ? "Y" : "N")
+      };
+      save_send_eval(data).then(res => {
+        if(res.code === "1"){
+          this.$message.success("評價成功")
+          this.$router.push('/demand')
+        }else{
+          this.$message.error("出錯啦，稍後再試試吧")
+        }
+      });
+    }
+  },
+  created() {
+    this.getOrderInfo(this.$router.history.current.query.pkid);
   }
 };
 </script>
@@ -139,6 +185,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 15px;
 }
 .tit_text {
   color: #212f3a;
@@ -147,7 +194,7 @@ export default {
 .tit_time {
   color: #0096ff;
   font-size: 16px;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 // 評價框
 .evaluationBox {

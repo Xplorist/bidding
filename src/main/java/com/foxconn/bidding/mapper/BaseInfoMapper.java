@@ -27,4 +27,7 @@ public interface BaseInfoMapper {
 
     // 查詢產品類型list
     List<BaseInfoParam> query_pd_type_list();
+
+    // 根據單位代碼查詢單位名稱
+    B_DEPT_bean query_dept_name_by_dept_no(String dept_no);
 }

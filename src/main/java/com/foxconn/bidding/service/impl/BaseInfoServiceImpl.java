@@ -65,4 +65,23 @@ public class BaseInfoServiceImpl implements BaseInfoService {
 
         return new ResultParam("1", "【07】查詢產品類型list成功", list);
     }
+
+    // 【08】根據單位代碼查詢單位名稱
+    @Override
+    public ResultParam query_dept_name_by_dept_no(BaseInfoParam param, HttpServletRequest request) {
+        String dept_no = param.getDept_no();
+        String fctry_zone = param.getFctry_zone();
+        if(fctry_zone == null || "".equals(fctry_zone)) {
+            throw new RuntimeException("廠區為空，根據單位名稱查詢單位代碼失敗");
+        }
+        if("深圳".equals(fctry_zone) || "龍華".equals(fctry_zone)) {
+            dept_no += "SZ";
+        }
+        B_DEPT_bean dept = mapper.query_dept_name_by_dept_no(dept_no);
+        if(dept == null || "".equals(dept)) {
+            throw new RuntimeException("根據單位名稱查詢單位代碼失敗");
+        }
+
+        return new ResultParam("1", "【08】根據單位名稱查詢單位代碼成功", dept);
+    }
 }

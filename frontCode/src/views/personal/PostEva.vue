@@ -1,5 +1,5 @@
 <template>
-  <div class="postEva">
+  <div class="postEva" v-if="orderInfo">
     <Top></Top>
     <Logo></Logo>
     <section id="content">
@@ -18,8 +18,8 @@
             <div class="back_status">評價</div>
           </div>
           <div class="title">
-            <div class="tit_text">【模具】需求單號A3000028</div>
-            <div class="tit_time">交貨時間: 2019-09-30</div>
+            <div class="tit_text">【模具】需求單號{{orderInfo.bill_no}}</div>
+            <div class="tit_time">交貨時間: {{orderInfo.deliver_date.split(" ")[0]}}</div>
           </div>
           <!-- evaluationBox -->
           <div class="evaluationBox">
@@ -42,16 +42,16 @@
               <el-input type="textarea" placeholder="请输入您對商家的評價" v-model="comments"></el-input>
               <!-- 匿名 -->
               <div class="anonymity">
-                <el-checkbox label="匿名評價" name="type" :checked="anonymityFlag"></el-checkbox>
+                <el-checkbox label="匿名評價" name="type" @change="anonymityFlag = !anonymityFlag" :checked="anonymityFlag"></el-checkbox>
                 <div>匿名評價不會再個人主頁中展示昵称</div>
               </div>
             </div>
             <!-- 付款時效 -->
-            <div class="rate-payment rate">
+            <div class="rate-speed rate">
               <div class="single">
                 <span>付款時效:</span>
                 <el-rate
-                  v-model="rate.payment"
+                  v-model="rate.speed"
                   :texts="rateData.texts"
                   :colors="rateData.color"
                   text-color="#212F3A"
@@ -76,7 +76,7 @@
             </div>
           </div>
           <!-- 提交 -->
-          <div class="confirm">
+          <div class="confirm" @click="comfirm">
             <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
               <polygon
                 points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
@@ -99,11 +99,12 @@
 </template>
 
 <script>
-import Top from "../../components/Top";
-import Logo from "../../components/Logo";
-import Footer from "../../components/Footer";
+import Top from "@/components/Top";
+import Logo from "@/components/Logo";
+import Footer from "@/components/Footer";
+import SilderBar from "@/components/personal/SilderBar";
 
-import SilderBar from "../../components/personal/SilderBar";
+import { query_bill_by_pkid, save_recv_eval } from "@/api/order";
 
 export default {
   data: function() {
@@ -115,14 +116,63 @@ export default {
         texts: ["(非常差)", "(差)", "(一般)", "(好)", "(非常好)"],
         color: ["#0096FF", "#0096FF", "#0096FF"]
       },
+      // 評分
       rate: {
         comprehensive: null,
-        payment: null,
+        speed: null,
         attitude: null
       },
+      // 是否匿名
       anonymityFlag: false,
-      comments: ""
+      // 評價
+      comments: "",
+      // 訂單信息
+      orderInfo: null
     };
+  },
+  methods: {
+    // 獲取信息
+    getOrderInfo(pkid) {
+      query_bill_by_pkid(pkid).then(res => {
+        if (res.code === "1") {
+          this.orderInfo = res.t;
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
+        }
+      });
+    },
+
+    // 按鈕
+    comfirm() {
+      if(!this.rate.comprehensive || !this.rate.speed || !this.rate.attitude) {
+        return this.$message.warning("評分未完成");
+      }
+      if (!this.comments) return this.$message.warning("評價未完成");
+      this.postEva();
+    },
+
+    // 發起評價
+    postEva() {
+      const data = {
+        bill_pkid: this.orderInfo.pkid,
+        summary_score: this.rate.comprehensive,
+        pay_rate_score: this.rate.speed,
+        svc_atitu_score: this.rate.attitude,
+        summary_text: this.comments,
+        f_anomus: this.anonymityFlag ? "Y" : "N"
+      };
+      save_recv_eval(data).then(res => {
+        if (res.code === "1") {
+          this.$message.success("評價成功");
+          this.$router.push("/personal");
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧");
+        }
+      });
+    }
+  },
+  created() {
+    this.getOrderInfo(this.$router.history.current.query.pkid);
   },
   components: {
     Top,

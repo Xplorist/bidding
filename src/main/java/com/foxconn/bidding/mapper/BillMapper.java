@@ -142,4 +142,10 @@ public interface BillMapper {
 
     // 更新訂單表為中標後狀態，更新中標接單用戶
     Integer update_bill_win_bid(@Param("bill_pkid") String bill_pkid, @Param("recv_user_pkid") String recv_user_pkid);
+
+    // 查詢發單方收到的評價list(不分頁)
+    List<RECV_EVAL_bean> query_send_get_eval_list_nopagi(String send_user_pkid);
+
+    // 查詢接單方收到的評價list(不分頁)
+    List<SEND_EVAL_bean> query_recv_get_eval_list_nopagi(String recv_user_pkid);
 }

@@ -2,13 +2,10 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-// 引入 axios
-// import axios from 'axios'
-// 引入 ElementUI
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-// 引入 md5
 import md5 from 'js-md5'
+import htmlToPdf from './assets/js/htmlToPdf'
 
 Vue.config.productionTip = false
 
@@ -16,6 +13,8 @@ Vue.config.productionTip = false
 Vue.prototype.$md5 = md5
 
 Vue.use(ElementUI)
+Vue.use(htmlToPdf)
+// Vue.use()
 
 new Vue({
   router,

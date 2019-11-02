@@ -35,8 +35,8 @@ export default {
   },
   methods: {
     quit(){
-      this.$store.commit("LOG_OUT")
       this.$router.push('/login')
+      this.$store.commit("LOG_OUT")
     }
   },
   components: {

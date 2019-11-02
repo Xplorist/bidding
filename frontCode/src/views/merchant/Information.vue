@@ -2,14 +2,14 @@
   <div class="information">
     <Top></Top>
     <Logo></Logo>
-    <section id="content">
+    <section id="content" v-if="merchantInfo">
       <!-- 主體內容 -->
       <div class="main type-area">
         <div class="warpper">
           <div class="principal">
             <div class="information">
               <!-- 基本信息 -->
-              <div class="info_logo"></div>
+              <el-image class="info_logo" :src="porImgUrl" fit="cover"></el-image>
               <div class="info_name">
                 <span class="icon"></span>
                 <span>{{merchantInfo.dept_name}}</span>
@@ -18,7 +18,14 @@
                 <span>廠區：{{merchantInfo.fctry_zone}} 》次集团：{{merchantInfo.secn_cmpy}} 》事業群：{{merchantInfo.entrps_group}} 》處：{{merchantInfo.pd_office}} 》單位：{{merchantInfo.dept_name}}</span>
               </div>
               <div class="info_two">
-                <span class="range">加工範圍：{{merchantInfo.recv_mnufc_range}}</span>
+                <span class="range" v-if="merchantInfo.send_recv_type == 'recv'">
+                  加工範圍：
+                  <span
+                    v-for="item in merchantInfo.recv_range_list"
+                    :key="item.pkid"
+                  >{{item.name}}</span>
+                </span>
+                <span v-else>&nbsp;</span>
                 <span class="tel">联系电话：{{merchantInfo.tel}}</span>
               </div>
               <!-- 客戶評價 -->
@@ -62,10 +69,10 @@
                 </table>
               </div>
               <div class="intro_text">
-                <div class="intro_text_title">客戶簡介</div>
+                <div v-if="merchantInfo.send_recv_type == 'recv'" class="intro_text_title">客戶簡介</div>
+                <div v-else class="intro_text_title">商戶簡介</div>
+
                 <pre>{{merchantInfo.summary}}</pre>
-                <pre>富士康科技集团是专业从事计算机、通讯、消费性电子等3C产品研发制造，广泛涉足数位内容、汽车零组件、通路、云运算服务及新能源、新材料开发应用的高新科技企业。</pre>
-                <pre>凭借前瞻决策、扎根科技和专业制造，自1974年在台湾肇基，1988年投资中国大陆以来，富士康迅速发展壮大，拥有百余万员工及全球顶尖客户群，是全球最大的电子产业科技制造服务商。2002年起位居中国内地企业出口200强榜首（2018年进出口总额占大陆进出口总额的4.1%）,2005年起跻身《财富》全球企业500强（2019年跃居第23位）。</pre>
               </div>
             </div>
           </div>
@@ -81,53 +88,55 @@
 </template>
 
 <script>
-import Top from "../../components/Top";
-import Logo from "../../components/Logo";
-import Footer from "../../components/Footer";
+import Top from "@/components/Top";
+import Logo from "@/components/Logo";
+import Footer from "@/components/Footer";
+
+import { query_user_info_by_pkid } from "@/api/user";
+import { getPorImg } from "@/assets/js/getInfo";
+// import { query_send_get_eval_list, query_recv_get_eval_list} from "@/api/order";
+
 
 export default {
   data: function() {
     return {
-      comments: [
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        }
-      ],
-      merchantInfo: ""
+      comments: [],
+      // 賬號信息
+      merchantInfo: "",
+      // 賬號頭像
+      porImgUrl: ""
     };
   },
   methods: {
-    // 獲取發單方信息
+    // 獲取信息
     getMerchantInfo() {
-      let info = JSON.parse(sessionStorage.getItem("merchantInfo"));
-      this.merchantInfo = info;
-      console.log(info);
-    }
+      const data = this.$router.history.current.query.pkid;
+      query_user_info_by_pkid(data).then(res => {
+        if (res.code === "1") {
+          this.merchantInfo = res.t;
+          const param = this.merchantInfo.user_pic_file;
+          this.porImgUrl = getPorImg(
+            param.file_save_path,
+            param.file_save_name,
+            param.file_origin_name
+          );
+
+          this.comments = []
+          for(let item of this.merchantInfo.get_eval_list){ 
+            const obj = {
+              text: item.summary_text,
+              date: item.create_date,
+              belong: item.user.dept_name,
+            }
+            this.comments.push(obj)
+          }  
+          // this.getEvaluation(data, this.merchantInfo.send_recv_type)
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧");
+        }
+      });
+    },
+
   },
   components: {
     Top,
@@ -173,7 +182,6 @@ export default {
   .info_logo {
     width: 200px;
     height: 200px;
-    background: url(../../assets/imgs/merchant/LOGO.png) no-repeat;
     margin-top: 20px;
   }
   // 公司名稱
@@ -278,11 +286,11 @@ export default {
   // 簡介-文字
   .intro_text {
     margin-top: 30px;
-    /* 修改首要字體 */
-    @font-face {
-      font-family: "myFont";
-      src: url("../../assets/font/STZHONGS.TTF");
-    }
+    // /* 修改首要字體 */
+    // @font-face {
+    //   font-family: "myFont";
+    //   src: url("../../assets/font/STZHONGS.TTF");
+    // }
     pre {
       font-family: "myFont", "Avenir", Helvetica, Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -292,7 +300,7 @@ export default {
       // 疊加背景
       mix-blend-mode: overlay;
       font-size: 14px;
-      text-indent: 1em;
+      // text-indent: 1em;
       line-height: 28px;
       // 自動換行
       word-wrap: break-word;

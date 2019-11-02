@@ -6,29 +6,28 @@
       <!-- 分類 -->
       <div class="main_classify">
         <div
-          :class="{active:currentType == 'received'}"
-          @click="getPage('received')"
-        >收到的評價({{allReceivedComments.length}})</div>
+          :class="{active:commentsType == 'received'}"
+          @click="commentsType = 'received'"
+        >收到的評價({{ receivedNum || 0 }})</div>
         <div
-          :class="{active:currentType == 'published'}"
-          @click="getPage('published')"
-        >做出的評價({{allPublishedComments.length}})</div>
+          :class="{active:commentsType == 'published'}"
+          @click="commentsType = 'published'"
+        >做出的評價({{ publishedNum || 0 }})</div>
       </div>
       <!-- 評分 -->
-      <div class="main_rate" v-show="currentType == 'received'">
+      <div class="main_rate" v-show="commentsType !== 'published'">
         <div class="single" v-for="(item, index) in rate.list" :key="index">
           <span>{{item.name}}:</span>
           <el-rate
-            v-model="item.value"
             disabled
             show-score
-            :colors="rate.color"
+            class="stars"
             text-color="#0096FF"
             score-template="{value}"
-            disabled-void-color	='#D3DFE7'
-            class="stars"
+            disabled-void-color="#D3DFE7"
+            :colors="rate.color"
+            v-model="item.value"
           ></el-rate>
-          <span>({{item.num}}個商家打分)</span>
         </div>
       </div>
       <!-- 評價 -->
@@ -45,33 +44,33 @@
       <!-- 分頁 -->
       <div class="main_paging">
         <Paging
-            :total="total"
-            :current-page="currentPage"
-            :page-size="pageSize"
-            @getCurrentPage="handlePage"
-          ></Paging>
+          :total="total"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          @getCurrentPage="getListDate"
+        ></Paging>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Paging from '@/components/paging/Paging'
+import Paging from "@/components/paging/Paging";
+import {
+  query_send_get_eval_list,
+  query_send_make_eval_list,
+  query_send_get_eval_avg
+} from "@/api/order";
 
 export default {
   data: function() {
     return {
-      // 当前评论类型
-      currentType: "received", // published
       // 評分信息
       rate: {
         // 評分顏色
         color: ["#0096FF", "#0096FF", "#0096FF"],
         // 評分類型、值、數量
-        list: [
-          { name: "付款時效", value: 3.2, num: "57" },
-          { name: "服務態度", value: 4.5, num: "58" }
-        ]
+        list: [{ name: "付款時效", value: 0 }, { name: "服務態度", value: 0 }]
       },
       // 总页数
       total: null,
@@ -430,7 +429,12 @@ export default {
         }
       ],
       // 选中的侧边栏条目
-      silderBarItem: "evaluation"
+      silderBarItem: "evaluation",
+      // 評價類型
+      commentsType: "",
+      // 評價個數
+      receivedNum: null,
+      publishedNum: null
     };
   },
   methods: {
@@ -439,16 +443,17 @@ export default {
       this.currentPage = val;
       var start = (this.currentPage - 1) * this.pageSize;
       var end = start + this.pageSize;
-      if (this.currentType == "published") {
+      if (this.commentsType == "published") {
         this.comments = this.allPublishedComments.slice(start, end);
       } else {
         this.comments = this.allReceivedComments.slice(start, end);
       }
     },
+
     // 获取总数目
     getPage(type) {
-      this.currentType = type || "received";
-      switch (this.currentType) {
+      this.commentsType = type || "received";
+      switch (this.commentsType) {
         case "published":
           this.total = this.allPublishedComments.length;
           break;
@@ -457,13 +462,95 @@ export default {
           break;
       }
       this.handlePage(1);
+    },
+
+    // 向後端發起請求獲取數據
+    getListDate(page = 1) {
+      this.currentPage = Number(page);
+      sessionStorage.setItem("demandGetEvaCurrentPage", this.currentPage);
+      if (this.commentsType == "received") {
+        console.log("received");
+        this._query_send_get_eval_list();
+      } else if (this.commentsType == "published") {
+        console.log("published");
+        this._query_send_make_eval_list();
+      } else {
+        this._query_send_get_eval_list();
+        query_send_make_eval_list(this.currentPage, this.pageSize).then(res => {
+          if (res.code === "1") {
+            this.publishedNum = res.t.row_total;
+          }
+        });
+      }
+    },
+
+    // received
+    _query_send_get_eval_list() {
+      query_send_get_eval_list(this.currentPage, this.pageSize).then(res => {
+        if (res.code === "1") {
+          // 清空原有數據
+          this.comments = [];
+          this.total = res.t.row_total;
+          this.receivedNum = res.t.row_total;
+          const listData = res.t.send_get_eval_list;
+          this.changeListData(listData);
+        }
+      });
+    },
+    // published
+    _query_send_make_eval_list() {
+      query_send_make_eval_list(this.currentPage, this.pageSize).then(res => {
+        console.log(res);
+        if (res.code === "1") {
+          // 清空原有數據
+          this.comments = [];
+          this.total = res.t.row_total;
+          this.publishedNum = res.t.row_total;
+          const listData = res.t.send_make_eval_list;
+          this.changeListData(listData);
+        }
+      });
+    },
+
+    // 修改數據格式
+    changeListData(listData) {
+      for (let item of listData) {
+        const obj = {
+          text: item.summary_text,
+          date: item.create_date,
+          belong: item.recv_user.dept_name
+        };
+        this.comments.push(obj);
+      }
+    },
+
+    // 獲取評分
+    getRate() {
+      query_send_get_eval_avg().then(res => {
+        if (res.code === "1") {
+          if(!res.t) return
+          this.rate.list[0].value = Number(res.t.pay_rate_avg);
+          this.rate.list[1].value = Number(res.t.svc_atitu_avg);
+        }
+      });
     }
   },
   created() {
-    this.getPage();
+    // this.getPage();
+    // 獲取分頁數據
+    let page = Number(sessionStorage.getItem("demandGetEvaCurrentPage"));
+    page = page ? page : 1;
+    this.getListDate(page);
+    // 獲取評分
+    this.getRate();
   },
-  components:{
+  components: {
     Paging
+  },
+  watch: {
+    commentsType: function() {
+      this.getListDate();
+    }
   }
 };
 </script>
@@ -488,7 +575,6 @@ export default {
   display: flex;
   align-items: center;
   cursor: pointer;
-  user-select: none;
   div {
     width: 200px;
     height: 36px;
@@ -544,5 +630,4 @@ export default {
 }
 // 分頁
 // .main_paging {}
-
 </style>

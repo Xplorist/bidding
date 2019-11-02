@@ -101,6 +101,7 @@
             entrps_group     = #{entrps_group},
             pd_office        = #{pd_office},
             dept_name        = #{dept_name},
+            dept_code        = #{dept_code},
             <if test='legal_person != null and legal_person != ""'>
                 legal_person     = #{legal_person},
             </if>
@@ -126,6 +127,28 @@
         delete from RECV_MNUFC_RANGE
         where recv_mnufc_range_rel_id = #{recv_mnufc_range_rel_id}
     </delete>
+
+    <!-- 根據訂單信息查詢相應的接單方郵箱地址 -->
+    <select id="query_email_by_bill_info" parameterType="com.foxconn.bidding.model.BILL_bean" resultType="String">
+        select t.email
+        from USER_INFO t, RECV_MNUFC_RANGE r
+        where t.recv_mnufc_range_rel_id = r.recv_mnufc_range_rel_id
+          and r.name = #{pd_type}
+          <if test='bid_range == "次集團"'>
+          and t.secn_cmpy = #{bid_range_value}
+          </if>
+          <if test='bid_range == "廠區"'>
+          and t.fctry_zone = #{bid_range_value}
+          </if>
+          <if test='bid_range == "事業群"'>
+          and t.entrps_group = #{bid_range_value}
+          </if>
+          <if test='bid_range == "產品處"'>
+          and t.pd_office = #{bid_range_value}
+          </if>
+        group by t.email
+        order by t.email
+    </select>
 
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

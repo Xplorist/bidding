@@ -74,6 +74,14 @@ public class BaseInfoController {
         return result;
     }
 
+    // 【08】根據單位代碼查詢單位名稱
+    @RequestMapping("/query_dept_name_by_dept_no")
+    public ResultParam query_dept_name_by_dept_no(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.query_dept_name_by_dept_no(param, request);
+
+        return result;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
     // 【】模板,放在最後
     @RequestMapping("/template")

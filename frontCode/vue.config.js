@@ -1,6 +1,7 @@
 module.exports = {
   // 部署应用包时的基本 URL
-  publicPath: process.env.NODE_ENV === 'production' ? '/test/' : '/',
+  // publicPath: process.env.NODE_ENV === 'production' ? '/bidding' : '/',
+  publicPath: '/',
   devServer: {
     proxy: {
       '/api': {

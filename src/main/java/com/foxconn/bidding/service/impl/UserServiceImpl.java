@@ -1,10 +1,8 @@
 package com.foxconn.bidding.service.impl;
 
+import com.foxconn.bidding.mapper.BillMapper;
 import com.foxconn.bidding.mapper.UserMapper;
-import com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean;
-import com.foxconn.bidding.model.ResultParam;
-import com.foxconn.bidding.model.USER_INFO_bean;
-import com.foxconn.bidding.model.USER_PIC_FILE_bean;
+import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.UserService;
 import com.foxconn.bidding.util.SimpleEncodeUtil;
 import com.foxconn.bidding.util.TokenUtil;
@@ -20,6 +18,8 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper mapper;
+    @Autowired
+    private BillMapper billMapper;
 
     @Override
     public ResultParam ck_user_is_exist(USER_INFO_bean param, HttpServletRequest request) {
@@ -130,6 +130,7 @@ public class UserServiceImpl implements UserService {
         if(user_info_bean == null) {
             throw new RuntimeException("根據用戶id查詢用戶信息失敗");
         }
+        // 查詢用戶頭像
         String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
         if(user_pic_file_pkid != null && !"".equals(user_pic_file_pkid)) {
             USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file(user_pic_file_pkid);
@@ -138,10 +139,34 @@ public class UserServiceImpl implements UserService {
             USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file("default");
             user_info_bean.setUser_pic_file(user_pic_file_bean);
         }
+        // 查詢接單方的加工範圍list
         String recv_mnufc_range_rel_id = user_info_bean.getRecv_mnufc_range_rel_id();
         if(recv_mnufc_range_rel_id != null && !"".equals(recv_mnufc_range_rel_id)) {
             List<RECV_MNUFC_RANGE_bean> recv_range_list = mapper.query_recv_range_list(recv_mnufc_range_rel_id);
             user_info_bean.setRecv_range_list(recv_range_list);
+        }
+
+        String send_recv_type = user_info_bean.getSend_recv_type();
+        if("send".equals(send_recv_type)) {
+            // 查詢發單方收到的評價list
+            List<RECV_EVAL_bean> send_get_eval_list = billMapper.query_send_get_eval_list_nopagi(pkid);
+            user_info_bean.setGet_eval_list(send_get_eval_list);
+            for(int i = 0; i < send_get_eval_list.size(); i++) {
+                RECV_EVAL_bean recv_eval_bean = send_get_eval_list.get(i);
+                String recv_user_pkid = recv_eval_bean.getRecv_user_pkid();
+                USER_INFO_bean user = mapper.findUserById(recv_user_pkid);
+                recv_eval_bean.setUser(user);
+            }
+        } else if("recv".equals(send_recv_type)) {
+            // 查詢接單方收到的評價list
+            List<SEND_EVAL_bean> recv_get_eval_list = billMapper.query_recv_get_eval_list_nopagi(pkid);
+            user_info_bean.setGet_eval_list(recv_get_eval_list);
+            for(int i = 0; i < recv_get_eval_list.size(); i++) {
+                SEND_EVAL_bean send_eval_bean = recv_get_eval_list.get(i);
+                String send_user_pkid = send_eval_bean.getSend_user_pkid();
+                USER_INFO_bean user = mapper.findUserById(send_user_pkid);
+                send_eval_bean.setUser(user);
+            }
         }
 
         return new ResultParam("1", "根據用戶id查詢用戶信息成功", user_info_bean);
@@ -194,6 +219,10 @@ public class UserServiceImpl implements UserService {
             }
         }
 
+        String dept_code = param.getDept_code();
+        if(dept_code == null || "".equals(dept_code)) {
+            throw new RuntimeException("更改用戶信息失败，用户单位代码为空");
+        }
         // 更新用戶主表信息
         Integer f_update_user_info = mapper.update_user_info(param);
         if(f_update_user_info <= 0) {

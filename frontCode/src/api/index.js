@@ -1,7 +1,10 @@
 import axios from 'axios'
-// import Qs from 'qs'
 import Vue from 'vue'
-import { Loading, Message } from 'element-ui'
+import {
+  Loading,
+  Message
+} from 'element-ui'
+import store from '@/store'
 
 const $axios = axios.create({
   // 設置超時時間
@@ -10,6 +13,7 @@ const $axios = axios.create({
   // baseURL: 'http://10.244.186.86:8081'
 })
 
+
 Vue.prototype.$http = axios
 
 let loading = null
@@ -17,7 +21,9 @@ let loading = null
 // 請求攔截器
 $axios.interceptors.request.use(
   config => {
-    loading = Loading.service({ text: '拼命加載中' })
+    loading = Loading.service({
+      text: '資源拉取中...'
+    })
     return config
   },
   error => {
@@ -28,23 +34,23 @@ $axios.interceptors.request.use(
 // 響應攔截器
 $axios.interceptors.response.use(
   response => {
-    if(loading){
+    if (loading) {
       loading.close()
     }
     const code = response.status
-    if((code >= 200 && code < 300) || code === 304 ){
+    if ((code >= 200 && code < 300) || code === 304) {
       return Promise.resolve(response.data)
-    }else{
+    } else {
       return Promise.reject(response)
     }
   },
   error => {
-    if(loading){
+    if (loading) {
       loading.close()
     }
     // console.log(error)
-    if(error.response){
-      switch(error.response.status){
+    if (error.response) {
+      switch (error.response.status) {
         case 404:
           Message.error('網絡請求不存在')
           break
@@ -54,11 +60,11 @@ $axios.interceptors.response.use(
         default:
           Message.error(error.response.data.message)
       }
-    }else{
+    } else {
       // 請求超時或者網絡有問題
-      if(error.message.includes('timeout')){
+      if (error.message.includes('timeout')) {
         Message.error('請求超時！請檢查網絡是否正常')
-      }else{
+      } else {
         Message.error('請求失敗！請檢查網絡是否連接')
       }
     }
@@ -67,25 +73,51 @@ $axios.interceptors.response.use(
 )
 
 // get post 請求方法
-export default{
-  post(url, data, headers){
+export default {
+  post(url, data, headers) {
     return $axios({
       method: 'post',
       url,
       data: data,
       headers: {
-        'Content-Type': ( headers || 'application/json' )
+        'Content-Type': (headers || 'application/json')
         // 'Content-Type': 'application/json'
         // 'Content-Type': 'multipart/form-data'
       }
     })
   },
 
-  get(url, params){
+  get(url, params) {
     return $axios({
       method: 'get',
       url,
       params
     })
-  }
+  },
+
+  getWithToken(url, params) {
+    const token = store.state.token
+    return $axios({
+      method: 'get',
+      url,
+      params,
+      responseType: 'blob',
+      headers: {
+        token
+      }
+    })
+  },
+
+  postWithToken(url, data, headers) {
+    const token = store.state.token
+    return $axios({
+      method: 'post',
+      url,
+      data,
+      headers: {
+        'Content-Type': (headers || 'application/json'),
+        token
+      }
+    })
+  },
 }

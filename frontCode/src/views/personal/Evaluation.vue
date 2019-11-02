@@ -11,23 +11,28 @@
           <div class="main_title">評價管理</div>
           <!-- 分類 -->
           <div class="main_classify">
-            <div :class="{active:currentType == 'received'}" @click="getPage('received')">收到的評價({{allReceivedComments.length}})</div>
-            <div :class="{active:currentType == 'published'}" @click="getPage('published')">做出的評價({{allPublishedComments.length}})</div>
+            <div
+              :class="{active:commentsType == 'received'}"
+              @click="commentsType = 'received'"
+            >收到的評價({{receivedNum || 0}})</div>
+            <div
+              :class="{active:commentsType == 'published'}"
+              @click="commentsType = 'published'"
+            >做出的評價({{publishedNum|| 0}})</div>
           </div>
           <!-- 評分 -->
-          <div class="main_rate" v-show="currentType == 'received'">
+          <div class="main_rate" v-show="commentsType !== 'published'">
             <div class="single" v-for="(item, index) in rate.list" :key="index">
               <span>{{item.name}}:</span>
               <el-rate
-                v-model="item.value"
                 disabled
                 show-score
-                :colors="rate.color"
+                class="stars"
                 text-color="#0096FF"
                 score-template="{value}"
-                class="stars"
+                :colors="rate.color"
+                v-model="item.value"
               ></el-rate>
-              <span>({{item.num}}個商家打分)</span>
             </div>
           </div>
           <!-- 評價 -->
@@ -42,26 +47,14 @@
             </div>
           </div>
           <!-- 分頁 -->
-              <div class="paging">
-                <Paging
-                  :total="total"
-                  :current-page="currentPage"
-                  :page-size="pageSize"
-                  @getCurrentPage="handlePage"
-                ></Paging>
-              </div>
-          <!-- <div class="main_paging">
-            <el-pagination
-              background
-              layout="prev, pager, next"
-              prev-text="上一頁"
-              next-text="下一頁"
+          <div class="paging">
+            <Paging
               :total="total"
               :current-page="currentPage"
               :page-size="pageSize"
-              @current-change="handlePage"
-            ></el-pagination>
-          </div> -->
+              @getCurrentPage="getListDate"
+            ></Paging>
+          </div>
         </div>
       </div>
     </section>
@@ -70,27 +63,32 @@
 </template>
 
 <script>
-import Top from "../../components/Top";
-import Logo from "../../components/Logo";
-import Footer from "../../components/Footer";
-import Paging from "../../components/paging/Paging";
+import Top from "@/components/Top";
+import Logo from "@/components/Logo";
+import Footer from "@/components/Footer";
+import Paging from "@/components/paging/Paging";
+import SilderBar from "@/components/personal/SilderBar";
 
-import SilderBar from "../../components/personal/SilderBar";
+import {
+  query_recv_get_eval_list,
+  query_recv_make_eval_list,
+  query_recv_get_eval_avg
+} from "@/api/order";
 
 export default {
   data: function() {
     return {
       // 当前评论类型
-      currentType: 'received', // published
+      currentType: "received", // published
       // 評分信息
       rate: {
         // 評分顏色
         color: ["#0096FF", "#0096FF", "#0096FF"],
         // 評分類型、值、數量
         list: [
-          { name: "出貨時效", value: 3.2, num: "48" },
-          { name: "出貨質量", value: 5.0, num: "53" },
-          { name: "服務態度", value: 4.5, num: "57" }
+          { name: "出貨時效", value: 0 },
+          { name: "出貨質量", value: 0 },
+          { name: "服務態度", value: 0 }
         ]
       },
       // 总页数
@@ -125,11 +123,11 @@ export default {
           date: "2019-08-29 17:22:33",
           belong: "FOXCONN 成都制一处"
         },
-          {
-            text: "很不错，多次合作，一如既往的好。",
-            date: "2019-08-29 17:22:34",
-            belong: "FOXCONN 成都制一处"
-          },
+        {
+          text: "很不错，多次合作，一如既往的好。",
+          date: "2019-08-29 17:22:34",
+          belong: "FOXCONN 成都制一处"
+        },
         {
           text:
             "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
@@ -190,7 +188,7 @@ export default {
             "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
           date: "2019-08-29 17:22:45",
           belong: "FOXCONN 成都制一处"
-        },
+        }
       ],
       // 做出的评价
       allPublishedComments: [
@@ -447,10 +445,15 @@ export default {
             "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
           date: "2019-08-29 17:22:45",
           belong: "FOXCONN 成都制一处"
-        },
+        }
       ],
       // 选中的侧边栏条目
-      silderBarItem: "evaluation"
+      silderBarItem: "evaluation",
+      // 評價類型
+      commentsType: "",
+      // 評價個數
+      receivedNum: null,
+      publishedNum: null
     };
   },
   methods: {
@@ -459,15 +462,15 @@ export default {
       this.currentPage = val;
       var start = (this.currentPage - 1) * this.pageSize;
       var end = start + this.pageSize;
-      if(this.currentType == 'published'){
+      if (this.currentType == "published") {
         this.comments = this.allPublishedComments.slice(start, end);
-      }else{
+      } else {
         this.comments = this.allReceivedComments.slice(start, end);
       }
     },
     // 获取总数目
     getPage(type) {
-      this.currentType = type || 'received'
+      this.currentType = type || "received";
       switch (this.currentType) {
         case "published":
           this.total = this.allPublishedComments.length;
@@ -477,10 +480,85 @@ export default {
           break;
       }
       this.handlePage(1);
+    },
+
+    // 向後端發起請求獲取數據
+    getListDate(page = 1) {
+      this.currentPage = Number(page);
+      sessionStorage.setItem("demandGetEvaCurrentPage", this.currentPage);
+      if (this.commentsType == "received") {
+        this._query_recv_get_eval_list();
+      } else if (this.commentsType == "published") {
+        this._query_recv_make_eval_list();
+      } else {
+        this._query_recv_get_eval_list();
+        query_recv_make_eval_list(this.currentPage, this.pageSize).then(res => {
+          if (res.code === "1") {
+            this.publishedNum = res.t.row_total;
+          }
+        });
+      }
+    },
+
+    // received
+    _query_recv_get_eval_list() {
+      query_recv_get_eval_list(this.currentPage, this.pageSize).then(res => {
+        if (res.code === "1") {
+          // 清空原有數據
+          this.comments = [];
+          this.total = res.t.row_total;
+          this.receivedNum = res.t.row_total;
+          const listData = res.t.recv_get_eval_list;
+          this.changeListData(listData);
+        }
+      });
+    },
+
+    // published
+    _query_recv_make_eval_list() {
+      query_recv_make_eval_list(this.currentPage, this.pageSize).then(res => {
+        if (res.code === "1") {
+          // 清空原有數據
+          this.comments = [];
+          this.total = res.t.row_total;
+          this.publishedNum = res.t.row_total;
+          const listData = res.t.recv_make_eval_list;
+          this.changeListData(listData);
+        }
+      });
+    },
+
+    // 修改數據格式
+    changeListData(listData) {
+      for (let item of listData) {
+        const obj = {
+          text: item.summary_text,
+          date: item.create_date,
+          belong: item.send_user.dept_name
+        };
+        this.comments.push(obj);
+      }
+    },
+
+    // 獲取評分
+    getRate() {
+      query_recv_get_eval_avg().then(res => {
+        if (res.code === "1") {
+          if(!res.t) return
+          this.rate.list[0].value = Number(res.t.out_rate_svg);
+          this.rate.list[1].value = Number(res.t.out_qual_svg);
+          this.rate.list[2].value = Number(res.t.svc_atitu_svg);
+        }
+      });
     }
   },
   created() {
-    this.getPage();
+    // 獲取分頁數據
+    let page = Number(sessionStorage.getItem("demandGetEvaCurrentPage"));
+    page = page ? page : 1;
+    this.getListDate(page);
+    // 獲取評分
+    this.getRate();
   },
   components: {
     Top,
@@ -488,6 +566,11 @@ export default {
     Footer,
     SilderBar,
     Paging
+  },
+  watch: {
+    commentsType: function() {
+      this.getListDate();
+    }
   }
 };
 </script>
@@ -524,7 +607,6 @@ export default {
 .main_classify {
   display: flex;
   align-items: center;
-  user-select: none;
   cursor: pointer;
   div {
     width: 200px;

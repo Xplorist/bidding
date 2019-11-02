@@ -32,4 +32,5 @@ public class SEND_EVAL_bean {
     // 用戶信息
     private USER_INFO_bean send_user;// 發單方用戶信息
     private USER_INFO_bean recv_user;// 接單方用戶信息
+    private USER_INFO_bean user;// 不區分接單發單的用戶信息
 }

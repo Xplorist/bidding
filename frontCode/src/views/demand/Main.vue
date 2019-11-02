@@ -28,7 +28,12 @@
       <div class="details">
         <!-- 篩選欄 -->
         <el-radio-group v-model="classify">
-          <el-radio v-for="(item) in classifyList" :key="item.id" :label="item.ename">
+          <el-radio
+            v-for="(item) in classifyList"
+            :key="item.id"
+            :label="item.ename"
+            @click="classify = item.ename"
+          >
             {{item.name}}
             <span v-show="item.num">({{item.num}})</span>
           </el-radio>
@@ -40,8 +45,8 @@
               <div class="left_info1">
                 <div>
                   <span class="price">{{item.money_type}}{{item.total_price}}</span>
-                  <router-link to="/particulars">
-                    <span class="orderNumber">【{{item.pd_type}}】需求單號{{item.bill_no}}</span>
+                  <router-link :to="'/particulars?pkid='+item.pkid">
+                    <span class="orderNumber">【{{item.pd_type}}】需求單號：{{item.bill_no}}</span>
                   </router-link>
                 </div>
                 <div v-if="item.publish_date" class="startTime">發佈時間：{{item.publish_date}}</div>
@@ -57,7 +62,7 @@
             <div class="list_right">
               <div>
                 <div v-if="item.winUnit" class="winUnit">中標單位：{{item.winUnit || ''}}</div>
-                <div v-else class="restTime">{{item.restTime}}</div>
+                <div v-else class="restTime">竞标结束时间：{{item.restTime}}</div>
               </div>
               <div class="right_info">
                 <div class="status" :class="item.statusClass">{{item.status}}</div>
@@ -98,9 +103,9 @@
 import Paging from "@/components/paging/Paging";
 import {
   query_bill_list_send_user,
-  query_status_bill_num_send_user
+  query_status_bill_num_send_user,
+  update_bill_status
 } from "@/api/order";
-import { mapState } from "vuex";
 
 export default {
   data() {
@@ -112,12 +117,13 @@ export default {
         { id: "0", ename: "all", name: "全部", num: "" },
         { id: "1", ename: "0", name: "待發佈", num: "" },
         { id: "2", ename: "1", name: "待報價", num: "" },
+        { id: "1_5", ename: "1.5", name: "待選標", num: "" },
         { id: "3", ename: "2", name: "待發貨", num: "" },
         { id: "4", ename: "3", name: "待收貨", num: "" },
         { id: "5", ename: "4", name: "待付款", num: "" },
         { id: "6", ename: "5", name: "待收款", num: "" },
-        { id: "7", ename: "6", name: "已完成", num: "" },
-        { id: "8", ename: "no_send_eval", name: "待評價", num: "" }
+        { id: "7", ename: "6", name: "已完成", num: "" }
+        // { id: "8", ename: "no_send_eval", name: "待評價", num: "" }
       ],
       // 下拉框
       dropDownFlag: false,
@@ -177,9 +183,8 @@ export default {
           status: "gather",
           text: "待收款",
           child: [
-            { id: "1", text: "收款", to: "gath" },
-            { id: "2", text: "查看", to: "show" },
-            { id: "3", text: "取消", to: "cancel" }
+            { id: "1", text: "查看", to: "show" },
+            { id: "2", text: "取消", to: "cancel" }
           ]
         },
         {
@@ -204,13 +209,19 @@ export default {
       ],
       currentPage: 1,
       pageSize: 10,
-      total: 1
+      total: 1,
+      // 初始页
+      initPage: 1
     };
   },
   methods: {
     // 操作處理
     handleOperation(to, pkid) {
       console.log(to, pkid);
+      let data = {
+        pkid: pkid,
+        bill_status: ""
+      };
       switch (to) {
         // 修改
         case "change":
@@ -218,25 +229,38 @@ export default {
           break;
         // 評價
         case "postEva":
-          this.$router.push("/demand/postEva");
+          this.$router.push("/demand/postEva?pkid=" + pkid);
           break;
         // 收貨
         case "take":
-          // this.$router.push()
+          data.bill_status = 4;
+          this.updataStatus(data);
           break;
         // 付款
         case "pay":
-          // this.$router.push()
+          data.bill_status = 5;
+          this.updataStatus(data);
           break;
         // 查看
         case "show":
-          this.$router.push("/demand/chooseDetails");
+          this.$router.push("/demand/chooseDetails?pkid=" + pkid);
           break;
         // 取消
         case "cancel":
           // this.$router.push()
           break;
       }
+    },
+    // 變更狀態
+    updataStatus(data) {
+      update_bill_status(data).then(res => {
+        console.log(res);
+        if (res.code === "1") {
+          this.getListDate(this.currentPage);
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧");
+        }
+      });
     },
     // 獲取下拉框條目
     getDropItem(val, index) {
@@ -246,33 +270,22 @@ export default {
         }
       }
     },
-    // // 獲取總頁數
-    // getPage() {
-    //   this.total = this.allOrderList.length;
-    //   this.handlePage(1);
-    // },
-    // // 獲取當前頁數
-    // handlePage(val) {
-    //   this.currentPage = val || 1;
-    //   this.getListDate();
-    //   const start = (this.currentPage - 1) * this.pageSize;
-    //   const end = start + this.pageSize;
-    //   this.orderList = this.allOrderList.slice(start, end);
-    // },
     // 向後端發起請求獲取數據
     getListDate(page = 1) {
-      this.currentPage = page
+      this.currentPage = Number(page);
+      sessionStorage.setItem("demandMainCurrentPage", this.currentPage);
+      console.log()
       query_bill_list_send_user(
         this.classify,
         this.currentPage,
         this.pageSize
       ).then(res => {
-        if (res.data.code === "1") {
+        if (res.code === "1") {
           // 清空原有數據
           this.orderList = [];
-          this.total = res.data.t.row_total;
-          const listData = res.data.t.bill_list;
-          this.changeListData(listData)
+          this.total = res.t.row_total;
+          const listData = res.t.bill_list;
+          this.changeListData(listData);
         }
       });
     },
@@ -346,8 +359,8 @@ export default {
     // 獲取訂單狀態數量
     getListClassifyNum() {
       query_status_bill_num_send_user().then(res => {
-        if (res.data.code === "1") {
-          const result = res.data.t;
+        if (res.code === "1") {
+          const result = res.t;
           for (let i in this.classifyList) {
             switch (this.classifyList[i].ename) {
               case "all":
@@ -358,6 +371,9 @@ export default {
                 break;
               case "1":
                 this.classifyList[i].num = result.num_status_1;
+                break;
+                case "1.5":
+                this.classifyList[i].num = result.num_status_1_5;
                 break;
               case "2":
                 this.classifyList[i].num = result.num_status_2;
@@ -386,17 +402,35 @@ export default {
     }
   },
   created() {
-    // this.getPage();
+    // 獲取篩選表數據
     this.getListClassifyNum();
-    this.getListDate();
+    // 獲取分頁數據
+    let page = Number(sessionStorage.getItem("demandMainCurrentPage"));
+    let classify = sessionStorage.getItem("demandMainCurrentClassify");
+    
+    this.currentPage = page || 1;
+
+    if(classify && classify !== 'all'){
+      this.initPage = this.currentPage
+      this.classify = classify
+    }else{
+      this.getListDate(this.currentPage);
+    }
   },
   components: {
     Paging
   },
-  computed: {
-    ...mapState({
-      token: state => state.token
-    })
+  computed: {},
+  watch: {
+    classify: function() {
+      sessionStorage.setItem("demandMainCurrentClassify", this.classify);
+      if(this.initPage == 1){
+        this.getListDate();
+      }else{
+        this.getListDate(this.initPage);
+        this.initPage = 1
+      }
+    }
   }
 };
 </script>
@@ -497,7 +531,7 @@ export default {
   }
   // 左側
   .list_left {
-    width: 540px;
+    // min-width: 40%;
     display: flex;
     justify-content: space-between;
   }
@@ -507,7 +541,11 @@ export default {
     flex-direction: column;
     justify-content: space-between;
   }
+  .left_info1 {
+    min-width: 380px;
+  }
   .left_info2 {
+    text-align: center;
     > div {
       width: 160px;
     }
@@ -545,7 +583,8 @@ export default {
   }
   .winUnit,
   .restTime {
-    width: 250px;
+    min-width: 250px;
+    padding: 0 5px;
     // height: 30px;
     line-height: 30px;
     text-align: center;
@@ -587,7 +626,6 @@ export default {
     background-color: #2e6e9e;
     color: #ffffff;
     // 避免連續點擊選中文字
-    user-select: none;
     font-size: 14px;
     text-align: center;
     line-height: 30px;

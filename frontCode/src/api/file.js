@@ -20,7 +20,7 @@ export function file_delete_Bypkid(data){
   return $axios.post(url, data)
 }
 
-// 下載 頭像/文件
+// 下載 文件
 export function downLoad(url){
-  return $axios.get(url)
+  return $axios.getWithToken(url)
 }

@@ -30,47 +30,65 @@
         </div>
         <!-- 篩選器 filter -->
         <div class="panel-filter">
-          <div class="fil-scope">
-            <div>目標範圍:</div>
-            <select @change="filter('scope', $event)" disabled>
+          <div class="fil-purpose">
+            <div>類型:</div>
+            <select
+              @change="change_classify('purpose')"
+              v-model="filterCondition.purpose"
+            >
               <option value="all">全部</option>
-              <option value="SHZBG">SHZBG</option>
+              <option
+                v-for="item in typeList"
+                :key="item.pkid"
+                :label="item.name"
+                :value="item.name"
+              ></option>
+            </select>
+          </div>
+          <div class="fil-scope">
+            <div>開標範圍:</div>
+            <select @change="change_classify('scope')" v-model="filterCondition.scope">
+              <option
+                v-for="item in rangeList"
+                :key="item.pkid"
+                :label="item.name"
+                :value="item.name"
+              ></option>
             </select>
           </div>
           <div class="fil-state">
             <div>狀態:</div>
-            <select @change="filter('state', $event)" disabled>
+            <select
+              @change="change_classify('state')"
+              v-model="filterCondition.state"
+            >
               <option value="all">全部</option>
-              <option value="競標中">競標中</option>
-              <option value="製作中">製作中</option>
-              <option value="已完成">已完成</option>
+              <option value="ing">競標中</option>
+              <option value="end">已結束</option>
             </select>
           </div>
           <div class="fil-site">
             <div>交貨地點:</div>
-            <select @change="filter('site', $event)" disabled>
+            <select @change="change_classify('site')" v-model="filterCondition.site">
               <option value="all">全部</option>
-              <option value="成都D23">成都D23</option>
-              <option value="深圳C27">深圳C27</option>
+              <option
+                v-for="item in addressList"
+                :key="item.pkid"
+                :label="item.name"
+                :value="item.name"
+              ></option>
             </select>
           </div>
           <div class="fil-time">
             <div>交貨時間:</div>
-            <select @change="filter('time', $event)" disabled>
+            <select
+              @click="change_classify('time')"
+              v-model="filterCondition.time"
+            >
               <option value="all">默認</option>
-              <option value="0-5">0-5天</option>
-              <option value="5-10">5-10天</option>
-              <option value="more">10天以上</option>
-            </select>
-          </div>
-          <div class="fil-purpose">
-            <div>用途:</div>
-            <select @change="filter('purpose', $event)" disabled>
-              <option value="all">全部</option>
-              <option value="治具">治具</option>
-              <option value="沖壓">沖壓</option>
-              <option value="檢具">檢具</option>
-              <option value="塑藝">塑藝</option>
+              <option value="0_5">0-5天</option>
+              <option value="5_10">5-10天</option>
+              <option value="10more">10天以上</option>
             </select>
           </div>
         </div>
@@ -78,7 +96,7 @@
         <div class="panel-list">
           <div class="list-single" v-for="(item, index) in listData" :key="index">
             <div class="single-left">
-              <!-- 用途 -->
+              <!-- 類型 -->
               <div class="sin_l_pur">
                 <div>{{item.purpose}}</div>
               </div>
@@ -87,8 +105,8 @@
                   <div class="formNum">需求單號{{item.formNum}}</div>
                   <div class="state">
                     <div class="bidding">{{item.bill_status_text}}</div>
-                    <div class="">{{item.deliver_address}}</div>
-                    <div class="">{{item.bid_range}}</div>
+                    <div class>{{item.deliver_address}}</div>
+                    <div class>{{item.bid_range}}</div>
                   </div>
                 </div>
                 <div class="info-bottom">
@@ -100,7 +118,7 @@
                     <div>需求量:</div>
                     <div class="num">{{item.demand}}</div>
                   </div>
-                  <div class="unitNum">{{item.unitNum?item.unitNum : 0}}個單位已參與</div>
+                  <div class="unitNum">{{item.unitNum ? item.unitNum : 0}}個單位已參與</div>
                 </div>
               </div>
             </div>
@@ -112,7 +130,7 @@
                 </div>
                 <div class="sin_r_l_time">
                   <div>交貨時間:</div>
-                  <div class="num">{{item.deliver_date}}</div>
+                  <div class="num">{{item.deliver_date.split(' ')[0]}}</div>
                 </div>
               </div>
               <div class="sin_r_right">
@@ -139,7 +157,12 @@
     <section id="fixBox">
       <!-- 頭像 -->
       <!-- <el-image style="width: 100px; height: 100px" src="../assets/imgs/index/portrait.png" fit="cover"></el-image> -->
-      <img v-if="porImgUrl" style="width: 100px; height: 100px" :src="porImgUrl" alt />
+      <img
+        v-if="porImgUrl"
+        style="width: 100px; height: 100px; object-fit:cover;"
+        :src="porImgUrl"
+        alt
+      />
       <!-- 功能 -->
       <div class="liFunc" v-if="porImgUrl">
         <div class="singleFunc collect">
@@ -176,7 +199,15 @@ import Footer from "@/components/Footer.vue";
 import Paging from "@/components/paging/Paging.vue";
 
 import { mapState } from "vuex";
-import { query_bill_list_not_login, query_bill_list_recv_main } from "@/api/order";
+import {
+  query_bill_list_not_login,
+  query_bill_list_recv_main
+} from "@/api/order";
+import {
+  query_deliver_address_list,
+  query_bid_range_list,
+  query_pd_type_list
+} from "@/api/formInfo";
 
 export default {
   name: "home",
@@ -192,12 +223,18 @@ export default {
       pageSize: 8,
       // 篩選條件
       filterCondition: {
-        scope: "all",
-        state: "all",
+        purpose: "all",
+        scope: "集團",
+        state: "ing",
         site: "all",
-        time: "all",
-        purpose: "all"
-      }
+        time: "all"
+      },
+      // 類型
+      typeList: [],
+      // 目標範圍
+      rangeList: [],
+      // 交貨地點
+      addressList: []
     };
   },
   components: {
@@ -223,47 +260,41 @@ export default {
         }
       }
     },
-    // getPage() {
-    //   this.total = this.allListData.length;
-    //   this.handlePage();
-    // },
-    // // 獲取數據 翻頁
-    // handlePage(page) {
-    //   this.currentPage = page || 1;
-    //   let start = (this.currentPage - 1) * this.pageSize;
-    //   let end = start + this.pageSize;
-    //   this.listData = this.allListData.slice(start, end);
-    // },
-    // 筛选信息
-    // filter(type, e) {
-    //   switch (type) {
-    //     case "scope":
-    //       this.filterCondition.scope = e.target.value;
-    //       break;
-    //     case "state":
-    //       this.filterCondition.state = e.target.value;
-    //       break;
-    //     case "site":
-    //       this.filterCondition.site = e.target.value;
-    //       break;
-    //     case "time":
-    //       this.filterCondition.time = e.target.value;
-    //       break;
-    //     case "purpose":
-    //       this.filterCondition.purpose = e.target.value;
-    //       break;
-    //     default:
-    //       return;
-    //   }
-    //   this.changeData();
-    // },
+    // 獲取筛选信息
+    query_classify() {
+      query_pd_type_list().then(res => {
+        if (res.code === "1") {
+          this.typeList = res.t;
+          console.log(this.typeList);
+        }
+      });
+
+      query_bid_range_list().then(res => {
+        if (res.code === "1") {
+          this.rangeList = res.t;
+          console.log(this.rangeList);
+        }
+      });
+
+      query_deliver_address_list().then(res => {
+        if (res.code === "1") {
+          this.addressList = res.t;
+          console.log(this.addressList);
+        }
+      });
+    },
+    // 修改篩選信息
+    change_classify(type) {
+      console.log(this.filterCondition);
+      console.log(type);
+    },
     // // 修改條件後重新獲取數據
     // changeData() {
     //   let arr = [];
     //   for (let i in this.originData) {
     //     arr.push(this.originData[i]);
     //   }
-    //   // 用途 篩選
+    //   // 類型 篩選
     //   for (let i = 0; i < arr.length; i++) {
     //     if (this.filterCondition.purpose == "all") {
     //       continue;
@@ -304,68 +335,69 @@ export default {
     // },
     // 從後台查詢數據信息
     getListDate(page = 1) {
-      this.currentPage = page
+      this.currentPage = Number(page);
+      sessionStorage.setItem("homeCurrentPage", this.currentPage);
       var data = {
+        pd_type: this.filterCondition.purpose,
         bid_range: this.filterCondition.scope,
         bill_status: this.filterCondition.state,
         deliver_address: this.filterCondition.site,
         deliver_date: this.filterCondition.time,
-        pd_type: this.filterCondition.purpose,
         pageIndex: this.currentPage,
         pageSize: this.pageSize
       };
-      if(this.userInfo && this.userInfo.send_recv_type === "recv"){
+      if (this.userInfo && this.userInfo.send_recv_type === "recv") {
         // 接單方
         query_bill_list_recv_main(data).then(res => {
-          console.log(res)
-          if(res.data.code === "1"){
-            this.total = res.data.t.row_total
-            var result = res.data.t.bill_list
-            this.changeListData(result)
+          console.log(res);
+          if (res.code === "1") {
+            this.total = res.t.row_total;
+            var result = res.t.bill_list;
+            this.changeListData(result);
           }
         });
-      }else{
+      } else {
         // 未登錄
         query_bill_list_not_login(data).then(res => {
-          console.log(res)
-          if(res.code === "1"){
-            this.total = res.t.row_total
-            var result = res.t.bill_list
-            this.changeListData(result)
+          console.log(res);
+          if (res.code === "1") {
+            this.total = res.t.row_total;
+            var result = res.t.bill_list;
+            this.changeListData(result);
           }
         });
       }
     },
     // 修改展示數據信息
-    changeListData(data){
+    changeListData(data) {
       // 先清空原始數據
-      this.listData = []
-      for(let i in data){
-        var bill_status_text = ''
-        switch(data[i].bill_status){
+      this.listData = [];
+      for (let i in data) {
+        var bill_status_text = "";
+        switch (data[i].bill_status) {
           case "0":
-            bill_status_text = '待發佈'
-            break
+            bill_status_text = "待發佈";
+            break;
           case "1":
-            bill_status_text = '待報價'
-            break
+            bill_status_text = "待報價";
+            break;
           case "2":
-            bill_status_text = '待發貨'
-            break
+            bill_status_text = "待發貨";
+            break;
           case "3":
-            bill_status_text = '待收貨'
-            break
+            bill_status_text = "待收貨";
+            break;
           case "4":
-            bill_status_text = '待付款'
-            break
+            bill_status_text = "待付款";
+            break;
           case "5":
-            bill_status_text = '待收款'
-            break
+            bill_status_text = "待收款";
+            break;
           case "6":
-            bill_status_text = '已完成'
-            break
+            bill_status_text = "已完成";
+            break;
           default:
-            break
+            break;
         }
         var obj = {
           // 唯一id
@@ -391,24 +423,35 @@ export default {
           // 參與單位數量
           unitNum: data[i].recv_user_num,
           // 發佈單位名稱
-          dept_name: data[i].send_user ? data[i].send_user.dept_name : '',
+          dept_name: data[i].send_user ? data[i].send_user.dept_name : "",
           // 交貨時間
           deliver_date: data[i].deliver_date.split("T")[0]
-        }
-        this.listData.push(obj)
+        };
+        this.listData.push(obj);
       }
-    },
-
+      console.log(data)
+    }
   },
   created() {
-    // this.getPage();
-    this.getListDate();
+    let page = Number(sessionStorage.getItem("homeCurrentPage"));
+    page = page ? page : 1;
+    this.getListDate(page);
+
+    this.query_classify();
   },
   computed: {
     ...mapState({
       porImgUrl: state => state.porImgUrl,
       userInfo: state => state.userInfo
     })
+  },
+  watch: {
+    filterCondition:{
+      handler : function() {
+        this.getListDate()
+      },
+      deep: true
+    }
   }
 };
 </script>

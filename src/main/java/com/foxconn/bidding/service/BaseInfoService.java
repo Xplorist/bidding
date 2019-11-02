@@ -26,4 +26,7 @@ public interface BaseInfoService {
 
     // 【07】查詢產品類型list
     ResultParam query_pd_type_list(BaseInfoParam param, HttpServletRequest request);
+
+    // 【08】根據單位代碼查詢單位名稱
+    ResultParam query_dept_name_by_dept_no(BaseInfoParam param, HttpServletRequest request);
 }

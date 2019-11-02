@@ -41,7 +41,6 @@ export default {
   padding: 30px;
   box-sizing: border-box;
   text-align: center;
-  user-select: none;
   /deep/ .number {
     width: 30px;
     height: 30px;

@@ -1,5 +1,5 @@
 <template>
-  <div class="sideBar">
+  <div class="sideBar" v-if="userInfo">
     <div class="side_portrait">
       <!-- 頭像 -->
       <img
@@ -49,7 +49,7 @@ export default {
           path: "/personal/evaluation",
           sub: ""
         },
-        { ename: "news", name: "消息", path: "", sub: "2" },
+        // { ename: "news", name: "消息", path: "", sub: "2" },
         { ename: "", name: "收藏", path: "", sub: "" },
         { ename: "setting", name: "設置", path: "/personal/setting", sub: "" }
       ]
@@ -60,6 +60,11 @@ export default {
     this.porImg = this.porImgUrl
   },
   methods: {},
+  watch:{
+    porImgUrl:function(){
+      this.porImg = this.porImgUrl
+    }
+  },
   computed: {
     ...mapState({
       userInfo: state => state.userInfo,
@@ -75,6 +80,7 @@ export default {
   width: 240px;
   // 設置最小高度
   min-height: 800px;
+  // height: 950px;
   background-color: #d3dfe7;
   display: flex;
   flex-direction: column;
@@ -98,6 +104,9 @@ export default {
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+  }
+  img{
+    object-fit: cover;
   }
 }
 // 所屬部門

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="userInfo">
     <el-container>
       <el-header height="60px">
         <router-link to="/"></router-link>
@@ -52,8 +52,8 @@
           <!-- 導航欄 -->
           <div class="side_navigate">
             <router-link
-              :to="item.path"
               v-for="(item, index) in list"
+              to=""
               :key="index"
               :class="{active: chooseItem == item.ename }"
               @click.native="navigatTo(item.ename)"
@@ -82,11 +82,11 @@ export default {
     return {
       // 侧边栏列表
       list: [
-        { ename: "/demand/order", name: "訂單管理", path: "", sub: "" },
-        { ename: "/demand/information", name: "賬戶信息", path: "", sub: "" },
-        { ename: "/demand/evaluation", name: "評價管理", path: "", sub: "" },
-        { ename: "/demand/news", name: "消息", path: "", sub: "2" },
-        { ename: "/demand/setting", name: "設置", path: "", sub: "" }
+        { ename: "/demand/order", name: "訂單管理", sub: "" },
+        { ename: "/demand/information", name: "賬戶信息", sub: "" },
+        { ename: "/demand/evaluation", name: "評價管理", sub: "" },
+        // { ename: "/demand/news", name: "消息", sub: "2" },
+        { ename: "/demand/setting", name: "設置", sub: "" }
       ],
       // 默认选择的项
       chooseItem: "/demand/order"
@@ -97,13 +97,14 @@ export default {
   methods: {
     // 点击修改
     navigatTo(val) {
+      if(this.chooseItem == val) return
       this.chooseItem = val;
       this.$router.push(val);
     },
     // 退出
     quit(){
-      this.$store.commit("LOG_OUT")
       this.$router.push('/login')
+      this.$store.commit("LOG_OUT")
     }
   },
   computed: {
@@ -213,6 +214,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  img{
+    object-fit: cover;
+  }
 }
 // 所屬部門
 .side_department {

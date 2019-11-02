@@ -9,59 +9,91 @@
         <div class="title">基本信息:</div>
         <!-- 表單 -->
         <el-form ref="form1" :model="form" :rules="rules" label-width="130px">
-          <el-form-item label="需求單位:">
-            <span>{{this.userInfo.dept_name}}</span>
-          </el-form-item>
-          <el-form-item label="交易法人名稱:">
-            <span>{{this.userInfo.legal_person}}</span>
-          </el-form-item>
-          <el-form-item label="用途:" prop="purpose">
-            <el-select type="select" v-model="form.purpose">
-              <el-option value="治具"></el-option>
-              <el-option value="模具"></el-option>
-              <el-option value="塑藝"></el-option>
+          <el-form-item label="類型:" prop="purpose">
+            <el-select type="select" v-model="form.purpose" @click.native="getRange">
+              <el-option
+                v-for="item in rangeOptions"
+                :key="item.pkid"
+                :label="item.name"
+                :value="item.name"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="競價開始時間:" prop="startTime">
-            <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择開始时间"></el-date-picker>
+            <el-date-picker
+              v-model="form.startTime"
+              type="datetime"
+              placeholder="选择開始时间"
+              @click.native="getStartTime"
+            ></el-date-picker>
+          </el-form-item>
+          <el-form-item label="競價持續時間:" prop="durTime">
+            <el-select
+            type="select"
+              v-model="form.durTime"
+              @change="getEndTime"
+            >
+              <el-option v-for="item in durTimeList" :key="item.id" :value="item.val" :label="item.val+'小時'"></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="競價結束時間:" prop="endTime">
-            <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择結束时间"></el-date-picker>
+            <el-date-picker
+              v-model="form.endTime"
+              type="datetime"
+              disabled=""
+            ></el-date-picker>
           </el-form-item>
           <el-form-item label="交貨日期:" prop="deliveryTime">
-            <el-date-picker v-model="form.deliveryTime" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker
+              v-model="form.deliveryTime"
+              type="date"
+              placeholder="选择日期"
+              @click.native="getDeliTime"
+            ></el-date-picker>
           </el-form-item>
           <el-form-item label="交貨地點:" prop="place">
-            <el-input v-model="form.place"></el-input>
+            <!-- 帶輸入建議的輸入框 -->
+            <el-autocomplete
+              class="inline-input"
+              v-model="form.place"
+              :fetch-suggestions="querySearch"
+              @select="handleSelect"
+            ></el-autocomplete>
           </el-form-item>
           <el-form-item label="聯繫電話:">
-            <span>{{this.userInfo.tel}}</span>
+            <span style="margin-right:10px;">{{userInfo.tel}}</span>
             <el-checkbox label="顯示聯繫電話" v-model="form.telCheck" name="type"></el-checkbox>
-          </el-form-item>
-          <el-form-item label="接受總價:" prop="price">
-            <el-input v-model="form.price"></el-input>
-          </el-form-item>
-          <el-form-item label="幣別:" prop="currencyType">
-            <el-radio label="RMB" v-model="form.currencyType" name="type"></el-radio>
-            <el-radio label="USD" v-model="form.currencyType" name="type"></el-radio>
           </el-form-item>
           <el-form-item label="需求數量:" prop="quantity">
             <el-input v-model="form.quantity" type="number"></el-input>
           </el-form-item>
-          <el-form-item label="目標範圍:" prop="scope">
-            <el-select type="select" v-model="form.scope">
-              <el-option value="SHZBG"></el-option>
-              <el-option value="CNSBG"></el-option>
-              <el-option value="iDPBG"></el-option>
-              <el-option value="NWInG"></el-option>
-              <el-option value="PCEBG"></el-option>
-              <el-option value="TMSBG"></el-option>
+          <el-form-item label="接受總價:" prop="price">
+            <el-input v-model="form.price" type="number" style="width:120px;"></el-input>
+            <!-- <el-form-item label="幣別:" prop="currencyType"> -->
+            <el-radio
+              label="RMB"
+              v-model="form.currencyType"
+              name="type"
+              style="marginLeft:10px;marginRight:10px;"
+            ></el-radio>
+            <el-radio
+              label="USD"
+              v-model="form.currencyType"
+              name="type"
+              style="marginLeft:10px;marginRight:10px;"
+            ></el-radio>
+            <!-- </el-form-item> -->
+          </el-form-item>
+
+          <el-form-item label="接單範圍:" prop="scope">
+            <el-select type="select" v-model="form.scope" @click.native="query_info('range')">
+              <el-option v-for="item in rangeList" :key="item.pkid" :value="item.name"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="交貨模式:" prop="deliveryMode">
             <el-select type="select" v-model="form.deliveryMode">
-              <el-option value="貨交工廠（DDU）" selected></el-option>
-              <!-- <el-option value="船边交货（FAS）"></el-option> -->
+              <el-option value="貨交工廠" selected></el-option>
+              <el-option value="工廠交貨" selected></el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -112,7 +144,7 @@
             <div class="fileBox" v-for="(item, index) in accessList" :key="item.id">
               <img src="../../assets/imgs/demand/img_pdf.png" alt />
               <span class="fileName">{{item.file_origin_name}}</span>
-              <input type="text" v-model="item.part_amunt" />
+              <!-- <input type="text" v-model="item.part_amunt" /> -->
               <img
                 class="close"
                 src="../../assets/imgs/demand/close.png"
@@ -120,14 +152,14 @@
               />
             </div>
           </div>
-          <div class="accessOperation">
+          <!-- <div class="accessOperation">
             <div class="upList">
               <img src="../../assets/imgs/demand/paperclip.png" alt />
               <span>上傳零件清單</span>
               <img src="../../assets/imgs/demand/add_blue.png" alt />
             </div>
             <div class="downTemplate">下載模板</div>
-          </div>
+          </div>-->
         </div>
       </div>
     </div>
@@ -172,9 +204,58 @@
 import { mapState } from "vuex";
 import { file_upload, file_delete, file_delete_Bypkid } from "@/api/file";
 import { saveBill, submitBill, query_bill_by_pkid } from "@/api/order";
+import {
+  query_deliver_address_list,
+  query_bid_range_list,
+  query_pd_type_list
+} from "@/api/formInfo";
 
 export default {
   data() {
+    // 開始時間
+    var validateST = (rule, value, callback) => {
+      let nowTime = new Date().getTime();
+      let validTime = new Date(nowTime - 1800000);
+      if (value === "") {
+        callback(new Error("請選擇開始時間！"));
+      } else if (value < validTime) {
+        callback(new Error("不能小於當前時間！"));
+      } else {
+        callback();
+      }
+    };
+
+    // 交貨時間
+    var validateDT = (rule, value, callback) => {
+      if (this.form.endTime === "") {
+        callback(new Error("請先確定競標時間！"));
+      } else if (value === "") {
+        callback(new Error("請選擇交貨時間！"));
+      } else if (value < new Date(this.form.endTime)) {
+        callback(new Error("不能小於競標結束時間！"));
+      } else {
+        callback();
+      }
+    };
+
+    // 價格
+    var validatePrice = (rule, value, callback) => {
+      if (this.form.price < 0) {
+        callback(new Error("不能小於零！"));
+      } else{
+        callback()
+      }
+    };
+
+    // 數量
+    var validateQuantity = (rule, value, callback) => {
+      if (this.form.quantity < 1) {
+        callback(new Error("不能小於一！"));
+      } else{
+        callback()
+      }
+    };
+
     return {
       form: {
         // 用途
@@ -186,42 +267,71 @@ export default {
         // 是否顯示聯繫電話
         telCheck: true,
         // 接受總價
-        price: "",
+        price: "0",
         // 貨幣種類
         currencyType: "RMB",
         // 需求數量
-        quantity: "",
+        quantity: "1",
         // 目標範圍
         scope: "",
         // 開始時間
         startTime: "",
+        // 持續時間
+        durTime: 24,
         // 結束時間
         endTime: "",
         // 交貨模式
-        deliveryMode: "貨交工廠（DDU）",
+        deliveryMode: "貨交工廠",
         // 製作要求
         requirement: ""
       },
       // 限定
       rules: {
         purpose: [{ required: true, message: "不能為空", trigger: "blur" }],
-        deliveryTime: [
-          { required: true, message: "不能為空", trigger: "blur" }
-        ],
         place: [{ required: true, message: "不能為空", trigger: "blur" }],
-        price: [{ required: true, message: "不能為空", trigger: "blur" }],
-        currencyType: [
-          { required: true, message: "不能為空", trigger: "blur" }
+        quantity: [
+          { required: true, message: "不能为空", trigger: "blur" },
+          { validator: validateQuantity, trigger: "blur" }
         ],
-        quantity: [{ required: true, message: "不能为空", trigger: "blur" }],
+        price: [{ validator: validatePrice, trigger: "blur" }],
+        currencyType: [],
         scope: [{ required: true, message: "不能為空", trigger: "blur" }],
-        startTime: [{ required: true, message: "不能為空", trigger: "blur" }],
-        endTime: [{ required: true, message: "不能為空", trigger: "blur" }],
+        startTime: [{ required: true, validator: validateST, trigger: "blur" }],
+        deliveryTime: [
+          { required: true, validator: validateDT, trigger: "blur" }
+        ],
         deliveryMode: [
           { required: true, message: "不能為空", trigger: "blur" }
         ],
         requirement: [{ required: true, message: "不能為空", trigger: "blur" }]
       },
+      // 持續時間列表
+      durTimeList: [
+        {val: 24, id: 24},
+        {val: 23, id: 23},
+        {val: 22, id: 22},
+        {val: 21, id: 21},
+        {val: 20, id: 20},
+        {val: 19, id: 19},
+        {val: 18, id: 18},
+        {val: 17, id: 17},
+        {val: 16, id: 16},
+        {val: 15, id: 15},
+        {val: 14, id: 14},
+        {val: 13, id: 13},
+        {val: 12, id: 12},
+        {val: 11, id: 11},
+        {val: 10, id: 10},
+        {val: 9, id: 9},
+        {val: 8, id: 8},
+        {val: 7, id: 7},
+        {val: 6, id: 6},
+        {val: 5, id: 5},
+        {val: 4, id: 4},
+        {val: 3, id: 3},
+        {val: 2, id: 2},
+        {val: 1, id: 1},
+      ],
       // 文件數量
       fileNum: "1",
       // 圖檔附件 公開 | 隱藏
@@ -235,14 +345,55 @@ export default {
       recv_user_pkid: "",
       give_price_mstr_pkid: "",
       part_doc_file_rel_id: "",
-      create_date: ""
+      create_date: "",
+      // 交货地点列表
+      addressList: [],
+      // 目标范围列表
+      rangeList: [],
+      // 類型
+      rangeOptions: []
     };
   },
   methods: {
+    // 獲取默認開始時間
+    getStartTime() {
+      this.form.startTime = new Date();
+      this.getEndTime()
+    },
+
+    // 獲取默認結束時間
+    getEndTime() {
+      const dHour = this.form.durTime
+      if (!this.form.startTime) return;
+      const startTime = new Date(this.form.startTime).getTime()
+      console.log(startTime)
+      this.form.endTime = new Date(startTime + dHour*60*60*1000);
+      console.log(this.form.endTime)
+    },
+
+    // 獲取默認交貨時間
+    getDeliTime() {
+      if(!this.form.startTime) return
+      let startTime = this.form.startTime
+      let reTime = ((startTime.getHours() * 60 + startTime.getMinutes()) * 60 + startTime.getSeconds()) * 1000
+      let dayTime = Date.parse(startTime) - reTime
+      this.form.deliveryTime = new Date(dayTime + 172800000)
+    },
+
+    // 獲取類型範圍
+    getRange() {
+      query_pd_type_list().then(res => {
+        if (res.code === "1") {
+          this.rangeOptions = res.t;
+        }
+      });
+    },
+
     // 觸發事件
     trigger() {
       this.$refs.uploadFile.dispatchEvent(new MouseEvent("click"));
     },
+
     // 獲取文檔信息
     getFile() {
       var inputFiles = this.$refs.uploadFile.files;
@@ -255,13 +406,30 @@ export default {
           item.type ===
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         if (isPdf || isDwg || isXls || isXlsx) {
-          this.$message.success("上傳成功");
-          this.uploadFile(item);
+          if (this.accessList.length == 0) {
+            this.uploadFile(item);
+          } else {
+            this.isRepetName(item);
+          }
         } else {
           this.$message.error("請選擇pdf/dwg/xls文檔");
         }
       }
+      // 清除 input 的 value 值，避免选择重复文件而不触发change事件
+      this.$refs.uploadFile.value = null;
     },
+
+    // 是否重名 TODO
+    isRepetName(item) {
+      for (let single of this.accessList) {
+        if (single.file_origin_name == item.name) {
+          alert("重复文件：" + item.name + "，若需更換文件請先手動刪除原文件");
+          return;
+        }
+      }
+      this.uploadFile(item);
+    },
+
     // 上傳文件
     uploadFile(file) {
       var data = new FormData();
@@ -269,6 +437,7 @@ export default {
       data.append("file_type", "part_doc");
       file_upload(data).then(res => {
         if (res.code == 1) {
+          this.$message.success("上傳成功");
           this.accessList.push({
             id: JSON.stringify(new Date()),
             part_amunt: "1",
@@ -276,11 +445,12 @@ export default {
             file_save_name: res.t.file_save_name,
             file_origin_name: res.t.file_origin_name
           });
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
+
     // 刪除文件
     deleteFile(index) {
       // 判斷是否在數據庫存有數據
@@ -291,14 +461,15 @@ export default {
         file_delete_Bypkid(data).then(res => {
           if (res.code === "1") {
             this.deleteFileFromFTP(index);
-          }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
-        }
+          } else {
+            this.$message.error("出錯啦，稍後再試試吧！");
+          }
         });
       } else {
         this.deleteFileFromFTP(index);
       }
     },
+
     // 刪除ftp數據
     deleteFileFromFTP(index) {
       // 刪除FTP數據
@@ -310,11 +481,12 @@ export default {
       file_delete(data).then(res => {
         if (res.code == 1) {
           this.accessList.splice(index, 1);
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
+
     // 檢查
     check(nameOne, nameTwo, type) {
       var file_list = [];
@@ -322,103 +494,111 @@ export default {
         this.$message.error("請先上傳圖檔附件！");
         return;
       }
-      for (let i in this.accessList) {
-        var obj = {
-          id: JSON.stringify(new Date()),
-          pkid: this.accessList[i].pkid,
-          file_origin_name: this.accessList[i].file_origin_name,
-          file_save_name: this.accessList[i].file_save_name,
-          file_save_path: this.accessList[i].file_save_path,
-          part_amunt: this.accessList[i].part_amunt
-        };
-        file_list.push(obj);
-      }
-      var data = {
-        pkid: this.pkid,
-        bill_no: this.bill_no,
-        bill_status: this.bill_status,
-        send_user_pkid: this.send_user_pkid,
-        recv_user_pkid: this.recv_user_pkid,
-        give_price_mstr_pkid: this.give_price_mstr_pkid,
-        // 用途
-        pd_type: this.form.purpose,
-        // 交貨時間
-        deliver_date: this.form.deliveryTime,
-        // 交貨地點
-        deliver_address: this.form.place,
-        // 聯繫電話
-        tel: this.userInfo.tel,
-        // 是否顯示聯繫電話
-        f_show_tel: this.form.telCheck == true ? "y" : "n",
-        // 接受總價
-        total_price: this.form.price,
-        // 幣別
-        money_type: this.form.currencyType,
-        // 需求數量
-        amount: this.form.quantity,
-        // 開標範圍
-        bid_range: this.form.scope,
-        // 競價開始時間
-        bid_start_date: this.form.startTime,
-        // 競價結束時間
-        bid_end_date: this.form.endTime,
-        // 交貨模式
-        deliver_way: this.form.deliveryMode,
-        // 製作要求
-        make_requ: this.form.requirement,
-        // 公開隱藏標誌
-        f_open_hide: this.accessFlag == true ? "o" : "h",
-        // 零件圖檔文件標關聯id
-        part_doc_file_rel_id: this.part_doc_file_rel_id,
-        // 創建時間
-        create_date: this.create_date,
-        // 文件List
-        file_list: file_list
-      };
       this.$refs[nameOne].validate(valid => {
         if (valid) {
           this.$refs[nameTwo].validate(valid => {
             if (valid) {
+              // 存入data
+              for (let i in this.accessList) {
+                var obj = {
+                  id: JSON.stringify(new Date()),
+                  pkid: this.accessList[i].pkid,
+                  file_origin_name: this.accessList[i].file_origin_name,
+                  file_save_name: this.accessList[i].file_save_name,
+                  file_save_path: this.accessList[i].file_save_path,
+                  part_amunt: this.accessList[i].part_amunt
+                };
+                file_list.push(obj);
+              }
+              var data = {
+                pkid: this.pkid,
+                bill_no: this.bill_no,
+                bill_status: this.bill_status,
+                send_user_pkid: this.send_user_pkid,
+                recv_user_pkid: this.recv_user_pkid,
+                give_price_mstr_pkid: this.give_price_mstr_pkid,
+                // 用途
+                pd_type: this.form.purpose,
+                // 交貨時間
+                deliver_date: new Date(this.form.deliveryTime),
+                // 交貨地點
+                deliver_address: this.form.place,
+                // 聯繫電話
+                tel: this.userInfo.tel,
+                // 是否顯示聯繫電話
+                f_show_tel: this.form.telCheck == true ? "y" : "n",
+                // 接受總價
+                total_price: this.form.price,
+                // 幣別
+                money_type: this.form.currencyType,
+                // 需求數量
+                amount: this.form.quantity,
+                // 開標範圍
+                bid_range: this.form.scope,
+                // 競價開始時間
+                bid_start_date: new Date(this.form.startTime),
+                // 競價結束時間
+                bid_end_date: new Date(this.form.endTime),
+                // 交貨模式
+                deliver_way: this.form.deliveryMode,
+                // 製作要求
+                make_requ: this.form.requirement,
+                // 公開隱藏標誌
+                f_open_hide: this.accessFlag == true ? "o" : "h",
+                // 零件圖檔文件標關聯id
+                part_doc_file_rel_id: this.part_doc_file_rel_id,
+                // 創建時間
+                create_date: this.create_date,
+                // 文件List
+                file_list: file_list
+              };
               if (type == "save") {
                 this.save(data);
               } else if (type == "publish") {
-                this.pulish(data);
+                let nowTime = new Date().getTime();
+                let validTime = new Date(nowTime - 1800000);
+                new Date(this.form.startTime) > validTime
+                  ? this.pulish(data)
+                  : this.$message.error("競標開始時間早於當前時間，請修改！");
               }
             } else {
-              console.log("error submit!!");
               return false;
             }
           });
         } else {
-          console.log("error submit!!");
           return false;
         }
       });
     },
+
     // 保存
     save(data) {
-      console.log("save");
+      console.log(this.form);
       saveBill(data, this.token).then(res => {
-        if (res.data.code == "1") {
+        console.log(res);
+        if (res.code == "1") {
           this.$message.success("保存成功!");
           this.$router.push("/demand/order");
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
+
     // 發佈
     pulish(data) {
       console.log("pulish");
-      submitBill(data, this.token).then(res => {
-        if (res.data.code == "1") {
+      submitBill(data).then(res => {
+        console.log(res);
+        if (res.code === "1") {
           this.$message.success("發佈成功!");
           this.$router.push("/demand/order");
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
+
     // 查詢保存的訂單信息
     _query_bill_by_pkid(param) {
       query_bill_by_pkid(param).then(res => {
@@ -446,10 +626,60 @@ export default {
           this.part_doc_file_rel_id = data.part_doc_file_rel_id;
           this.create_date = data.create_date;
           this.accessList = data.file_list;
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
+    },
+
+    // 查询 交货地点 | 開標範圍
+    query_info(val) {
+      switch (val) {
+        case "address":
+          query_deliver_address_list().then(res => {
+            if (res.code === "1") {
+              this.addressList = res.t;
+            }
+          });
+          break;
+        case "range":
+          query_bid_range_list().then(res => {
+            if (res.code === "1") {
+              this.rangeList = res.t;
+            }
+          });
+          break;
+      }
+    },
+
+    // 輸入框 查詢交貨地點
+    querySearch(queryString, cb) {
+      var addressList = [];
+      for (let item of this.addressList) {
+        const obj = {
+          value: item.name,
+          id: item.pkid
+        };
+        addressList.push(obj);
+      }
+
+      // var results = queryString
+      //   ? addressList.filter(this.createFilter(queryString))
+      //   : addressList;
+      // cb(results);
+      // 调用 callback 返回建议列表的数据
+      cb(addressList);
+    },
+    createFilter(queryString) {
+      return address => {
+        console.log(address);
+        return (
+          address.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
+        );
+      };
+    },
+    handleSelect(item) {
+      console.log(item);
     }
   },
   created() {
@@ -458,6 +688,11 @@ export default {
     if (param) {
       this._query_bill_by_pkid(param);
     }
+  },
+  mounted() {
+    this.form.place = this.userInfo.fctry_zone;
+    this.query_info("address");
+    this.query_info("range");
   },
   computed: {
     ...mapState({
@@ -555,7 +790,6 @@ export default {
       align-items: center;
       margin-left: 12px;
       cursor: pointer;
-      user-select: none;
     }
     img {
       margin-right: 4px;
@@ -596,7 +830,7 @@ export default {
       text-align: center;
     }
     .fileName {
-      width: 60%;
+      width: 66%;
       overflow: hidden;
     }
     .close {
@@ -649,7 +883,7 @@ export default {
 }
 // 按鈕
 .btn {
-  margin-top: 50px;
+  margin-top: 30px;
   display: flex;
   justify-content: center;
   .saveBtn,
@@ -688,7 +922,8 @@ export default {
 /deep/ .el-form-item__content {
   font-size: 16px;
   color: #0f1e29;
-  .el-select {
+  .el-select,
+  .el-autocomplete {
     width: 100%;
   }
   .el-input {

@@ -1,5 +1,6 @@
 package com.foxconn.bidding.mapper;
 
+import com.foxconn.bidding.model.BILL_bean;
 import com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean;
 import com.foxconn.bidding.model.USER_INFO_bean;
 import com.foxconn.bidding.model.USER_PIC_FILE_bean;
@@ -41,4 +42,7 @@ public interface UserMapper {
 
     // 刪除接單方加工範圍list
     Integer delete_recv_range_list(String recv_mnufc_range_rel_id);
+
+    // 根據訂單信息查詢相應的接單方郵箱地址
+    List<String> query_email_by_bill_info(BILL_bean param);
 }

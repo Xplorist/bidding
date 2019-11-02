@@ -1,5 +1,4 @@
 import $axios from './index'
-import axios from 'axios'
 
 // 登錄
 export function login(data){
@@ -8,16 +7,21 @@ export function login(data){
 }
 
 // 查詢登錄用戶信息
-export function login_user_info(data, token){
-  const url = '/api/user/login_user_info'
+export function login_user_info(data) {
   data = { 'username': data }
-  return axios({
-    method: 'post',
-    url,
-    data,
-    headers: {
-      'Content-Type': 'application/json',
-      'token' : token
-    }
-  })
+  const url = '/api/user/login_user_info'
+  return $axios.postWithToken(url, data)
+}
+
+// 根據pkid查詢用戶信息
+export function query_user_info_by_pkid(data) {
+  data = { 'pkid': data }
+  const url = '/api/user/query_user_info_by_pkid'
+  return $axios.post(url, data)
+}
+
+// 修改用戶信息
+export function update_user_info(data) {
+  const url = '/api/user/update_user_info'
+  return $axios.postWithToken(url, data)
 }

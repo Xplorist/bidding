@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main" v-if="orderInfo">
     <Top></Top>
     <Logo></Logo>
     <section id="content">
@@ -7,32 +7,30 @@
         <!-- 右上角tag -->
         <div class="con-tag">
           <ul>
-            <li>
+            <!-- <li>
               <div
                 @click="collect"
                 :style="{backgroundImage: 'url('+collectBg+')'}"
                 class="tag_icon tag_collect"
               ></div>
               <div>收藏</div>
-            </li>
+            </li>-->
             <li>
               <div class="tag_icon tag_browse"></div>
               <div>瀏覽:</div>
-              <div class="tag_browseNum">295次</div>
+              <div class="tag_browseNum">{{Math.floor(Math.random()*99)+1}}次</div>
             </li>
           </ul>
         </div>
         <!-- 標題 title -->
         <div class="con-title">
-          <div class="tit-text">【治具】需求單號{{this.orderInfo.bill_no}}</div>
+          <div class="tit-text">【治具】需求單號{{orderInfo.bill_no}}</div>
           <div class="tit-info">
             <div
               class="info-price info-single"
-            >接受單價: {{this.orderInfo.money_type ==="RMB" ? "￥":"$"}}{{this.orderInfo.total_price}}</div>
-            <div class="info-num info-single">需求數量: {{this.orderInfo.amount}}</div>
-            <div
-              class="info-time info-single"
-            >投標截止日期: {{this.orderInfo ? this.orderInfo.bid_end_date.split("T")[0] : ''}}</div>
+            >標價: {{orderInfo.money_type ==="RMB" ? "￥":"$"}}{{orderInfo.total_price}}</div>
+            <div class="info-num info-single">需求數量: {{orderInfo.amount}}</div>
+            <div class="info-time info-single">投標截止日期: {{orderInfo.bid_end_date}}</div>
           </div>
         </div>
         <!-- 主體內容 -->
@@ -73,63 +71,66 @@
                     <td>:</td>
                     <td class="blueTd">
                       <span></span>
-                      {{this.orderInfo ? this.orderInfo.send_user.dept_name : ''}}
+                      <router-link
+                        :to="'/merchant/information?pkid='+orderInfo.send_user.pkid"
+                        style="color:#0096ff"
+                      >{{orderInfo.send_user.dept_name}}</router-link>
                     </td>
                   </tr>
                   <tr>
                     <td>交易法人名稱</td>
                     <td>:</td>
-                    <td>{{this.orderInfo ? this.orderInfo.send_user.legal_person: ''}}</td>
+                    <td>{{orderInfo.send_user.legal_person}}</td>
                   </tr>
                   <tr>
                     <td>交貨地點</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.deliver_address}}</td>
+                    <td>{{orderInfo.deliver_address}}</td>
                   </tr>
                   <tr>
                     <td>競價開始時間</td>
                     <td>:</td>
-                    <td>{{this.orderInfo?this.orderInfo.bid_start_date.split("T")[0]:""}}</td>
+                    <td>{{orderInfo.bid_start_date}}</td>
                   </tr>
                   <tr>
                     <td>競價結束時間</td>
                     <td>:</td>
-                    <td>{{this.orderInfo?this.orderInfo.bid_end_date.split("T")[0]:""}}</td>
+                    <td>{{orderInfo.bid_end_date}}</td>
                   </tr>
                   <tr>
                     <td>實際交貨時間</td>
                     <td>:</td>
-                    <td>{{this.orderInfo?this.orderInfo.deliver_date.split("T")[0]:""}}</td>
+                    <td>{{orderInfo.deliver_date.split(' ')[0]}}</td>
                   </tr>
                   <tr>
-                    <td>用途</td>
+                    <td>類型</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.pd_type}}</td>
+                    <td>{{orderInfo.pd_type}}</td>
                   </tr>
                   <tr>
                     <td>費用代碼</td>
                     <td>:</td>
-                    <td>{{this.orderInfo ? this.orderInfo.send_user.cost_code: ''}}</td>
+                    <td>{{orderInfo.send_user.cost_code}}</td>
                   </tr>
                   <tr>
                     <td>接受總價</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.total_price}}</td>
+                    <td>{{orderInfo.total_price}}</td>
                   </tr>
                   <tr>
                     <td>幣別</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.money_type}}</td>
+                    <td>{{orderInfo.money_type}}</td>
                   </tr>
                   <tr>
                     <td>競標範圍</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.bid_range}}</td>
+                    <td>{{orderInfo.bid_range}}</td>
                   </tr>
                   <tr>
                     <td>交貨方式</td>
                     <td>:</td>
-                    <td>{{this.orderInfo.deliver_way}}</td>
+                    <td>{{orderInfo.deliver_way}}</td>
                   </tr>
                 </table>
               </div>
@@ -141,18 +142,23 @@
                 <div class="ac_content">
                   <div
                     class="ac_con_item"
-                    v-for="(item) in this.orderInfo.file_list"
+                    v-for="(item) in orderInfo.file_list"
                     :key="item.pkid"
+                    :style="{cursor: send_recv_type == 'recv' || send_recv_type == 'send' ? 'pointer': 'not-allowed'}"
                     @click="downloadOne(item.file_save_path, item.file_save_name, item.file_origin_name)"
                   >
                     <div class="item-wrapper">
                       <div class="itemIcon"></div>
                       <div class="itemName">{{item.file_origin_name}}</div>
-                      <div class="itemNum">{{item.part_amunt}}</div>
+                      <!-- <div class="itemNum">{{item.part_amunt}}</div> -->
                     </div>
                   </div>
                 </div>
-                <div class="ac_allDownload" @click="downloadAll">全部下載</div>
+                <div
+                  class="ac_allDownload"
+                  @click="downloadAll"
+                  :style="{cursor: send_recv_type == 'recv' || send_recv_type == 'send' ? 'pointer': 'not-allowed'}"
+                >全部下載</div>
               </div>
             </div>
             <!-- 製作要求 -->
@@ -160,22 +166,35 @@
               <div class="req_title">
                 <span>製作要求</span>
               </div>
-              <pre class="req_content">{{this.orderInfo.make_requ}}</pre>
+              <pre class="req_content">{{orderInfo.make_requ}}</pre>
             </div>
             <!-- 立即參與按鈕 -->
-            <div class="pan_info_join" @click="alertBoxShow()" v-if="send_recv_type !== 'send'">
+            <div
+              class="pan_info_join"
+              @click="joinFlag ? checkList('uploaded') : alertBoxShow()"
+              v-if="send_recv_type !== 'send'"
+              :style="{cursor: send_recv_type == 'recv' ? 'pointer': 'not-allowed'}"
+            >
               <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <polygon
                   points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
                   style="fill:none;stroke:#0096FF;stroke-width:1"
                 />
-                <rect x="2" y="2" width="261" height="61" style="fill:#0096FF;" />
+                <!-- :style="{stroke: send_recv_type == 'recv' ? '#0096FF': '0096FF'} " -->
+                <rect
+                  x="2"
+                  y="2"
+                  width="261"
+                  height="61"
+                  style="fill:#0096FF;"
+                  :style="{fill: send_recv_type == 'recv' ? '#0096FF': '0096FF'} "
+                />
                 <polyline
                   points="10,13 10,6 6,6 6,10 13,10 13,6 252,6 252,10 259,10 259,6 255,6 255,13 259,13 259,52 255,52 255,59 259,59 259,55 252,55 252,59 13,59 13,55 6,55 6,59 10,59 10,52 6,52 6,14 11,14"
                   style="fill:none;stroke:#3FB0FF;stroke-width:2;"
                 />
               </svg>
-              <span>立即參與</span>
+              <span>{{ joinFlag ? "查看標書" : "參與報價"}}</span>
             </div>
           </div>
           <!-- 列表2 -->
@@ -185,15 +204,20 @@
               <div class="bid_title">
                 <span>競標單位</span>
               </div>
-              <div v-if="orderInfo.give_recv_user_list && orderInfo.give_recv_user_list.length > 0" class="bid_content">
+              <div
+                v-if="orderInfo.give_recv_user_list && orderInfo.give_recv_user_list.length > 0"
+                class="bid_content"
+              >
                 <div
                   class="bid_con_item"
                   v-for="(item) in orderInfo.give_recv_user_list"
                   :key="item.pkid"
                 >
-                  <div :class="{active: item.f_win_bid==='Y'}" class="item-wrapper" @click="saveToLocal(item)">
+                  <div :class="{active: item.f_win_bid==='Y'}" class="item-wrapper">
                     <span class="icon"></span>
-                    <router-link to="/merchant/information">{{item.dept_name}}</router-link>
+                    <router-link
+                      :to="{path:'/merchant/information', query:{pkid: item.pkid}}"
+                    >{{item.dept_name}}</router-link>
                   </div>
                 </div>
               </div>
@@ -207,7 +231,8 @@
                 <span>項目評價</span>
               </div>
               <div class="eva_content">
-                <p>確實不錯，交付很快，質量杠杠滴。</p>
+                <p v-if="orderInfo.send_eval">需求方：{{orderInfo.send_eval.summary_text}}</p>
+                <p v-if="orderInfo.recv_eval">接單方：{{orderInfo.recv_eval.summary_text}}</p>
               </div>
             </div>
           </div>
@@ -215,9 +240,10 @@
       </div>
     </section>
     <Footer></Footer>
-    <!-- 彈窗 -->
+
+    <!-- 競價彈窗 -->
     <section id="alertBox" v-show="alertBoxFlag">
-      <div class="content">
+      <div ref="alertBox" class="content">
         <div class="con_top">
           <div class="boxName">接單競價</div>
           <div class="closeBox" @click="alertBoxShow"></div>
@@ -225,32 +251,41 @@
         <div class="con_form">
           <!-- 標題 title -->
           <div class="con_form_title">
-            <div class="tit_text">【治具】需求單號A3000028</div>
+            <div class="tit_text">【治具】需求單號{{orderInfo.bill_no}}</div>
             <div class="tit_info">
-              <div class="tit_info_single">接受單價: 50000元</div>
-              <div class="tit_info_single">需求數量: 10</div>
-              <div class="tit_info_single">投標剩餘時間: 14天19小時08分2秒</div>
+              <div class="tit_info_single">標價: {{orderInfo.total_price}}{{orderInfo.money_type}}</div>
+              <div class="tit_info_single">需求數量: {{orderInfo.amount}}</div>
+              <div class="tit_info_single">交貨時間: {{orderInfo.deliver_date.split(' ')[0]}}</div>
             </div>
           </div>
           <!-- 表格1 -->
           <div class="con_form_listOne">
-            <div class="listOne_info">投標法人: Mac(I)製一處; 法人代碼: TOU12345</div>
+            <div class="listOne_info">投標法人: {{orderInfo.send_user.legal_person}}</div>
             <table cellspacing="0" cellpadding="0" class="listOne_table">
               <tr>
                 <th>幣別</th>
-                <th>報價（元）</th>
+                <th>總報價（{{orderInfo.money_type}}）</th>
                 <th>交期</th>
-                <th>理由說明</th>
+                <th>備註</th>
               </tr>
-              <tr>
-                <td>RMB</td>
+              <tr v-if="joinFlag">
+                <td>{{orderInfo.money_type}}</td>
+                <td>{{totalPrices * orderInfo.amount}}</td>
+                <td>{{deliver_date.split(' ')[0]}}</td>
+                <td>{{bidReason}}</td>
+              </tr>
+              <tr v-else>
+                <td>{{orderInfo.money_type}}</td>
+                <td>{{totalPrices * orderInfo.amount}}</td>
                 <td>
-                  <input type="number" class="form_input" v-model="bidprice" />
+                  <el-date-picker
+                    v-model="deliver_date"
+                    type="date"
+                    :placeholder="orderInfo.deliver_date.split(' ')[0]"
+                  ></el-date-picker>
                 </td>
-                <td>2019-09-30</td>
                 <td>
-                  <textarea name id cols="30" rows="4" v-model="bidReason" style="margin: 10px 0;"></textarea>
-                  <!-- <input type="" class="form_input" /> -->
+                  <el-input v-model="bidReason" type="textarea" maxlength="50"></el-input>
                 </td>
               </tr>
             </table>
@@ -258,51 +293,111 @@
           <!-- 表格2 -->
           <div class="con_form_listSec">
             <div class="listSec_info">
-              <div>報價清單:</div>
-              <div>
-                <div class="up-icon"></div>
-                <div class="up-text">批量上傳報價清單</div>
-                <div class="dow-text">下載模板</div>
-              </div>
+              <div>報價清單（單套）:</div>
             </div>
             <table class="listSec_table" cellspacing="0" cellpadding="0">
               <tr>
-                <th>零件名</th>
-                <th>數量</th>
-                <th>報價（元/個）</th>
-                <th>小計（元）</th>
+                <th style="width: 80px;">序號</th>
+                <th style="width: 290px;">零件名</th>
+                <th style="width: 120px;">零件數量</th>
+                <th style="width: 280px;">報價（{{orderInfo.money_type}}/個）</th>
+                <th style="width: 120px;">小計（{{orderInfo.money_type}}）</th>
+                <th style="width: 80px;">操作</th>
               </tr>
-              <tr v-for="item in quotatList" :key="item.id">
-                <td>{{item.name}}</td>
-                <td>{{item.num}}</td>
-                <td>
-                  <input type="number" v-model="item.price" class="form_input" />
+              <tr v-for="(item, index) in quotatList" :key="item.id">
+                <td>{{index + 1}}</td>
+                <td>{{item.name.split('.')[0]}}</td>
+                <td v-if="joinFlag">{{item.num}}</td>
+                <td v-else>
+                  <el-input
+                    v-model="item.num"
+                    type="number"
+                    class="el-input-text-center"
+                    style="width: 100px;"
+                  ></el-input>
+                </td>
+                <td v-if="joinFlag">{{item.price}}</td>
+                <td v-else>
+                  <el-input
+                    v-model="item.price"
+                    type="number"
+                    class="el-input-text-center"
+                    style="width: 160px;"
+                  ></el-input>
                 </td>
                 <td>{{item.num * item.price}}</td>
+                <td v-if="joinFlag"></td>
+                <td v-else style="color:#0096ff; cursor:pointer" @click="delQuota(index)">刪除</td>
               </tr>
+              <!-- 自定義的清單列表 -->
+              <tr>
+                <td
+                  colspan="6"
+                  v-show="otherList.length"
+                  style="height: 10px; background:#c8d4de"
+                >自定義</td>
+              </tr>
+              <tr v-for="(item, index) in otherList" :key="item.id">
+                <td>{{index + 1}}</td>
+                <td v-if="joinFlag">{{item.selfDefineName}}</td>
+                <td v-else>
+                  <el-input
+                    v-model="item.selfDefineName"
+                    :placeholder="item.name"
+                    type="text"
+                    class="el-input-text-center"
+                    style="width: 180px;"
+                    maxlength="25"
+                    :disabled="joinFlag"
+                  ></el-input>
+                </td>
+                <td v-if="joinFlag">{{item.num}}</td>
+                <td v-else>
+                  <el-input
+                    v-model="item.num"
+                    type="number"
+                    class="el-input-text-center"
+                    style="width: 100px;"
+                    placeholder="1"
+                    :disabled="joinFlag"
+                  ></el-input>
+                </td>
+                <td v-if="joinFlag">{{item.price}}</td>
+                <td v-else>
+                  <el-input
+                    v-model="item.price"
+                    type="number"
+                    class="el-input-text-center"
+                    style="width: 160px;"
+                    placeholder="0"
+                    :disabled="joinFlag"
+                  ></el-input>
+                </td>
+                <td>{{item.num * item.price}}</td>
+                <td v-if="joinFlag"></td>
+                <td v-else style="color:#0096ff; cursor:pointer" @click="delOther(index)">刪除</td>
+              </tr>
+
               <tr>
                 <td>總計</td>
-                <td></td>
-                <td></td>
-                <td>{{totalPrices}}</td>
+                <td colspan="5">{{totalPrices}}</td>
               </tr>
             </table>
-            <!-- <div class="listSec_add">
-              <div class="addIcon"></div>
-              <div>添 加</div>
-            </div>-->
+            <div class="listSec_opera">
+              <div class="listSec_add" @click="dialogVisible = !dialogVisible" v-if="!joinFlag">
+                <div class="addIcon"></div>
+                <div>添加報價選項</div>
+              </div>
+              <div class="listSec_addS" v-if="!joinFlag" @click="addNewLine">
+                <div class="addIcon"></div>
+                <div>添加自定義選項</div>
+              </div>
+            </div>
           </div>
           <!-- footer -->
-          <div class="con_form_footer">
-            <!-- 同意協議 -->
-            <div class="foo_agreement">
-              <label for="agree">
-                <input id="agree" type="checkBox" />
-                我已仔细阅读此竞标信息，并对我提交的信息负责。
-              </label>
-            </div>
+          <div class="con_form_footer" v-if="!joinFlag">
             <!-- 開始競價按鈕 -->
-            <div class="foo_startBtn">
+            <div class="foo_startBtn" @click="checkBidding()">
               <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <polygon
                   points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
@@ -314,12 +409,63 @@
                   style="fill:none;stroke:#3FB0FF;stroke-width:2;"
                 />
               </svg>
-              <span>開始競價</span>
+              <span>確認提交</span>
             </div>
           </div>
+          <span
+            style="display:inline-block; margin-top:20px; color:#0096ff; cursor:pointer"
+            @click="checkList('uploaded')"
+            v-if="joinFlag"
+          >查看標書</span>
+          <!-- startBidding -->
         </div>
       </div>
     </section>
+
+    <!-- 添加弹窗 -->
+    <el-dialog title="零件名稱" :visible.sync="dialogVisible">
+      <el-checkbox
+        :indeterminate="isIndeterminate"
+        v-model="checkAll"
+        @change="handleCheckAllChange"
+      >全选</el-checkbox>
+      <div style="margin: 15px 0;"></div>
+      <el-checkbox-group v-model="checkedComponents" @change="handleCheckedComponentsChange">
+        <el-checkbox
+          v-for="component in components"
+          :label="component"
+          :key="component"
+        >{{component}}</el-checkbox>
+      </el-checkbox-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addToQuotatList(),dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 添加弹窗 -->
+    <el-dialog title="提交" :visible.sync="dialogSecVisible">
+      <p>
+        您的單套報價清單為
+        <span style="font-size:28px;">{{totalPrices}}</span>，總報價為
+        <span style="font-size:28px;">{{totalPrices * orderInfo.amount}}</span>;
+      </p>
+      <p>
+        標書已生成,
+        <router-link @click.native="checkList" to style="color:#0096ff">點擊查看</router-link>
+      </p>
+      <!-- 同意協議 -->
+      <div class="foo_agreement">
+        <label for="agree">
+          <input id="agree" type="checkBox" @click="agree=!agree" :checked="agree" />
+          我已仔细查看標書及相關協議內容，并对我提交的信息负责。
+        </label>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogSecVisible = false">返 回</el-button>
+        <el-button type="primary" @click="isAgree()">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -328,15 +474,33 @@ import Top from "@/components/Top";
 import Logo from "@/components/Logo";
 import Footer from "@/components/Footer";
 
-import { query_bill_by_pkid } from "@/api/order";
+import {
+  query_bill_by_pkid,
+  save_give_price,
+  query_give_price_by_bill_pkid
+} from "@/api/order";
 import { downLoad } from "@/api/file";
-import { getAccess } from "@/assets/js/getInfo";
 
+import { getAccess } from "@/assets/js/getInfo";
 import { mapState } from "vuex";
 
+let componentOptions = [];
 export default {
   data: function() {
     return {
+      // 添加彈窗的顯示/隱藏
+      dialogVisible: false,
+      dialogSecVisible: false,
+      // 是否全選
+      checkAll: false,
+      // 已選項
+      checkedComponents: [],
+      // 可選項
+      components: [],
+      // 全選狀態
+      isIndeterminate: false,
+      // 可選項詳細信息
+      componentAllOptions: [],
       // 查詢到的信息
       orderInfo: "",
       // 進度條
@@ -348,57 +512,134 @@ export default {
       // 彈窗
       alertBoxFlag: false,
       // 圖檔附件數據
-      accessoryData: [
-        { itemIcon: "", itemName: "K1.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K2.pdf", itemNum: "113" },
-        { itemIcon: "", itemName: "K3.pdf", itemNum: "3" },
-        { itemIcon: "", itemName: "K4.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K5.pdf", itemNum: "5" },
-        { itemIcon: "", itemName: "K6.pdf", itemNum: "21" },
-        { itemIcon: "", itemName: "K7.X12.C3.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K8.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K9.pdf", itemNum: "7" },
-        { itemIcon: "", itemName: "K10.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K11.pdf", itemNum: "2" },
-        { itemIcon: "", itemName: "K12.L11.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K13.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K1.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K2.pdf", itemNum: "113" },
-        { itemIcon: "", itemName: "K3.pdf", itemNum: "3" },
-        { itemIcon: "", itemName: "K4.pdf", itemNum: "1" },
-        { itemIcon: "", itemName: "K5.pdf", itemNum: "5" }
-      ],
-      // 報價
-      bidprice: "",
+      accessoryData: [],
+      // 交期
+      deliver_date: "",
       // 報價理由
       bidReason: "",
       // 報價清單
-      quotatList: [
-        { id: "1", name: "螺帽1", num: "2", price: "" },
-        { id: "2", name: "螺帽2", num: "2", price: "" },
-        { id: "3", name: "螺絲1", num: "5", price: "" },
-        { id: "4", name: "螺絲2", num: "8", price: "" },
-        { id: "5", name: "螺絲3", num: "2", price: "" }
-      ],
-      // 競標單位數據
-      biddingUnits: [
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: true },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false },
-        { name: "鴻富錦成都Mac(I)製造一處", success: false }
-      ],
+      quotatList: [],
+      // 其它零件
+      otherList: [],
       // 是否參與
-      joinFlag: false
+      joinFlag: false,
+      // 是否同意
+      agree: false,
+      // 是否查看標書
+      isCheckList: false,
+      //
+      scrollTopDistance: 0
     };
   },
   methods: {
+    consoleLog() {},
+    // 是否同意
+    isAgree() {
+      // this.agree;
+
+      if (!this.isCheckList) return this.$message.error("請先查看標書!");
+      if (!this.agree)
+        return this.$message.error("請確認標書內容無誤,並勾選同意內容！");
+      this.upBidding();
+      this.dialogSecVisible = false;
+    },
+    // 查看報價清單
+    checkList(val) {
+      if (val === "uploaded") {
+        sessionStorage.setItem("biddinfdDoc", JSON.stringify(this.orderInfo));
+        const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
+        window.open(url);
+      } else {
+        this.isCheckList = true;
+        let slav_list = [];
+        // 將報價清單的數據加入slav_list
+        for (let item of this.quotatList) {
+          let obj = {
+            part_name: item.selfDefineName || item.name,
+            part_doc_file_pkid: item.id,
+            part_amunt: item.num,
+            part_unit_price: item.price,
+            part_price_sum: Number(item.num) * Number(item.price)
+          };
+          slav_list.push(obj);
+        }
+
+        // 將 其它 的數據加入slav_list
+        for (let item of this.otherList) {
+          let obj = {
+            part_name: item.selfDefineName || item.name,
+            part_doc_file_pkid: item.id,
+            part_amunt: item.num,
+            part_unit_price: item.price,
+            part_price_sum: Number(item.num) * Number(item.price)
+          };
+          slav_list.push(obj);
+        }
+
+        // 存入 data
+        const data = {
+          orderInfo: this.orderInfo,
+          total_price: this.totalPrices,
+          deliver_date:
+            this.deliver_date || new Date(this.orderInfo.deliver_date),
+          descp: this.bidReason,
+          // f_win_bid: "",
+          slav_list: slav_list
+        };
+        sessionStorage.setItem("biddinfdDoc", JSON.stringify(data));
+        const url = "/biddingDoc?loaded=false";
+        window.open(url);
+      }
+    },
+    // 添加自定義清單
+    addNewLine() {
+      let cliH = this.$refs.alertBox.clientHeight;
+      let scrH = this.$refs.alertBox.scrollHeight;
+      this.$refs.alertBox.scrollTop = scrH - cliH;
+
+      const id = this.otherList.length
+        ? this.otherList[this.otherList.length - 1].id + 1
+        : 1;
+      this.otherList.push({
+        selfDefineName: "",
+        num: 1,
+        price: 0,
+        id: id,
+        name: "其它" + id
+      });
+    },
+
+    // 添加零件 全選
+    handleCheckAllChange(val) {
+      // this.checkedComponents = val ? componentOptions : [];
+      if (val) {
+        this.checkedComponents = [];
+        for (let item of componentOptions) {
+          this.checkedComponents.push(item);
+        }
+      } else {
+        this.checkedComponents = [];
+      }
+      this.isIndeterminate = false;
+    },
+    handleCheckedComponentsChange(value) {
+      let checkedCount = value.length;
+      this.checkAll = checkedCount === this.components.length;
+      this.isIndeterminate =
+        checkedCount > 0 && checkedCount < this.components.length;
+    },
+    // 刪除發單方給定零件
+    delQuota(index) {
+      this.checkedComponents.splice(index, 1);
+      this.addToQuotatList();
+      this.handleCheckedComponentsChange(this.checkedComponents);
+    },
+
+    // 刪除自定義零件
+    delOther(index) {
+      this.otherList.splice(index, 1);
+    },
+
     // 收藏事件
     collect() {
       this.collectFlag = !this.collectFlag;
@@ -406,44 +647,84 @@ export default {
         ? require("../../assets/imgs/particulars/collected.png")
         : require("../../assets/imgs/particulars/collect.png");
     },
+
     // 彈窗
     alertBoxShow() {
       if (this.send_recv_type == "recv") {
-        // 判斷是否參加過
-        for (let item of this.orderInfo.give_recv_user_list) {
-          if (item.pkid == this.my_pkid) {
-            // 如果參加過 退出循環
-            this.joinFlag = true;
-            this.$message.warning("您已參與！");
-            return;
-          }
-        }
         var flag = this.alertBoxFlag ? false : true;
         return (this.alertBoxFlag = flag);
       } else {
-        this.$message.warning("請先登錄！");
+        this.$alert("請先登錄！");
       }
     },
+
     // 獲取信息
     getInfo() {
       query_bill_by_pkid(this.pkid).then(res => {
-        console.log(res);
         if (res.code === "1") {
           this.orderInfo = res.t;
+          this.isJoin();
+          // 如果參加過 不需要再渲染表格
+          if (this.joinFlag) return;
+
+          this.componentAllOptions = [];
+          for (let item of this.orderInfo.file_list) {
+            // if(item.part_doc_file_pkid){}
+            const obj = {
+              id: item.pkid,
+              name: item.file_origin_name,
+              selfDefineName: "",
+              num: item.part_amunt,
+              price: 0
+            };
+            // 將文件列表信息存入 componentAllOptions
+            this.componentAllOptions.push(obj);
+          }
+          this.detachment();
         }
       });
     },
+
+    // 抽離出可選的項
+    detachment() {
+      componentOptions = [];
+      for (let item of this.componentAllOptions) {
+        componentOptions.push(item.name);
+      }
+      this.components = componentOptions;
+    },
+
+    // 將文件列表信息存入 quotatList
+    addToQuotatList() {
+      this.quotatList = [];
+      for (let check of this.checkedComponents) {
+        for (let component of this.componentAllOptions)
+          if (check == component.name) {
+            this.quotatList.push(component);
+          }
+      }
+    }, 
+
     // 下載文件
     downloadOne(path, name, originName) {
-      if (this.send_recv_type == "recv") {
-        window.open(getAccess(path, name, originName));
+      if (this.send_recv_type == "recv" || this.send_recv_type == "send") {
+        downLoad(getAccess(path, name, originName)).then(res => {
+          console.log(res);
+          let blob = new Blob([res], { type: res.type });
+          let objectUrl = URL.createObjectURL(blob); //生成一个url
+
+          let link = document.createElement("a");
+          link.href = objectUrl;
+          link.setAttribute( "download", originName);
+          link.click();
+        });
       } else {
-        this.$message.warning("請先登錄");
+        this.$alert("請先登錄");
       }
     },
+
     downloadAll() {
       for (let item of this.orderInfo.file_list) {
-        console.log(item);
         this.downloadOne(
           item.file_save_path,
           item.file_save_name,
@@ -452,9 +733,144 @@ export default {
       }
     },
 
-    // 把數據保存在本地 
-    saveToLocal(item){
-      sessionStorage.setItem('merchantInfo', JSON.stringify(item))
+    // 檢查競價信息
+    checkBidding() {
+      // 判斷是否參加過
+      if (this.joinFlag) return this.$message.warning("您已參與！");
+      // 判斷
+      if (this.deliver_date) {
+        // let nowTime = new Date().getTime();
+        // let earliestTime = new Date(nowTime - 300000);
+        let earliestTime = new Date(this.orderInfo.bid_end_date);
+        let latestTime = new Date(
+          new Date(this.orderInfo.deliver_date).getTime() + 2592000000
+        );
+        if (new Date(this.deliver_date) < earliestTime)
+          return this.$message.error("交期不能早於競標結束時間，請修改！");
+        if (new Date(this.deliver_date) > latestTime)
+          return this.$message.error("交期不能延遲超過一個月，請修改！");
+      }
+      for (let item of this.quotatList) {
+        if (!item.num) {
+          return this.$message.error("零件報價信息不完整");
+        } else if (item.num < 1) {
+          return this.$message.error("零件個數不正確");
+        }
+        if (!item.price) {
+          return this.$message.error("零件報價信息不完整");
+        } else if (item.price < 1) {
+          return this.$message.error("零件報價不正確");
+        }
+      }
+      for (let item of this.otherList) {
+        if (!item.num) {
+          return this.$message.error("零件報價信息不完整");
+        } else if (item.num < 1) {
+          return this.$message.error("零件個數不正確");
+        }
+        if (!item.price) {
+          return this.$message.error("零件報價信息不完整");
+        } else if (item.price < 1) {
+          return this.$message.error("零件報價不正確");
+        }
+      }
+      if (this.totalPrices < 1) return this.$message.error("請報價");
+      // if (!this.agree) return this.$message.error("請同意協議");
+      this.dialogSecVisible = !this.dialogSecVisible;
+      this.isCheckList = false;
+    },
+    // this.upBidding();
+
+    // 上傳競價信息
+    upBidding() {
+      let slav_list = [];
+      // 將報價清單的數據加入slav_list
+      for (let item of this.quotatList) {
+        let obj = {
+          part_name: item.selfDefineName || item.name,
+          part_doc_file_pkid: item.id,
+          part_amunt: item.num,
+          part_unit_price: item.price,
+          part_price_sum: Number(item.num) * Number(item.price)
+        };
+        slav_list.push(obj);
+      }
+
+      // 將 其它 的數據加入slav_list
+      for (let item of this.otherList) {
+        let obj = {
+          part_name: item.selfDefineName || item.name,
+          part_doc_file_pkid: item.id,
+          part_amunt: item.num,
+          part_unit_price: item.price,
+          part_price_sum: Number(item.num) * Number(item.price)
+        };
+        slav_list.push(obj);
+      }
+
+      // 存入 data
+      const data = {
+        bill_pkid: this.orderInfo.pkid,
+        total_price: this.totalPrices,
+        deliver_date:
+          this.deliver_date || new Date(this.orderInfo.deliver_date),
+        descp: this.bidReason,
+        f_win_bid: "",
+        slav_list: slav_list
+      };
+      save_give_price(data).then(res => {
+        if (res.code === "1") {
+          this.$message.success(
+            "上傳價格完成，請在個人中心查看詳情，祝您競價成功！"
+          );
+          // 關閉窗口
+          this.$router.push("/");
+        } else {
+          this.$message.error("出錯啦，請稍後重試");
+        }
+      });
+    },
+
+    // 判斷是否參加過
+    isJoin() {
+      for (let item of this.orderInfo.give_recv_user_list) {
+        if (item.pkid == this.my_pkid) {
+          var id = 0;
+          // 查詢報價信息
+          query_give_price_by_bill_pkid(this.orderInfo.pkid).then(res => {
+            // { id: "1", name: "螺帽1", num: "2", price: "" }
+            for (let item of res.t.slav_list) {
+              if (item.part_doc_file) {
+                const obj = {
+                  id: item.pkid,
+                  name: item.part_doc_file.file_origin_name,
+                  selfDefineName: item.part_name,
+                  num: item.part_amunt,
+                  price: item.part_unit_price
+                };
+                this.quotatList.push(obj);
+              } else {
+                id++;
+                const obj = {
+                  id: id,
+                  selfDefineName: item.part_name,
+                  num: item.part_amunt,
+                  price: item.part_unit_price
+                };
+                this.otherList.push(obj);
+                // (this.other.selfDefineName = item.part_name),
+                //   (this.other.num = item.part_amunt),
+                //   (this.other.price = item.part_unit_price);
+              }
+            }
+            // this.totalPrices = res.t.total_price;
+            this.deliver_date = res.t.deliver_date;
+            this.bidReason = res.t.descp;
+          });
+          // 退出循環
+          return (this.joinFlag = true);
+        }
+      }
     }
   },
   components: {
@@ -474,6 +890,10 @@ export default {
       for (let i in this.quotatList) {
         val += this.quotatList[i].num * this.quotatList[i].price;
       }
+      for (let i in this.otherList) {
+        val += this.otherList[i].num * this.otherList[i].price;
+      }
+      // val += this.other.num * this.other.price;
       return val;
     }
   },
@@ -489,6 +909,8 @@ export default {
 .main {
   position: relative;
 }
+
+// 主体内容
 #content {
   background: #12222e url(../../assets/imgs/particulars/contentBG.png) no-repeat
     top center / contain;
@@ -630,7 +1052,7 @@ export default {
 
   // 主體-信息
   .panel_info {
-    // margin-top: 24px;
+    box-sizing: border-box;
     padding: 32px 50px;
     background: #d3dfe7;
   }
@@ -730,16 +1152,17 @@ export default {
       background: url(../../assets/imgs/particulars/Excel.png) no-repeat;
     }
     .itemName {
-      width: 80px;
+      width: 60%;
       overflow: hidden;
+      margin-right: 10px;
     }
-    .itemNum {
-      width: 22px;
-      text-align: center;
-      font-size: 12px;
-      color: #626f7f;
-      overflow: hidden;
-    }
+    // .itemNum {
+    //   width: 22px;
+    //   text-align: center;
+    //   font-size: 12px;
+    //   color: #626f7f;
+    //   overflow: hidden;
+    // }
   }
 
   // 全部下載按鈕
@@ -759,19 +1182,15 @@ export default {
 
   // 【製作要求】
   .pan_info_req {
-    margin-top: 60px;
+    margin-top: 30px;
     .req_content {
       margin-top: 22px;
+      user-select: text;
     }
     p {
       color: #212f3a;
       font-size: 16px;
       height: 28px;
-    }
-    /* 修改首要字體 */
-    @font-face {
-      font-family: "myFont";
-      src: url("/src/assets/font/STZHONGS.TTF");
     }
     pre {
       font-family: "myFont", "Avenir", Helvetica, Arial, sans-serif;
@@ -786,7 +1205,7 @@ export default {
   }
   // 參與按鈕
   .pan_info_join {
-    margin: 72px auto 30px;
+    margin: 28px auto 0;
     width: 265px;
     height: 65px;
     color: #fff;
@@ -854,7 +1273,7 @@ export default {
   }
 }
 
-// 彈框
+// 彈窗
 #alertBox {
   position: absolute;
   top: 0;
@@ -872,7 +1291,7 @@ export default {
     padding: 20px;
     box-sizing: border-box;
     // 窗口滾動
-    height: 740px;
+    height: 780px;
     overflow: scroll;
     /* 滚动槽 */
     &::-webkit-scrollbar {
@@ -965,29 +1384,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    > div:nth-child(1) {
-      color: #0096ff;
-    }
-    > div:nth-child(2) {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .up-icon {
-      width: 21px;
-      height: 19px;
-      background: url(../../assets/imgs/particulars/link-icon.png) no-repeat;
-      cursor: pointer;
-    }
-    .up-text {
-      color: #0f1e29;
-      margin-right: 20px;
-      cursor: pointer;
-    }
-    .dow-text {
-      color: #0096ff;
-      cursor: pointer;
-    }
+    color: #0096ff;
   }
   .listSec_table {
     margin-top: 15px;
@@ -1007,18 +1404,13 @@ export default {
       font-weight: 400;
     }
   }
-  .form_input {
-    // border: 1px solid #d3dfe7;
-    // border-radius: 0px;
-    text-align: center;
-    // background: #d3dfe7;
-    // border: 1px solid #ccc;
-    &:focus {
-      // border-color: #0092ff;
-    }
+  .listSec_opera {
+    display: flex;
+    align-items: center;
   }
-  .listSec_add {
-    width: 120px;
+  .listSec_add,
+  .listSec_addS {
+    width: 140px;
     height: 36px;
     margin-top: 20px;
     background-color: #9ab0c3;
@@ -1027,6 +1419,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
     > .addIcon {
       width: 15px;
       height: 15px;
@@ -1034,29 +1427,28 @@ export default {
       margin-right: 14px;
     }
   }
+  .listSec_addS {
+    width: 160px;
+    margin-left: 20px;
+  }
+  // el-input
+  /deep/ .el-input-text-center {
+    .el-input__inner {
+      text-align: center;
+    }
+  }
+  /deep/ .el-input {
+    height: 40px;
+    margin: 8px 0;
+  }
   // 底部
   .con_form_footer {
-    margin-top: 40px;
+    margin-bottom: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-  // 同意協議
-  .foo_agreement {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #212f3a;
-    label {
-      display: flex;
-      align-items: center;
-    }
-    input {
-      width: 16px;
-      height: 16px;
-      margin-right: 5px;
-    }
-  }
+
   // 開始競價按鈕
   .foo_startBtn {
     margin: 20px 0;
@@ -1066,12 +1458,30 @@ export default {
     color: #fff;
     font-size: 20px;
     position: relative;
+    cursor: pointer;
     > span {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
     }
+  }
+}
+
+// 弹窗2
+// 同意協議
+.foo_agreement {
+  margin-top: 40px;
+  font-size: 14px;
+  color: #212f3a;
+  label {
+    display: flex;
+    align-items: center;
+  }
+  input {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
   }
 }
 </style>

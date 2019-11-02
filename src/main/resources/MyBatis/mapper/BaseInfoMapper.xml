@@ -47,5 +47,10 @@
         select t.*, t.rowid from PD_TYPE t order by t.list_order asc
     </select>
 
+    <!-- 根據單位代碼查詢單位名稱 -->
+    <select id="query_dept_name_by_dept_no" parameterType="String" resultType="com.foxconn.bidding.model.B_DEPT_bean">
+        select t.* from B_DEPT t where t.dept_no = #{dept_no}
+    </select>
+
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

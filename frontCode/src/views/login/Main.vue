@@ -46,7 +46,7 @@
                   </div>
                   <div class="forget_register">
                     <router-link to>忘記密碼</router-link>
-                    <router-link to>立即註冊</router-link>
+                    <router-link to="/merchant">立即註冊</router-link>
                   </div>
                 </div>
                 <div class="loginBtn" @click="_login()">立即登錄</div>
@@ -121,27 +121,29 @@ export default {
     // 獲取信息並寫入vuex
     getInfo() {
       var username = this.username;
-      var token = this.token;
-      login_user_info(username, token).then(res => {
-        if (res.data.code === "1") {
+      login_user_info(username).then(res => {
+        console.log(res)
+        if (res.code === "1") {
           // 如果返回成功，講數據通過 actions 傳給 state
-          this.get_userInfo(res.data.t);
+          this.get_userInfo(res.t);
           // 查詢頭像信息
-          if(res.data.t.send_recv_type === "send"){
+          if(res.t.send_recv_type === "send"){
             this.$router.push("/demand");
           }else{
-            this.$router.push("/personal");
+            this.$router.push("/");
           }
           this.get_porImgUrl(getPorImg());
         } else {
           Message.error("出錯啦，稍後再試試吧！")
         }
-      });
+      })
+      .catch(err => {
+        console.log(err)
+      })
     }
   },
   computed: {
     ...mapState({
-      token: state => state.token,
       username: state => state.username,
       userInfo: state => state.userInfo
     })

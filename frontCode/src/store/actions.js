@@ -1,6 +1,3 @@
-// import $axios from '@/api/index'
-// import { login_user_info } from '@/api/user'
-
 const actions = {
   // 獲取 token
   get_token({ commit }, data) {

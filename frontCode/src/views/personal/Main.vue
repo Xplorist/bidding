@@ -54,7 +54,12 @@
             </div>
             <!-- 篩選 -->
             <el-radio-group v-model="classify">
-              <el-radio v-for="(item) in classifyList" :key="item.id" :label="item.ename">
+              <el-radio
+                v-for="(item) in classifyList"
+                :key="item.id"
+                :label="item.ename"
+                @click="classify = item.ename"
+              >
                 {{item.name}}
                 <span v-show="item.num">({{item.num}})</span>
               </el-radio>
@@ -71,7 +76,10 @@
                   <div class="sin_left_scope">{{item.scope}}</div>
                   <div class="sin_left_info">
                     <div class="left_info_item">
-                      <div class="formNum">{{item.formNum}}</div>
+                      <div
+                        class="formNum"
+                        @click="$router.push('/particulars?pkid='+item.pkid)"
+                      >{{item.formNum}}</div>
                       <div class="state">
                         <div v-for="(itemS, index) in item.state" :key="index">{{itemS}}</div>
                       </div>
@@ -89,7 +97,10 @@
                   <div class="sin_right_left">
                     <div class="current">
                       <div v-if="item.winBidding === 'f'" class="failed">競標失敗</div>
-                      <div v-else class="remainTime">交貨時間：{{item.deliver_date.split("T")[0]}}</div>
+                      <div
+                        v-else
+                        class="remainTime"
+                      >{{item.status.class=="finished" ? '':'交貨日期：'+item.deliver_date.split(' ')[0]}}</div>
                     </div>
                   </div>
                   <div class="sin_right_right" :class="item.status.class">
@@ -103,14 +114,14 @@
               <!-- listEnd -->
 
               <!-- 分頁 -->
-              <div class="paging">
-                <Paging
-                  :total="total"
-                  :current-page="currentPage"
-                  :page-size="pageSize"
-                  @getCurrentPage="getListDate"
-                ></Paging>
-              </div>
+            </div>
+            <div class="paging">
+              <Paging
+                :total="total"
+                :current-page="currentPage"
+                :page-size="pageSize"
+                @getCurrentPage="getListDate"
+              ></Paging>
             </div>
           </div>
         </div>
@@ -151,57 +162,50 @@ export default {
           id: "0",
           ename: "all",
           name: "全部",
-          num: "59"
+          num: "0"
         },
         {
           interfaceName: "num_status_1",
           id: "1",
-          ename: "quote",
+          ename: "1",
           name: "競價中",
-          num: "2"
+          num: "0"
         },
         {
           interfaceName: "num_status_2",
           id: "2",
-          ename: "deliver",
+          ename: "2",
           name: "待發貨",
-          num: "2"
+          num: "0"
         },
         {
           interfaceName: "num_status_3",
           id: "3",
-          ename: "takeDelivery",
+          ename: "3",
           name: "待收貨",
-          num: ""
+          num: "0"
         },
         {
           interfaceName: "num_status_4",
           id: "4",
-          ename: "payment",
+          ename: "4",
           name: "待付款",
-          num: ""
+          num: "0"
         },
         {
           interfaceName: "num_status_5",
           id: "5",
-          ename: "gather",
+          ename: "5",
           name: "待收款",
-          num: ""
+          num: "0"
         },
         {
           interfaceName: "num_status_6",
           id: "6",
-          ename: "finished",
+          ename: "6",
           name: "已完成",
-          num: "53"
-        },
-        // {
-        //   interfaceName: "num_no_recv_eval",
-        //   id: "7",
-        //   ename: "evaluation",
-        //   name: "待評價",
-        //   num: "3"
-        // }
+          num: "0"
+        }
       ],
       // 單頁顯示的數據
       orderList: [],
@@ -212,7 +216,8 @@ export default {
       // 當前頁數
       currentPage: null,
       // 侧边栏选中条目
-      silderBarItem: "order"
+      silderBarItem: "order",
+      initPage: 1
     };
   },
   methods: {
@@ -231,7 +236,7 @@ export default {
             this.orderList[i].href = "personal/delivery";
             break;
           case "gather":
-            this.orderList[i].href = "personal/payment";
+            this.orderList[i].href = "personal/gather";
             break;
           case "evaluation":
             this.orderList[i].href = "personal/postEvaluation";
@@ -243,61 +248,64 @@ export default {
     // 獲取訂單狀態數量
     getListClassifyNum() {
       query_status_num_recv_user().then(res => {
-        if (res.data.code === "1") {
+        if (res.code === "1") {
           for (let i in this.classifyList) {
             // 對應賦值
             switch (this.classifyList[i].interfaceName) {
               case "num_status_all":
-                this.classifyList[i].num = res.data.t.num_status_all;
+                this.classifyList[i].num = res.t.num_status_all;
                 break;
               case "num_status_1":
-                this.classifyList[i].num = res.data.t.num_status_1;
+                this.classifyList[i].num = res.t.num_status_1;
                 break;
               case "num_status_2":
-                this.classifyList[i].num = res.data.t.num_status_2;
+                this.classifyList[i].num = res.t.num_status_2;
                 break;
               case "num_status_3":
-                this.classifyList[i].num = res.data.t.num_status_3;
+                this.classifyList[i].num = res.t.num_status_3;
                 break;
               case "num_status_4":
-                this.classifyList[i].num = res.data.t.num_status_4;
+                this.classifyList[i].num = res.t.num_status_4;
                 break;
               case "num_status_5":
-                this.classifyList[i].num = res.data.t.num_status_5;
+                this.classifyList[i].num = res.t.num_status_5;
                 break;
               case "num_status_6":
-                this.classifyList[i].num = res.data.t.num_status_6;
+                this.classifyList[i].num = res.t.num_status_6;
                 break;
               case "num_no_recv_eval":
-                this.classifyList[i].num = res.data.t.num_no_recv_eval;
+                this.classifyList[i].num = res.t.num_no_recv_eval;
                 break;
               default:
                 break;
             }
           }
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
 
     // 向後端發起請求獲取數據
-    getListDate(currentPage = 1) {
-      this.currentPage = currentPage;
+    getListDate(page = 1) {
+      this.currentPage = Number(page);
+      sessionStorage.setItem("personalMainCurrentPage", this.currentPage);
       query_bill_list_recv_user(
         this.classify,
         this.currentPage,
         this.pageSize
       ).then(res => {
-        if (res.data.code === "1") {
+        console.log(res)
+        console.log(this.classify)
+        if (res.code === "1") {
           // 清空原有數據 獲取總數據長度
           this.orderList = [];
-          this.total = res.data.t.row_total;
+          this.total = res.t.row_total;
 
-          const listData = res.data.t.bill_list;
+          const listData = res.t.bill_list;
           this.changeListData(listData);
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧！")
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧！");
         }
       });
     },
@@ -312,17 +320,18 @@ export default {
           btnText: ""
         };
         // 判斷是否中標 f:fail s:success w:wait
-        var winBidding = "f"
-        if(listData[i].recv_user_pkid){
-          winBidding = listData[i].recv_user_pkid == this.userInfo.pkid ? "s" : "f";
-        }else{
-          winBidding = "w"
+        var winBidding = "f";
+        if (listData[i].recv_user_pkid) {
+          winBidding =
+            listData[i].recv_user_pkid == this.userInfo.pkid ? "s" : "f";
+        } else {
+          winBidding = "w";
         }
-        if(winBidding === "f"){
-          status.class = "failed",
-          status.text = "",
-          status.btnText = "詳情"
-        }else{
+        if (winBidding === "f") {
+          (status.class = "failed"),
+            (status.text = ""),
+            (status.btnText = "詳情");
+        } else {
           switch (listData[i].bill_status) {
             case "1":
               status.class = "quote";
@@ -387,42 +396,42 @@ export default {
   },
   created() {
     this.getListClassifyNum();
-    this.getListDate();
+    // 获取分页数据
+    let page = Number(sessionStorage.getItem("personalMainCurrentPage"));
+    let classify = sessionStorage.getItem("personalMainCurrentClassify");
+
+    this.currentPage = page || 1;
+
+    if (classify && classify !== "all") {
+      this.initPage = this.currentPage
+      this.classify = classify;
+    } else {
+      this.getListDate(this.currentPage);
+    }
   },
   computed: {
     ...mapState({
       userInfo: state => state.userInfo
     })
   },
-  filters: {
-    // formatDate(val) {
-    //   if (val === 0) {
-    //     return "時間已到";
-    //   } else if (val == "") {
-    //     return;
-    //   } else {
-    //     var dd,
-    //       hh,
-    //       mm,
-    //       ss = null;
-    //     dd = Math.floor(val / 60 / 60 / 24);
-    //     hh = Math.floor((val / 60 / 60) % 24);
-    //     mm = Math.floor((val / 60) % 60);
-    //     ss = Math.floor(val % 60);
-    //     dd = dd < 10 ? "0" + dd : dd;
-    //     hh = hh < 10 ? "0" + hh : hh;
-    //     mm = mm < 10 ? "0" + mm : mm;
-    //     ss = ss < 10 ? "0" + ss : ss;
-    //     return "時間剩餘" + dd + "天" + hh + "小時" + mm + "分鐘" + ss + "秒";
-    //   }
-    // }
-  },
+  filters: {},
   components: {
     Top,
     Logo,
     Footer,
     SilderBar,
     Paging
+  },
+  watch: {
+    classify: function() {
+      sessionStorage.setItem("personalMainCurrentClassify", this.classify);
+      if(this.initPage == 1){
+        this.getListDate();
+      }else{
+        this.getListDate(this.initPage);
+        this.initPage = 1
+      }
+    }
   }
 };
 </script>
@@ -620,7 +629,11 @@ export default {
 .formNum {
   color: #212f3a;
   font-size: 16px;
-  width: 345px;
+  width: 230px;
+  cursor: pointer;
+  &:hover {
+    color: #0093ff;
+  }
 }
 // 狀態
 .state {
@@ -662,7 +675,7 @@ export default {
   font-size: 16px;
   .remainTime,
   .failed {
-    width: 180px;
+    width: 280px;
     text-align: center;
   }
   .remainTime {

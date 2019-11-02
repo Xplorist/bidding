@@ -1,6 +1,9 @@
 package com.foxconn.bidding.ztest;
 
+import com.foxconn.bidding.model.BILL_bean;
+import com.foxconn.bidding.model.EmailContent;
 import com.foxconn.bidding.model.GIVE_PRICE_MSTR_bean;
+import com.foxconn.bidding.util.EmailUtil;
 import org.springframework.beans.BeanUtils;
 
 import java.text.ParseException;
@@ -12,7 +15,45 @@ import java.util.List;
 public class Test {
     public static void main(String[] args) {
         // test();
-        test2();
+        // test2();
+        testSendEmail();
+    }
+
+    public static void testSendEmail() {
+        String address = "hzcd-mis-sys4@mail.foxconn.com";
+        String subject = "【模治檢具訂單管理平台】";
+        String content = "【模治檢具訂單管理平台】";
+
+        BILL_bean bill_bean = new BILL_bean();
+        String bill_no = bill_bean.getBill_no();
+        String pd_type = bill_bean.getPd_type();
+
+        String send_dept_name = "【測試賬號】測試發單方單位";
+        String send_username = "send";
+
+        // 生成郵件標題
+        subject += "發單方【" + send_dept_name + "（" + send_username + "）】新發佈了"
+                + "單號為【" + bill_no + "】的【" + pd_type + "】訂單";
+        // 生成郵件內容
+        content += "發單方<b style='color: blue;'>" + send_dept_name + "（" + send_username + "）</b>新發佈了"
+                + "單號為<b style='color: blue;'>" + bill_no + "</b>的<b style='color: blue;'>" + pd_type + "</b>訂單<br><br>";
+        content += "<b style='color: red;'>網址</b>:&nbsp;&nbsp;<a href='http://10.244.231.103:8086'>http://10.244.231.103:8086</a>";
+        content += "&nbsp;&nbsp;&nbsp;&nbsp;(<b style='color: red;'>請用Chrome瀏覽器（谷歌瀏覽器）打開</b>)<br>";
+        content += "<hr><b style='color: black;'>【訂單詳情】</b><br><br>";
+        content += "<b style='color: black;'>類型</b>：<b style='color: blue;'>" + pd_type + "</b><br>";
+        content += "<b style='color: black;'>單號</b>：<b style='color: blue;'>" + bill_no + "</b><br>";
+        content += "<b style='color: black;'>發單方</b>：<b style='color: blue;'>" + send_dept_name + "（" + send_username + "）</b><br>";
+        content += "<b style='color: black;'>需求數量</b>：<b style='color: blue;'>" + bill_bean.getAmount() + "</b><br>";
+        content += "<b style='color: black;'>接受總價</b>：<b style='color: blue;'>" + bill_bean.getTotal_price() + bill_bean.getMoney_type() + "</b><br>";
+        content += "<b style='color: black;'>交貨時間</b>：<b style='color: blue;'>" + bill_bean.getDeliver_date() + "</b><br>";
+        content += "<b style='color: black;'>交貨地點</b>：<b style='color: blue;'>" + bill_bean.getDeliver_address() + "</b><br>";
+        content += "<b style='color: black;'>交貨方式</b>：<b style='color: blue;'>" + bill_bean.getDeliver_way() + "</b><br>";
+        content += "<b style='color: black;'>制作要求</b>：<b style='color: blue;'>" + bill_bean.getMake_requ() + "</b><br>";
+
+        Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
+        if(!f_sendEmail) {
+            throw new RuntimeException("發佈訂單發送通知郵件失敗");
+        }
     }
 
     public static void test2() {

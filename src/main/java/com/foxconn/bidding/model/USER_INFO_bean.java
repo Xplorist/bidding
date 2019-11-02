@@ -8,7 +8,7 @@ import java.util.List;
  * 用戶表bean
  */
 @Data
-public class USER_INFO_bean {
+public class USER_INFO_bean<T> {
     private String pkid;//主鍵id
     private String username;//賬號名稱
     private String password;//賬號密碼
@@ -37,4 +37,5 @@ public class USER_INFO_bean {
     private USER_PIC_FILE_bean user_pic_file;// 用戶頭像文件
     private String f_win_bid;// 是否中標標誌（Y:是，N:否）
     private List<RECV_MNUFC_RANGE_bean> recv_range_list;// 接單方加工範圍list
+    private List<T> get_eval_list;// 收到的評價list
 }

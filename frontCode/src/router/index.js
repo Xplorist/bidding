@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home.vue'
+import store from '@/store'
 
 Vue.use(Router)
 
@@ -20,56 +21,67 @@ const creatRouter = () => {
       },
       {
         path: '/personal',
-        name: 'personal',
+        // name: 'personal',
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import( /* webpackChunkName: "about" */ '../views/personal/Container'),
+        meta: {
+          title: 'permission',
+          roles: ['recv']
+        },
         children: [{
             path: '',
-            name: 'main',
+            name: 'per-main',
             component: () => import('@/views/personal/Main'),
           },
           {
             path: 'delivery',
-            name: 'delivery',
+            name: 'per-delivery',
             component: () => import('@/views/personal/Delivery'),
           },
           {
             path: 'evaluation',
-            name: 'evaluation',
+            name: 'per-evaluation',
             component: () => import('@/views/personal/Evaluation'),
           },
           {
             path: 'information',
-            name: 'information',
+            name: 'per-information',
             component: () => import('@/views/personal/Information'),
           },
           {
             path: 'postEvaluation',
-            name: 'postEvaluation',
+            name: 'per-postEvaluation',
             component: () => import('@/views/personal/PostEva'),
           },
           {
-            path: 'payment',
-            name: 'payment',
-            component: () => import('@/views/personal/Payment'),
+            path: 'gather',
+            name: 'per-gather',
+            component: () => import('@/views/personal/Gather'),
           },
           {
             path: 'setting',
-            name: 'setting',
+            name: 'per-setting',
             component: () => import('@/views/personal/Setting')
           }
         ]
       },
+      // 詳情頁
       {
         path: '/particulars',
         name: 'particulars',
         component: () => import('@/views/particulars/Main')
       },
+      // 標書
+      {
+        path: '/biddingDoc',
+        name: 'biddingDoc',
+        component: () => import('@/views/particulars/BiddingDoc')
+      },
       {
         path: '/merchant',
-        name: 'merchant',
+        // name: 'merchant',
         component: () => import('@/views/merchant/Container'),
         children: [{
             path: '',
@@ -88,49 +100,60 @@ const creatRouter = () => {
           }
         ]
       },
+      // 合同
       {
         path: '/contract',
         name: 'contract',
         component: () => import('@/views/contract/Main')
       },
+      // 404
+      {
+        path: '/404',
+        name: '404',
+        component: () => import('@/views/404/404')
+      },
       {
         path: '/demand',
         redirect: '/demand/order',
         name: 'demand',
+        meta: {
+          title: 'permission',
+          roles: ['send']
+        },
         component: () => import('@/views/demand/Container'),
         children: [{
             path: 'order',
-            name: 'main',
+            name: 'de-main',
             component: () => import('@/views/demand/Main')
           },
           {
             path: 'information',
-            name: 'informaiton',
+            name: 'de-informaiton',
             component: () => import('@/views/demand/Information')
           },
           {
             path: 'evaluation',
-            name: 'evaluation',
+            name: 'de-evaluation',
             component: () => import('@/views/demand/Evaluation'),
           },
           {
             path: 'postEva',
-            name: 'postEva',
+            name: 'de-postEva',
             component: () => import('@/views/demand/PostEva')
           },
           {
             path: 'publish',
-            name: 'publish',
+            name: 'de-publish',
             component: () => import('@/views/demand/Publish')
           },
           {
             path: 'chooseDetails',
-            name: 'chooseDetails',
+            name: 'de-chooseDetails',
             component: () => import('@/views/demand/ChooseDetails')
           },
           {
             path: 'setting',
-            name: 'setting',
+            name: 'de-setting',
             component: () => import('@/views/demand/Setting')
           }
         ]
@@ -146,13 +169,33 @@ const router = creatRouter()
 router.beforeEach((to, from, next) => {
   let token = sessionStorage.getItem('token')
   const nextRoute = ['/personal', '/demand']
-  // console.log(to)
   var path = '/' + to.path.split('/')[1]
-  if (nextRoute.indexOf(path) >= 0 && (!token || token == null)) {
+
+  if (to.name === null) {
+    console.log("這是錯誤的頁面")
     next({
-      path: '/login',
+      path: '/404'
     })
-  } else {
+  } else if(nextRoute.indexOf(path) >= 0){
+    // 未登錄不能進入
+    if (!token || token == null) {
+      next({
+        path: '/login',
+      })
+    } else {
+      // 權限
+      const type = store.state.userInfo.send_recv_type // recv send
+      const flag = to.matched[0].meta.roles.includes(type)
+      if (flag) {
+        next()
+      } else {
+        console.log("這是你不該來的頁面")
+        next({
+          path: '/404'
+        })
+      }
+    }
+  } else{
     next()
   }
 })

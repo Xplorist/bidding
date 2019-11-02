@@ -10,23 +10,24 @@
 <script>
 import { mapState } from "vuex";
 
+
 export default {
   data: function() {
-    return {
-
-    };
+    return {};
   },
   methods: {
     // 退出登錄，清除信息
-    quit(){
-      this.$store.commit("LOG_OUT")
-      this.$router.push('/login')
+    quit() {
+      this.$router.push("/login");
+      this.$store.commit("LOG_OUT");
     }
   },
   computed: {
     ...mapState({
       userInfo: state => state.userInfo
     })
+  },
+  created(){
   }
 };
 </script>
@@ -47,5 +48,4 @@ export default {
   margin-bottom: 20px;
   border-bottom: 1px solid #d3dfe7;
 }
-
 </style>

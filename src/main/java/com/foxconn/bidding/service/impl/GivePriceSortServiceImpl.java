@@ -48,7 +48,18 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         bill_bean.setSend_user(send_user);
         String send_secn_cmpy = send_user.getSecn_cmpy();
         String send_entrps_group = send_user.getEntrps_group();
-        Integer send_total_price = bill_bean.getTotal_price();// 標價
+        /* 這是以發單方的標價作為標準來進行排序的算法 */
+        //Integer send_total_price = bill_bean.getTotal_price();// 標價
+
+        /* 這是以接單方最小的報價最為標準來進行排序的算法 */
+        Integer send_total_price = 0;
+        if(!give_price_list.isEmpty()) {
+            send_total_price = give_price_list.get(0).getTotal_price();
+        }
+
+        if(send_total_price == null || send_total_price == 0) {
+            send_total_price = 100000;// 如果發單方沒有填寫接受總價，默認為100000，這樣導致排序算法肯定有問題，後面再改
+        }
         for(int i = 0; i < give_price_list.size(); i++) {
             GIVE_PRICE_MSTR_bean give_price = give_price_list.get(i);
             Integer recv_total_price = give_price.getTotal_price();

@@ -4,6 +4,7 @@ import com.foxconn.bidding.mapper.BillMapper;
 import com.foxconn.bidding.mapper.UserMapper;
 import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.BillService;
+import com.foxconn.bidding.service.EmailService;
 import com.foxconn.bidding.service.GivePriceSortService;
 import com.foxconn.bidding.util.DateParseUtil;
 import com.foxconn.bidding.util.UUID_Util;
@@ -21,12 +22,12 @@ import java.util.Map;
 public class BillServiceImpl implements BillService {
     @Autowired
     private BillMapper mapper;// 訂單mapper
-
     @Autowired
     private UserMapper userMapper;// 用戶mapper
-
     @Autowired
     private GivePriceSortService sortSVC;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     @Transactional
@@ -89,21 +90,18 @@ public class BillServiceImpl implements BillService {
             param.setPart_doc_file_rel_id(part_doc_file_rel_id);
             // 設置類型編號
             String pd_type = param.getPd_type();
-            String pd_type_no = "M";
+            String pd_type_no = "Z";
             switch (pd_type) {
-                case "模具":
-                    pd_type_no = "M";
-                    break;
                 case "治具":
                     pd_type_no = "Z";
                     break;
                 case "檢具":
                     pd_type_no = "J";
                     break;
-                case "沖具":
+                case "沖模":
                     pd_type_no = "C";
                     break;
-                case "塑具":
+                case "塑模":
                     pd_type_no = "S";
                     break;
             }
@@ -159,21 +157,18 @@ public class BillServiceImpl implements BillService {
 
             // 設置類型編號
             String pd_type = param.getPd_type();
-            String pd_type_no = "M";
+            String pd_type_no = "Z";
             switch (pd_type) {
-                case "模具":
-                    pd_type_no = "M";
-                    break;
                 case "治具":
                     pd_type_no = "Z";
                     break;
                 case "檢具":
                     pd_type_no = "J";
                     break;
-                case "沖具":
+                case "沖模":
                     pd_type_no = "C";
                     break;
-                case "塑具":
+                case "塑模":
                     pd_type_no = "S";
                     break;
             }
@@ -243,6 +238,12 @@ public class BillServiceImpl implements BillService {
         Integer f_update_bill_no = mapper.update_bill_no(bill_pkid, bill_no);
         if(f_update_bill_no <= 0) {
             throw new RuntimeException("更新訂單單號失敗");
+        }
+
+        // 發佈訂單發送通知郵件
+        ResultParam result = emailService.publish_bill_send_email(bill_pkid);
+        if(!"1".equals(result.getCode())) {
+            throw new RuntimeException("發佈訂單發送通知郵件失敗");
         }
 
         return new ResultParam("1","發佈(提交)訂單成功", null);
@@ -320,10 +321,11 @@ public class BillServiceImpl implements BillService {
     public ResultParam query_status_bill_num_send_user(BILL_bean param, HttpServletRequest request) {
         String user_pkid = (String) request.getAttribute("user_pkid");
 
-        // 根據狀態查詢相應狀態的訂單個數（all：全部，0：待發佈，1：待報價，2：待發貨，3：待收貨，4：待付款，5：待收款，6：已完成）
+        // 根據狀態查詢相應狀態的訂單個數（all：全部，0：待發佈，1：待報價，1.5:待選標,2：待發貨，3：待收貨，4：待付款，5：待收款，6：已完成）
         Integer num_status_all = mapper.query_bill_num_by_status(user_pkid, "all");
         Integer num_status_0 = mapper.query_bill_num_by_status(user_pkid, "0");
         Integer num_status_1 = mapper.query_bill_num_by_status(user_pkid, "1");
+        Integer num_status_1_5 = mapper.query_bill_num_by_status(user_pkid, "1.5");
         Integer num_status_2 = mapper.query_bill_num_by_status(user_pkid, "2");
         Integer num_status_3 = mapper.query_bill_num_by_status(user_pkid, "3");
         Integer num_status_4 = mapper.query_bill_num_by_status(user_pkid, "4");
@@ -337,6 +339,7 @@ public class BillServiceImpl implements BillService {
         map.put("num_status_all", num_status_all);
         map.put("num_status_0", num_status_0);
         map.put("num_status_1", num_status_1);
+        map.put("num_status_1_5", num_status_1_5);
         map.put("num_status_2", num_status_2);
         map.put("num_status_3", num_status_3);
         map.put("num_status_4", num_status_4);
@@ -457,9 +460,13 @@ public class BillServiceImpl implements BillService {
         }
         for(int i = 0; i < bill_list.size(); i++) {
             BILL_bean bill_bean = bill_list.get(i);
+            String bill_pkid = bill_bean.getPkid();
             String send_user_pkid = bill_bean.getSend_user_pkid();
             USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
             bill_bean.setSend_user(send_user);
+            // 查詢參與單位個數
+            Integer recv_user_num = mapper.query_bill_recv_user_num(bill_pkid);
+            bill_bean.setRecv_user_num(recv_user_num);
         }
 
         Map<String,Object> map = new HashMap<>();

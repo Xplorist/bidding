@@ -17,17 +17,17 @@
         </li>
         <li>
           <!-- 測試效果，判斷userInfo值 -->          
-          <router-link :to="userInfo ? (userInfo.send_recv_type == 'send' ? '/demand' : 'personal') : '/login' ">個人中心</router-link>
+          <router-link :to="userInfo ? (userInfo.send_recv_type == 'send' ? '/demand' : '/personal') : '/login' ">個人中心</router-link>
         </li>
         <li v-if="userInfo" @click="quit">
           <router-link to="" >退出登錄</router-link>
         </li>
         <li>
-          <router-link to="/merchant">商家入駐</router-link>
+          <router-link to="/merchant">註冊</router-link>
         </li>
-        <li @click="consoleLog">
+        <!-- <li>
           <router-link to >規則中心</router-link>
-        </li>
+        </li> -->
       </ul>
     </div>
   </section>
@@ -43,12 +43,9 @@ export default {
     }
   },
   methods:{
-    consoleLog(){
-      console.log(this.userInfo)
-    },
     quit(){
-      this.$store.commit("LOG_OUT")
       this.$router.push('/login')
+      this.$store.commit("LOG_OUT")
     }
   },
   props:{

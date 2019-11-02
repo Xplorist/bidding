@@ -10,7 +10,7 @@
           <!-- title -->
           <div class="main_title">個人資料</div>
           <!-- form表單 -->
-          <el-form ref="form" :model="form" label-width="80px">
+          <el-form ref="form" :model="form" :rules="rules" label-width="80px">
             <!-- 賬號屬性 -->
             <el-form-item label="賬號屬性:" class="properties">
               <span>{{form.properties}}</span>
@@ -21,112 +21,103 @@
               <input ref="fileInp" type="file" class="dis_none" @change="getFile" />
               <span @click="upImg">更換</span>
             </el-form-item>
-            <!-- 賬號名稱 -->
-            <el-form-item label="賬號名稱:">
-              <el-input v-model="form.name"></el-input>
+            <!-- 所屬地區 -->
+            <el-form-item label="所屬地區:" class="department">
+              <el-select v-model="form.fctry_zone" @click.native="query_department('factory')">
+                <el-option
+                  v-for="item in form.fctry_zone_list"
+                  :key="item.pkid"
+                  :label="item.name"
+                  :value="item.name"
+                ></el-option>
+              </el-select>
             </el-form-item>
             <!-- 所屬單位 -->
             <el-form-item label="所屬單位:" class="department">
-              <el-select v-model="form.department.fctry_zone">
+              <el-select v-model="form.secn_cmpy" @click.native="query_department('SECN_CMPY')">
                 <el-option
-                  v-for="(item, index) in form.departmentList.fctry_zone"
-                  :key="index"
-                  :label="item"
-                  :value="item"
+                  v-for="(item) in form.secn_cmpy_list"
+                  :key="item.pkid"
+                  :label="item.name"
+                  :value="item.name"
                 ></el-option>
               </el-select>
-              <el-select v-model="form.department.secn_cmpy">
+              <el-select
+                v-model="form.entrps_group"
+                @click.native="query_department('ENTRPS_GROUP')"
+              >
                 <el-option
-                  v-for="(item, index) in form.departmentList.secn_cmpy"
-                  :key="index"
-                  :label="item"
-                  :value="item"
+                  v-for="(item) in form.entrps_group_list"
+                  :key="item.pkid"
+                  :label="item.name"
+                  :value="item.name"
                 ></el-option>
               </el-select>
-              <el-select v-model="form.department.entrps_group">
+              <el-select v-model="form.pd_office" @click.native="query_department('PD_OFFICE')">
                 <el-option
-                  v-for="(item, index) in form.departmentList.entrps_group"
-                  :key="index"
-                  :label="item"
-                  :value="item"
-                ></el-option>
-              </el-select>
-              <el-select v-model="form.department.pd_office">
-                <el-option
-                  v-for="(item, index) in form.departmentList.pd_office"
-                  :key="index"
-                  :label="item"
-                  :value="item"
+                  v-for="(item) in form.pd_office_list"
+                  :key="item.pkid"
+                  :label="item.name"
+                  :value="item.name"
                 ></el-option>
               </el-select>
             </el-form-item>
+            <!-- 賬號名稱 -->
+            <el-form-item label="賬號名稱:" prop="name">
+              <el-input v-model="form.name"></el-input>
+            </el-form-item>
+            <!-- 單位代碼 -->
+            <el-form-item label="單位代碼:" prop="departCode">
+              <el-input v-model="form.departCode" @focus="form.departName = ''" @blur="queryDeptName"></el-input>
+            </el-form-item>
             <!-- 單位名稱 -->
-            <el-form-item label="單位名稱:">
-              <el-input v-model="form.departName"></el-input>
+            <el-form-item label="單位名稱:" prop="departName">
+              <el-input v-model="form.departName" disabled=""></el-input>
             </el-form-item>
             <!-- 交易法人 -->
             <el-form-item label="交易法人:">
               <span>{{form.corporate}}</span>
             </el-form-item>
+            <!-- 加工範圍 -->
+            <el-form-item label="加工範圍:">
+              <el-select multiple v-model="form.processRange" @click.native="getRange">
+                <el-option
+                  v-for="item in rangeOptions"
+                  :key="item.pkid"
+                  :label="item.name"
+                  :value="item.name"
+                ></el-option>
+              </el-select>
+            </el-form-item>
             <!-- 費用代碼 -->
-            <el-form-item label="費用代碼:" class="costCode">
+            <el-form-item label="費用代碼:" class="costCode" prop="costCode">
               <span>{{form.costCode}}</span>
               <el-button type="text" @click="open('costCode')">&nbsp;變更</el-button>
             </el-form-item>
-            <!-- 加工範圍 -->
-            <el-form-item v-if="form.in_out_type != 'in'" label="加工範圍:" class="processRange">
-              <span>{{form.processRange }}</span>
-              <el-button type="text" @click="open('processRange')">&nbsp;修改</el-button>
-            </el-form-item>
-            <!-- 銀行賬號 -->
-            <el-form-item v-if="form.in_out_type != 'in'" label="銀行賬號:" class="bankAccount">
-              <span>{{form.bankName}}&nbsp;{{form.bankAccount}}</span>
-              <el-button type="text" @click="dialogFormVisible = true">變更賬號</el-button>
-            </el-form-item>
-
-            <!-- 彈出對話框 -->
-            <el-dialog title="請修改銀行賬號" width="400px;" :visible.sync="dialogFormVisible">
-              <el-form :model="alertForm">
-                <el-form-item label="銀行名稱">
-                  <el-input v-model="alertForm.bankName" autocomplete="off"></el-input>
-                </el-form-item>
-                <el-form-item label="銀行賬號">
-                  <el-input v-model="alertForm.bankAccount" placeholder></el-input>
-                </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false, transmit('cancel')">取 消</el-button>
-                <el-button
-                  type="primary"
-                  @click="dialogFormVisible = false, transmit('confirm')"
-                >确 定</el-button>
-              </div>
-            </el-dialog>
-
             <!-- 業務經理 -->
-            <el-form-item label="加工範圍:">
-              <el-input v-model="form.processRange"></el-input>
-            </el-form-item>
-            <!-- 業務經理 -->
-            <el-form-item label="業務經理:">
+            <el-form-item label="業務經理:" prop="manager">
               <el-input v-model="form.manager"></el-input>
             </el-form-item>
-            <!-- 聯繫電話 -->
-            <el-form-item label="聯繫電話:" class="tel">
-              <el-input v-model="form.tel.num"></el-input>
-              <el-checkbox label="在主頁中顯示" :checked="form.tel.check" name="type"></el-checkbox>
+            <!-- 固定電話 -->
+            <el-form-item label="固定電話:" class="tel" prop="telNum">
+              <el-input v-model="form.telNum"></el-input>
+              <!-- <el-checkbox label="在主頁中顯示" @change="form.tel.check = !form.tel.check" :checked="form.tel.check" name="type"></el-checkbox> -->
+            </el-form-item>
+            <!-- 移動電話 -->
+            <el-form-item label="移動電話:" class="tel" prop="mobileNum">
+              <el-input v-model="form.mobileNum"></el-input>
             </el-form-item>
             <!-- Email -->
-            <el-form-item label="Email:" class="email">
+            <el-form-item label="Email:" class="email" prop="email">
               <el-input v-model="form.email"></el-input>
             </el-form-item>
             <!-- 簡介 -->
-            <el-form-item label="簡介:" class="intro">
+            <el-form-item label="簡介:" class="intro" prop="intro">
               <el-input type="textarea" v-model="form.intro" autosize></el-input>
             </el-form-item>
             <!-- 按鈕 -->
             <el-form-item label=" ">
-              <el-button type="primary" @click="save">保存</el-button>
+              <el-button type="primary" @click="save()">保存</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -143,12 +134,35 @@ import Footer from "../../components/Footer";
 import SilderBar from "../../components/personal/SilderBar";
 
 import { file_upload } from "@/api/file";
-import { mapState } from "vuex";
+import { update_user_info, query_user_info_by_pkid } from "@/api/user";
 
-import { Message } from "element-ui";
+import {
+  ck_user_is_exist,
+  query_factory_list,
+  query_SECN_CMPY_list,
+  query_ENTRPS_GROUP_list,
+  query_PD_OFFICE_list,
+  query_dept_name_by_dept_no,
+  query_pd_type_list
+} from "@/api/formInfo";
+
+import { getPorImg } from "@/assets/js/getInfo";
+import { mapState } from "vuex";
 
 export default {
   data: function() {
+    var validatorName = (rule, value, callback) => {
+      if (value === "") {
+        callback(new Error("请輸入名稱"));
+      } else if (value.length < 3 || value.length > 10) {
+        callback(new Error("长度在 3 到 10 个字符"));
+      } else {
+        // 如果 value 不為空且作出更改，發起請求判斷重複
+        this.userInfo.username == this.form.name
+          ? callback()
+          : this.ck_user(this.form.name, callback);
+      }
+    };
     return {
       // 侧边栏选中条目
       silderBarItem: "information",
@@ -159,91 +173,277 @@ export default {
         // 頭像地址
         portraitUrl: require("../../assets/imgs/personal/portrait.png"),
         // 賬號名稱
-        name: "SHZBG",
-        // 所屬單位
-        department: {
-          fctry_zone: "成都",
-          secn_cmpy: "次集團",
-          entrps_group: "事業群",
-          pd_office: "處"
-        },
+        name: "",
+        // 所屬地區
+        fctry_zone: "",
+        secn_cmpy: "",
+        entrps_group: "",
+        pd_office: "",
+
         // 所屬單位可選項【不傳】
-        departmentList: {
-          fctry_zone: ["成都", "深圳", "鄭州"],
-          secn_cmpy: ["A", "B", "C", "D", "D"],
-          entrps_group: ["SHZBG", "PCEBG", "CCPBG", "CNSBG", "NWING", "CMMSG"],
-          pd_office: ["處"]
-        },
+        fctry_zone_list: [],
+        secn_cmpy_list: [],
+        entrps_group_list: [],
+        pd_office_list: [],
+
         // 單位名稱
         departName: "",
+        // 單位代碼
+        departCode: "",
         // 交易法人
         corporate: "",
         // 費用代碼
         costCode: "",
         // 加工範圍
-        processRange: "",
+        processRange: [],
         // 銀行賬號
         bankName: "",
         bankAccount: "",
         // 業務經理
         manager: "",
-        // 聯繫電話
-        tel: {
-          num: "",
-          check: false
-        },
+        // 固定電話
+        telNum: "",
+        // 移動電話
+        mobileNum: "",
         // Email
         email: "",
         // 簡介
         intro: "",
-        // 需求方 | 接單方
+        // 內部 | 外部
         in_out_type: ""
       },
+      // 限定
+      rules: {
+        // 賬號名稱
+        name: [
+          {
+            required: true,
+            validator: validatorName,
+            trigger: "blur"
+          }
+        ],
+        // 单位代碼
+        departCode: [
+          { required: true, message: "单位代碼不能为空", trigger: "blur" }
+        ],
+        // 单位名称
+        departName: [
+          { required: true, message: "未查詢到单位名称，請檢查", trigger: "blur" }
+        ],
+        // 费用代码
+        costCode: [
+          { required: true, message: "费用代码不能为空", trigger: "blur" }
+        ],
+        // 业务经理
+        manager: [
+          { required: true, message: "业务经理不能为空", trigger: "blur" }
+        ],
+        // 固定電話
+        telNum: [
+          { required: true, message: "固定電話不能为空", trigger: "blur" }
+        ],
+        // 移動電話
+        mobileNum: [
+          { required: true, message: "移動電話不能为空", trigger: "blur" }
+        ],
+        // email
+        email: [
+          { required: true, message: "email不能为空", trigger: "blur" },
+          {
+            type: "email",
+            message: "请输入正确的邮箱地址",
+            trigger: ["blur", "change"]
+          }
+        ],
+        // 简介
+        intro: [{ max: 100, message: "最長100個字符", trigger: "blur" }]
+      },
+      // 加工範圍
+      rangeOptions: [],
       // 彈框數據
       dialogFormVisible: false,
       alertForm: {
         bankName: "",
         bankAccount: ""
-      }
+      },
+      // 頭像信息
+      user_pic_file: null
     };
   },
   mounted() {
     this.initData();
   },
   methods: {
-    save() {
-      // console.log(this.form.manager);
+    // 查詢單位名稱
+    queryDeptName(){
+      if(!this.form.factory) return this.$message.error('請先選擇廠區！')
+      query_dept_name_by_dept_no(this.form.departCode, this.form.fctry_zone).then(res => {
+        if(res.code === '1'){
+          this.form.departName = res.t.dept_name
+        }else{
+          this.form.departName = ''
+          this.$message.error("查詢失敗，請檢查單位代碼是否輸入正確！")
+        }
+      })
+    },
 
-      // 判斷值不為 '', null, undefined.此時 Boolean() 返回 false
-      // 但是不適用于 空對象{} 或 空數組[], Boolean() 會返回 true
-      if (Boolean(this.form.name) == false) {
-        Message.error("賬號名稱不能為空");
-      } else if (Boolean(this.form.departName) == false) {
-        Message.error("單位名稱不能為空");
-      } else if (Boolean(this.form.costCode) == false) {
-        Message.error("費用代碼不能為空");
-      } else if (
-        Boolean(this.form.processRange) == false &&
-        this.form.in_out_type !== "in"
-      ) {
-        Message.error("加工範圍不能為空");
-      } else if (Boolean(this.form.manager) == false) {
-        Message.error("業務經理不能為空");
-      } else if (Boolean(this.form.tel) == false) {
-        Message.error("聯繫電話不能為空");
-      } else if (Boolean(this.form.email) == false) {
-        Message.error("Email不能為空");
-      } else {
-        Message.success("已保存");
+    // 查詢加工範圍
+    getRange(){
+      query_pd_type_list().then(res => {
+        if(res.code === "1"){
+          this.rangeOptions = res.t
+        }
+      })
+    },
+
+    // 查詢 廠區 單位
+    query_department(type) {
+      var data = "";
+      switch (type) {
+        case "factory":
+          query_factory_list().then(res => {
+            if (res.code === "1") {
+              this.form.fctry_zone_list = res.t;
+            }
+          });
+          break;
+        case "SECN_CMPY":
+          query_SECN_CMPY_list().then(res => {
+            if (res.code === "1") {
+              this.form.secn_cmpy_list = res.t;
+              // 清空 事業群 產品處
+              this.form.entrps_group = "";
+              this.form.pd_office = "";
+            }
+          });
+          break;
+        case "ENTRPS_GROUP":
+          for (let item of this.form.secn_cmpy_list) {
+            if (this.form.secn_cmpy == item.name) {
+              data = item.pkid;
+            }
+          }
+          query_ENTRPS_GROUP_list(data).then(res => {
+            if (res.code === "1") {
+              this.form.entrps_group_list = res.t;
+              // 清空 產品處
+              this.form.pd_office = "";
+            }
+          });
+          break;
+        case "PD_OFFICE":
+          // var data = ''
+          for (let item of this.form.entrps_group_list) {
+            if (this.form.entrps_group == item.name) {
+              data = item.pkid;
+            }
+          }
+          query_PD_OFFICE_list(data).then(res => {
+            if (res.code === "1") {
+              this.form.pd_office_list = res.t;
+            }
+          });
+          break;
       }
+    },
+
+    // 查詢名稱是否重複
+    ck_user(name, callback) {
+      var data = { username: name };
+      // 調用api接口
+      ck_user_is_exist(data).then(res => {
+        if (res.code == "0") {
+          callback(new Error("賬戶已存在!"));
+        } else {
+          callback();
+        }
+      });
+    },
+
+    save() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          if (!this.form.entrps_group || !this.form.pd_office)
+            return this.$message.error("所屬單位未填寫完整");
+          if (this.form.processRange.length == 0)
+            return this.$message.error("請選擇加工範圍");
+
+          this.updateInfo();
+        } else {
+          // console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+
+    // 更新用戶信息
+    updateInfo() {
+      var recv_range_list = [];
+      for (let item of this.form.processRange) {
+        recv_range_list.push({ name: item });
+      }
+      const data = {
+        pkid: this.userInfo.pkid,
+        // 賬號名
+        username: this.form.name,
+        // 產區
+        fctry_zone: this.form.fctry_zone,
+        // 次集團
+        secn_cmpy: this.form.secn_cmpy,
+        // 事業群
+        entrps_group: this.form.entrps_group,
+        // 產品處
+        pd_office: this.form.pd_office,
+        // 單位名稱
+        dept_name: this.form.departName,
+        // 單位代碼
+        dept_code: this.form.departCode,
+        // 交易法人
+        legal_person: this.form.corporate,
+        // 費用代碼
+        cost_code: this.form.costCode,
+        // 加工範圍
+        recv_range_list: recv_range_list,
+        // 業務經理
+        busis_mngr: this.form.manager,
+        // 固定電話
+        tel: this.form.telNum,
+        // 移動電話
+        phone: this.form.mobileNum,
+        // email
+        email: this.form.email,
+        // 簡介
+        summary: this.form.intro,
+        // 頭像
+        user_pic_file: this.user_pic_file,
+        // 接單方 | 需求方 類型
+        send_recv_type: this.userInfo.send_recv_type
+      };
+      // 調用接口上傳信息
+      update_user_info(data).then(res => {
+        if (res.code === "1") {
+          this.$message.success("已保存");
+          // 重新查詢信息存儲在 vuex
+          query_user_info_by_pkid(this.userInfo.pkid).then(res => {
+            if (res.code === "1") {
+              this.$store.dispatch("get_userInfo", res.t);
+              this.$store.dispatch("get_porImgUrl", getPorImg());
+
+            }
+          });
+        } else {
+          this.$message.error("出錯啦，稍後再試試吧");
+        }
+      });
     },
 
     // 點擊更換觸發input[type='file']的點擊事件
     upImg() {
       this.$refs.fileInp.dispatchEvent(new MouseEvent("click"));
     },
+
+    // 獲取到 input 選中的文件信息
     getFile() {
-      // 獲取到 input 選中的文件信息
       const inputFile = this.$refs.fileInp.files[0];
       // window 对象的 URL 对象通過 createObjectURL() 将blob或者file读取成一个url。
       const windowURl = window.URL || window.webkitURL;
@@ -266,8 +466,7 @@ export default {
 
         file_upload(data).then(res => {
           if (res.code == 1) {
-            // console.log(res)
-            // window.sessionStorage.setItem('user')
+            this.user_pic_file = res.t;
           }
         });
       }
@@ -275,47 +474,54 @@ export default {
 
     // 從 vuex 從獲取數據
     initData() {
+      var processRange = [];
+      for (let item of this.userInfo.recv_range_list) {
+        processRange.push(item.name);
+      }
+
       // 頭像
       (this.form.portraitUrl = this.porImgUrl),
         // 賬號名稱
         (this.form.name = this.userInfo.username),
         // 廠區
-        (this.form.department.fctry_zone = this.userInfo.fctry_zone),
+        (this.form.fctry_zone = this.userInfo.fctry_zone),
         // 次集團
-        (this.form.department.secn_cmpy = this.userInfo.secn_cmpy),
+        (this.form.secn_cmpy = this.userInfo.secn_cmpy),
         // 事業群
-        (this.form.department.entrps_group = this.userInfo.entrps_group),
+        (this.form.entrps_group = this.userInfo.entrps_group),
         // 產品處
-        (this.form.department.pd_office = this.userInfo.pd_office),
+        (this.form.pd_office = this.userInfo.pd_office),
         // 單位名稱
         (this.form.departName = this.userInfo.dept_name),
+        // 單位代碼
+        (this.form.departCode = this.userInfo.dept_code),
         // 法人
         (this.form.corporate = this.userInfo.legal_person),
         // 費用代碼
         (this.form.costCode = this.userInfo.cost_code),
         // 加工範圍
-        (this.form.processRange = this.userInfo.recv_mnufc_range),
+        (this.form.processRange = processRange),
         // 銀行名稱
         (this.form.bankName = this.userInfo.bank_name),
         // 銀行賬號
         (this.form.bankAccount = this.userInfo.bank_acunt),
         // 業務經理
         (this.form.manager = this.userInfo.busis_mngr),
-        // 聯繫電話
-        (this.form.tel.num = this.userInfo.tel),
+        // 固定電話
+        (this.form.telNum = this.userInfo.tel),
+        // 移動電話
+        (this.form.mobileNum = this.userInfo.phone),
         // 郵箱
         (this.form.email = this.userInfo.email),
         // 簡介
         (this.form.intro = this.userInfo.summary),
-        // 需求方 | 接單方
+        // 內部 | 外部
         (this.form.in_out_type = this.userInfo.in_out_type);
-      // (this.form.in_out_type = 'out'),
-      // console.log(this.userInfo);
     },
 
     // 彈窗消息1
-    open(val) {
-      var text = val == "costCode" ? "費用代碼" : "加工範圍";
+    open() {
+      var text = "費用代碼";
       this.$prompt("请输入" + text, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -323,13 +529,12 @@ export default {
         inputErrorMessage: text + "格式不正确"
       })
         .then(({ value }) => {
+          if (!value) return this.$message.warning("费用代码不能为空");
           this.$message({
             type: "success",
             message: "已修改" + text + "為: " + value
           });
-          val == "costCode"
-            ? (this.form.costCode = value)
-            : (this.form.processRange = value);
+          this.form.costCode = value;
         })
         .catch(() => {
           this.$message({
@@ -363,6 +568,7 @@ export default {
     Footer,
     SilderBar
   },
+  watch: {},
   computed: {
     ...mapState({
       userInfo: state => state.userInfo,
@@ -434,7 +640,7 @@ export default {
     }
     .el-input {
       input {
-        width: 100px;
+        width: 160px;
       }
     }
   }
@@ -531,6 +737,13 @@ export default {
     .el-input__inner {
       background-color: #fff;
     }
+  }
+}
+
+// 消去紅*
+/deep/ .el-form-item__label {
+  &:before {
+    content: "" !important;
   }
 }
 </style>

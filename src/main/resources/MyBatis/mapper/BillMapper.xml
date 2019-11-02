@@ -146,7 +146,8 @@
                              or  t.bill_status = '5' or t.bill_status = '6')
                          </if>
                          <if test='deliver_address != "all"'>
-                             and t.deliver_address = #{deliver_address}
+                            <bind name="p_deliver_address" value="'%' + deliver_address + '%'"/>
+                             and t.deliver_address like #{p_deliver_address}
                          </if>
                          <if test='deliver_date != "all" and deliver_date == "0_5"'>
                              and t.deliver_date &lt;= (sysdate + 5)
@@ -227,7 +228,7 @@
             )
             )
         </if>
-        order by t.pd_type asc, t.create_date desc
+        order by t.create_date desc, t.pd_type asc
         ) t1) t2
         where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1 and #{pageIndex} * #{pageSize}
     </select>
@@ -239,8 +240,14 @@
                   from (select t.*, count(*) over() row_total
                           from BILL t
                          where t.send_user_pkid = #{send_user_pkid}
-                         <if test='bill_status != "all" and bill_status != "no_send_eval"'>
+                         <if test='bill_status != "all" and bill_status != "no_send_eval" and bill_status != "1" and bill_status != "1.5"'>
                              and t.bill_status = #{bill_status}
+                         </if>
+                         <if test='bill_status == "1"'>
+                             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date - 1 / 24)
+                         </if>
+                         <if test='bill_status == "1.5"'>
+                             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date - 1 / 24)
                          </if>
                          <if test='bill_status == "no_send_eval"'>
                              and t.bill_status = '6'
@@ -338,7 +345,8 @@
             or  t.bill_status = '5' or t.bill_status = '6')
         </if>
         <if test='deliver_address != "all"'>
-            and t.deliver_address = #{deliver_address}
+            <bind name="p_deliver_address" value="'%' + deliver_address + '%'"/>
+            and t.deliver_address like #{p_deliver_address}
         </if>
         <if test='deliver_date != "all" and deliver_date == "0_5"'>
             and t.deliver_date &lt;= (sysdate + 5)
@@ -367,8 +375,14 @@
         select count(*)
           from BILL t
          where t.send_user_pkid = #{send_user_pkid}
-         <if test='bill_status != "all"'>
+         <if test='bill_status != "all" and bill_status != "1" and bill_status != "1.5"'>
              and t.bill_status = #{bill_status}
+         </if>
+         <if test='bill_status == "1"'>
+             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date - 1 / 24)
+         </if>
+         <if test='bill_status == "1.5"'>
+             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date - 1 / 24)
          </if>
     </select>
 
@@ -651,6 +665,22 @@
     <update id="update_bill_win_bid">
         update BILL set bill_status = '2', recv_user_pkid = #{recv_user_pkid} where pkid = #{bill_pkid}
     </update>
+
+    <!-- 查詢發單方收到的評價list(不分頁) -->
+    <select id="query_send_get_eval_list_nopagi" parameterType="String" resultType="com.foxconn.bidding.model.RECV_EVAL_bean">
+        select t.*
+          from RECV_EVAL t
+         where t.send_user_pkid = #{send_user_pkid}
+         order by t.create_date desc
+    </select>
+
+    <!-- 查詢接單方收到的評價list(不分頁) -->
+    <select id="query_recv_get_eval_list_nopagi" parameterType="String" resultType="com.foxconn.bidding.model.SEND_EVAL_bean">
+        select t.*
+          from SEND_EVAL t
+         where t.recv_user_pkid = #{recv_user_pkid}
+         order by t.create_date desc
+    </select>
 
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

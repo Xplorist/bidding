@@ -11,109 +11,496 @@
         <span>選標</span>
       </div>
       <!-- 排序 -->
-      <div class="sort">
+      <div class="sort" style="position:relative">
         <!-- 展示按鈕 -->
         <div class="sort_btn" @click="sortList">
-          <span>排序：競價時間</span>
+          <span>排序：</span>
+          <span>{{sortBy | sortNameFormat}}</span>
           <img src="../../assets/imgs/demand/arrow.png" alt />
+        </div>
+        <div class="classifyList" v-show="sortFlag">
+          <span
+            v-for="item in classifyList"
+            :key="item.id"
+            :class="{active: sortBy==item.val}"
+            @click="selectClassfiy(item.val)"
+          >{{item.name}}</span>
         </div>
       </div>
     </div>
     <!-- 標題 -->
-    <div class="title">
+    <div class="title" v-if="billInfo">
       <div class="tit_text">
-        【模具】需求單號A3000028&nbsp;需求量:5
-        <span class="title_btn">詳情</span>
+        【模具】需求單號{{billInfo.bill_no}}&nbsp;需求量:{{billInfo.amount}}
+        <router-link :to="'/particulars?pkid=' + pkid" class="title_btn">詳情</router-link>
       </div>
-      <div class="tit_time">發佈時間: 2019-08-27 10:52:25</div>
+      <div class="tit_info">我的報價: {{billInfo.total_price}}&nbsp;{{billInfo.money_type}}</div>
+      <div class="tit_info">發佈時間: {{billInfo.publish_date}}</div>
       <div class="tit_unit">
         當前項目投標單位數
-        <span>57</span>
+        <span>{{billInfo.give_recv_user_list ? billInfo.give_recv_user_list.length : 0}}</span>
       </div>
     </div>
     <!-- 表格信息 -->
-    <table style="width:100%; text-align:center; border-collapse:collapse;">
+    <table style="width:100%; text-align:center; border-collapse:collapse;" v-if="give_price_list">
       <!-- 表頭 -->
       <tr>
-        <th>序號</th>
-        <th>單位</th>
-        <th style="width: 14%;">報價</th>
-        <th>幣別</th>
-        <th>交期</th>
-        <th style="width: 38%;">理由說明</th>
-        <th>操作</th>
+        <th style="min-width: 40px;">排名</th>
+        <th style="min-width: 160px;">單位</th>
+        <th style="min-width: 60px;">總報價</th>
+        <th style="min-width: 180px;">廠商報價</th>
+        <th style="min-width: 100px;">交期</th>
+        <th style="min-width: 280px;">備註</th>
+        <th style="min-width: 140px;">操作</th>
       </tr>
       <!--  -->
-      <tr>
-        <td>1</td>
-        <td>精密組件</td>
+      <tr v-for="(singleList, index) in give_price_list" :key="singleList.pkid">
+        <td>{{(index + 1)+(currentPage-1)*pageSize}}</td>
+        <td>
+          <router-link
+            :to="'/merchant/information?pkid='+singleList.recv_user.pkid"
+            style="color:#0096ff"
+          >{{singleList.recv_user.dept_name}}</router-link>
+        </td>
+        <td>
+          {{singleList.total_price * billInfo.amount}}
+        </td>
         <td>
           <div class="detailList">
-            <span>5000</span>
-            <img src="../../assets/imgs/demand/look_gray.png" alt />
-            <span>清單</span>
+            <span>{{singleList.total_price}}</span>
+            <div
+              class="showList"
+              @click="getSlavList(singleList)"
+            >
+              <!-- @click="alertBoxShow(), " -->
+              <span></span>
+              標書
+            </div>
           </div>
         </td>
-        <td>USD</td>
-        <td>2019-09-30</td>
-        <td>本公司近期新增先进设备，大量引进优秀人才，只为获得客户更好的认可。</td>
-        <td>选为中标</td>
+        <td>{{singleList.deliver_date.split(' ')[0]}}</td>
+        <td>{{singleList.descp}}</td>
+        <td
+          v-if="billInfo.bill_status === '1'"
+          class="chooseToWin"
+          @click="chooseToWin(singleList.pkid, singleList.recv_user.dept_name)"
+        >选为中标</td>
+        <td v-else>
+          <img v-if="singleList.f_win_bid === 'Y'" src="../../assets/imgs/demand/winImg.png" alt />
+        </td>
       </tr>
-      <!--  -->
-      <tr>
-        <td>1</td>
-        <td>精密組件</td>
-        <td>
-          <div class="detailList">
-            <span>5000</span>
-            <img src="../../assets/imgs/demand/look_gray.png" alt />
-            <span>清單</span>
-          </div>
-        </td>
-        <td>USD</td>
-        <td>2019-09-30</td>
-        <td>多次与贵公司精诚合作，希望这一次依然能够选我。</td>
-        <td>
-          <img src="../../assets/imgs/demand/winImg.png" alt />
-        </td>
+      <tr v-if="give_price_list.length == 0">
+        <td colspan="7">暫無數據</td>
       </tr>
     </table>
     <!-- 分頁 -->
-    <Paging :total="total" :current-page="currentPage" :page-size="pageSize" @getCurrentPage="getCurrentPage"></Paging>
+    <Paging
+      :total="total"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      @getCurrentPage="getListDate"
+    ></Paging>
+
+    <!-- 競價彈窗 -->
+    <section id="alertBox" v-show="alertBoxFlag">
+      <div class="content">
+        <div class="closeBox" @click="alertBoxShow"></div>
+        <!-- 表格一 -->
+        
+        <!-- 表格二 -->
+        <div class="con_form">
+          <div class="list_info">報價清單（單套）:</div>
+          <table class="list_table" cellspacing="0" cellpadding="0">
+            <tr>
+              <th>零件名</th>
+              <!-- <th>零件名（接單方定義）</th> -->
+              <th>數量</th>
+              <th>報價（{{billInfo.money_type}}/個）</th>
+              <th>小計（{{billInfo.money_type}}）</th>
+            </tr>
+            <tr v-for="(item) in slav_list" :key="item.pkid">
+              <!-- <td>{{item.part_doc_file ? item.part_doc_file.file_origin_name.split('.')[0] : '其它'}}</td> -->
+              <td>{{item.part_name.split('.')[0]}}</td>
+              <td>{{item.part_amunt || 0 }}</td>
+              <td>{{item.part_unit_price || 0}}</td>
+              <td>{{item.part_price_sum || 0}}</td>
+            </tr>
+          </table>
+          <span style="display:inline-block; margin-top:20px; color:#0096ff; cursor:pointer;" @click="checkList()">查看標書</span>
+          <br/>
+          <button style="margin-top:40px;" @click="exportExcel">導出Excel</button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <script>
 import Paging from "@/components/paging/Paging";
+import {
+  query_bill_by_pkid,
+  query_give_price_list,
+  select_win_bid
+} from "@/api/order";
 
 export default {
   data() {
     return {
       sortItem: "",
       // 總數據量
-      total: 100,
+      total: 1,
       // 當前頁數
       currentPage: 1,
       // 每一頁長度
-      pageSize: 10
+      pageSize: 8,
+      pkid: "",
+      // 數據
+      give_price_list: [],
+      // 訂單信息
+      billInfo: {},
+      // 是否彈窗
+      alertBoxFlag: false,
+      // 零件清單信息
+      slav_list: [],
+      // 排序
+      classifyList: [
+        { id: 1, name: "綜合排序", val: "complex" },
+        { id: 2, name: "價格優先", val: "price" },
+        { id: 3, name: "交期優先", val: "date" }
+      ],
+      // 默認 | 選中 的排序方式
+      sortBy: "complex",
+      // 是否展開
+      sortFlag: false,
+      // ==================
+      excelList: [],
+      autoWidth: true,
+      bookType: "xlsx",
+      filename: "",
+      // ==================
+      recvPkid: ''
     };
   },
   methods: {
+    // 查看報價清單
+    checkList() {
+      sessionStorage.setItem("biddinfdDoc", JSON.stringify(this.billInfo));
+      sessionStorage.setItem("recvPkid", JSON.stringify(this.recvPkid));
+      const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
+      window.open(url);
+    },
+
+    // 展開 | 關閉 下拉列表
     sortList() {
-      console.log(this.$refs);
-      // this.$refs.sortBtn.dispatchEvent(new MouseEvent('click'))
+      this.sortFlag = this.sortFlag ? false : true;
     },
-    //
-    handlePage(val) {
-      console.log(val)
-      console.log(1)
+    // 選中的項
+    selectClassfiy(val) {
+      console.log(val);
+      this.sortBy = val;
+      this.sortFlag = false;
     },
-    getCurrentPage(page){
-      console.log(page)
+
+    // 彈窗
+    alertBoxShow() {
+      var flag = this.alertBoxFlag ? false : true;
+      return (this.alertBoxFlag = flag);
+    },
+
+    // 獲取零件清單信息
+    getSlavList(singleList) {
+      const pkid = singleList.pkid
+      this.recvPkid = singleList.recv_user_pkid
+      sessionStorage.setItem('deliverDate', JSON.stringify(singleList.deliver_date))
+      for (let item of this.give_price_list) {
+        if (item.pkid == pkid) {
+          console.log(item.slav_list)
+          sessionStorage.setItem('slavList', JSON.stringify(item.slav_list))
+          this.checkList()
+
+          this.slav_list = item.slav_list;
+          this.getExcelList(item);
+          return;
+        }
+      }
+    },
+
+    // 選為中標
+    chooseToWin(pkid, deptName) {
+      this.$confirm('请确认是否将 "' + deptName + '" 选为中标单位?', "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          select_win_bid(pkid).then(res => {
+            console.log(res);
+            if (res.code === "1") {
+              this.getBillInfo();
+              this.getListDate(
+                Number(sessionStorage.getItem("demandDetailsCurrentPage"))
+              );
+              this.$message({
+                type: "success",
+                message: "成功!"
+              });
+            } else {
+              this.$message.error("網絡開小差了，稍後再試試吧！");
+            }
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消"
+          });
+        });
+    },
+
+    // 向後端發起請求獲取數據
+    getListDate(page = 1) {
+      this.currentPage = Number(page);
+      sessionStorage.setItem("demandDetailsCurrentPage", this.currentPage);
+      const data = {
+        bill_pkid: this.pkid,
+        pageIndex: this.currentPage,
+        pageSize: this.pageSize,
+        sort_way: this.sortBy
+      };
+      query_give_price_list(data).then(res => {
+        if (res.code === "1") {
+          // 清空原有數據
+          this.give_price_list = [];
+          this.total = res.t.row_total;
+          const listData = res.t.give_price_list;
+          console.log(listData);
+          this.changeListData(listData);
+        }
+      });
+    },
+
+    // 修改展示列表數據
+    changeListData(listData) {
+      for (let item of listData) {
+        this.give_price_list.push(item);
+      }
+      console.log(this.give_price_list);
+    },
+
+    // 查詢訂單信息
+    getBillInfo() {
+      query_bill_by_pkid(this.pkid).then(res => {
+        if (res.code === "1") {
+          this.billInfo = res.t;
+        }
+        console.log(this.billInfo);
+      });
+    },
+
+    // excelList
+    getExcelList(val) {
+      var list = [];
+      var num = 1;
+      for (let item of this.slav_list) {
+        const obj = {
+          a: num,
+          b: item.part_doc_file ? item.part_doc_file.file_origin_name : "其它",
+          c: item.part_name,
+          d: item.part_amunt || 0,
+          e: item.part_unit_price || 0,
+          f: item.part_price_sum || 0
+        };
+        num++;
+        list.push(obj);
+      }
+
+      console.log(this.billInfo);
+      const recv = val.recv_user;
+      const send = this.billInfo.send_user;
+      const billInfo = this.billInfo;
+
+      const info = [
+        // 訂單信息
+        // 交易類型 交易法人 交易代碼 交易地點 需求時間 交易幣別
+        {
+          a: "",
+          b: "",
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "訂單信息：",
+          b: "",
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "交易類型",
+          b: billInfo.pd_type,
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "交易法人",
+          b: send.legal_person,
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "交易地點",
+          b: billInfo.deliver_address,
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "需求時間",
+          b: billInfo.deliver_date,
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "交易幣別",
+          b: billInfo.money_type,
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+
+        // 單位信息
+        {
+          a: "",
+          b: "",
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "單位信息：",
+          b: "",
+          c: "",
+          d: "",
+          e: "",
+          f: ""
+        },
+        {
+          a: "接單方",
+          b: recv.dept_name,
+          c: "",
+          d: "發單方(需求方)",
+          e: send.dept_name,
+          f: ""
+        },
+        {
+          a: "聯絡人",
+          b: recv.busis_mngr,
+          c: "",
+          d: "聯絡人",
+          e: send.busis_mngr,
+          f: ""
+        },
+        {
+          a: "移動電話",
+          b: recv.phone,
+          c: "",
+          d: "移動電話",
+          e: send.phone,
+          f: ""
+        },
+        {
+          a: "固定電話",
+          b: recv.tel,
+          c: "",
+          d: "固定電話",
+          e: send.tel,
+          f: ""
+        }
+      ];
+
+      for (let single of info) {
+        list.push(single);
+      }
+      this.excelList = list;
+    },
+
+    // 導出excel
+    exportExcel() {
+      import("@/assets/js/Export2Excel.js").then(moudle => {
+        const tHeader = [
+          "序號",
+          "零件名",
+          "零件名(接單方定義)",
+          "數量",
+          "單價(" + this.billInfo.money_type + ")",
+          "金額(" + this.billInfo.money_type + ")"
+        ];
+        const filterVal = ["a", "b", "c", "d", "e", "f"];
+        const list = this.excelList;
+        const data = this.formatJson(filterVal, list);
+        moudle.export_json_to_excel({
+          header: tHeader,
+          data,
+          // filename: this.filename === "" ? "filename" : this.filename,
+          filename: this.billInfo.bill_no || "filename",
+          autoWidth: this.autoWidth,
+          bookType: this.bookType
+        });
+      });
+    },
+    formatJson(filterVal, jsonData) {
+      console.log(jsonData.map(v => filterVal.map(j => v[j])));
+      return jsonData.map(v => filterVal.map(j => v[j]));
     }
   },
   components: {
     Paging
+  },
+  created() {
+    this.pkid = this.$router.history.current.query.pkid;
+
+    // 獲取分頁數據
+    let page = Number(sessionStorage.getItem("demandDetailsCurrentPage"));
+    page = page ? page : 1;
+    this.getListDate(page);
+
+    // 查詢訂單信息
+    this.getBillInfo();
+  },
+  filters: {
+    // 過濾排序名稱的顯示
+    sortNameFormat(val) {
+      if (!val) return "";
+      switch (val) {
+        case "complex":
+          return "綜合排序";
+        case "price":
+          return "價格優先";
+        case "date":
+          return "時間優先";
+      }
+    }
+  },
+  watch: {
+    sortBy: function() {
+      this.getListDate();
+    }
+  },
+  computed:{
+    // slav_list
+    // total_price
   }
 };
 </script>
@@ -152,6 +539,11 @@ export default {
     margin-left: 28px;
   }
 }
+// 排序
+.sort {
+  color: #626f7f;
+  font-size: 14px;
+}
 .sort_btn {
   width: 160px;
   height: 30px;
@@ -160,11 +552,36 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  color: #626f7f;
-  font-size: 14px;
   cursor: pointer;
-  user-select: none;
+  span {
+    display: inline-block;
+  }
+  span:nth-child(2) {
+    text-align: left;
+    width: 60px;
+  }
 }
+.classifyList {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #d7efff;
+  // border-radius: 15px;
+  width: 130px;
+  z-index: 1;
+  span {
+    display: block;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    cursor: pointer;
+    &.active,
+    &:hover {
+      color: #0096ff;
+    }
+  }
+}
+
 // 主內容標題
 .title {
   display: flex;
@@ -188,15 +605,17 @@ export default {
     font-size: 16px;
     right: -100px;
     bottom: -10px;
+    cursor: pointer;
   }
 }
-.tit_time {
+.tit_info {
   color: #626f7f;
   margin-top: 10px;
 }
 .tit_unit {
-  color: #0096ff;
-  margin-top: 24px;
+  // color: #0096ff;
+  color: #626f7f;
+  margin: 24px 0 16px;
   span {
     font-size: 36px;
   }
@@ -215,16 +634,35 @@ table {
       font-weight: 400;
       background-color: #d3dfe7;
     }
-    .detailList {
-      display: flex;
+  }
+  .detailList {
+    display: flex;
+    > span {
+      width: 60%;
+    }
+  }
+  .showList {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #0096ff;
+    span:nth-child(1) {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-image: url("../../assets/imgs/demand/look_gray.png");
+      background-repeat: no-repeat;
+      margin-right: 4px;
+    }
+    &:hover {
       span:nth-child(1) {
-        width: 60%;
-      }
-      span:nth-child(3) {
-        margin-left: 4px;
-        color: #0096ff;
+        background-image: url("../../assets/imgs/demand/look.png");
       }
     }
+  }
+  .chooseToWin {
+    color: #0096ff;
+    cursor: pointer;
   }
 }
 // 分页
@@ -261,6 +699,77 @@ table {
     height: 30px;
     background: url(../../assets/imgs/index/pageBG.png) no-repeat center /
       contain;
+  }
+}
+//
+#alertBox {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  .content {
+    position: fixed;
+    width: 1200px;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #d3dfe7;
+    padding: 20px;
+    box-sizing: border-box;
+    // 窗口滾動
+    height: 740px;
+    overflow: scroll;
+    /* 滚动槽 */
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.06);
+      -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.08);
+    }
+    /* 滚动条滑块 */
+    &::-webkit-scrollbar-thumb {
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.12);
+      -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+  }
+  // 頂部信息
+  .closeBox {
+    width: 24px;
+    height: 24px;
+    background: url(../../assets/imgs/particulars/closeAlertBox.png) no-repeat;
+    cursor: pointer;
+    float: right;
+  }
+  .con_form {
+    width: 85%;
+    margin: 40px auto 0;
+  }
+  .list_info {
+    color: #0096ff;
+  }
+  .list_table {
+    margin-top: 15px;
+    width: 100%;
+    border-collapse: collapse;
+    // border: 1px solid #C0C8CF;
+    th {
+      background-color: #c8d4de;
+    }
+    td,
+    th {
+      font-size: 16px;
+      color: #212f3a;
+      border: 1px solid #c0c8cf;
+      text-align: center;
+      height: 40px;
+      font-weight: 400;
+    }
   }
 }
 </style>
