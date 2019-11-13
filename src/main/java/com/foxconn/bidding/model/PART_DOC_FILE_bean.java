@@ -17,4 +17,6 @@ public class PART_DOC_FILE_bean {
     private Integer part_amunt;//零件個數
     private Integer list_order;//列表序號
     private Date create_date;//創建時間
+    private String create_user_pkid;// 創建用戶pkid
+    private String create_user_ip;// 創建用戶IP地址
 }

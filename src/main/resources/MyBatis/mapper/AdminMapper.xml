@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.foxconn.bidding.mapper.AdminMapper">
+    <!-- 管理員查詢賬號審核任務(分頁) -->
+    <select id="admin_query_user_au_list_pagi" parameterType="com.foxconn.bidding.model.USER_INFO_bean" resultType="com.foxconn.bidding.model.USER_INFO_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+                select t.*, count(*) over() row_total
+                from USER_TEMP t
+                where t.au_status = '0'
+                order by t.create_date desc
+             ) t1) t2
+        where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+                  and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 注釋模板，放在最後一行 -->
+</mapper>

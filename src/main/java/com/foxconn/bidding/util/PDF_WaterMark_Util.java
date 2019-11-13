@@ -30,7 +30,7 @@ public class PDF_WaterMark_Util {
 
         // transparency
         PdfExtGState gs1 = new PdfExtGState();
-        gs1.setFillOpacity(0.5f);
+        gs1.setFillOpacity(0.1f);
         // properties
         PdfCanvas over;
         Rectangle pagesize;

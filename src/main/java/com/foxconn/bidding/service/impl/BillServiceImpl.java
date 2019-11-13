@@ -6,6 +6,7 @@ import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.BillService;
 import com.foxconn.bidding.service.EmailService;
 import com.foxconn.bidding.service.GivePriceSortService;
+import com.foxconn.bidding.util.Client_Real_IP_Util;
 import com.foxconn.bidding.util.DateParseUtil;
 import com.foxconn.bidding.util.UUID_Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class BillServiceImpl implements BillService {
     public ResultParam saveBill(BILL_bean param, HttpServletRequest request) {
         String send_user_pkid = (String) request.getAttribute("user_pkid");
         USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
+        String ip = Client_Real_IP_Util.getRealIP(request);
 
         String bill_pkid = param.getPkid();
         if(bill_pkid == null || "".equals(bill_pkid))  {
@@ -45,6 +47,8 @@ public class BillServiceImpl implements BillService {
                 PART_DOC_FILE_bean part_doc_file_bean = file_list.get(i);
                 part_doc_file_bean.setPart_doc_file_rel_id(part_doc_file_rel_id);
                 part_doc_file_bean.setList_order(i + 1);
+                part_doc_file_bean.setCreate_user_pkid(send_user_pkid);
+                part_doc_file_bean.setCreate_user_ip(ip);
                 // 保存零件圖檔文件信息
                 Integer save_part_doc_file_flag = mapper.save_PART_DOC_FILE(part_doc_file_bean);
                 if(save_part_doc_file_flag <= 0) {
@@ -185,6 +189,8 @@ public class BillServiceImpl implements BillService {
                 PART_DOC_FILE_bean part_doc_file_bean = file_list.get(i);
                 part_doc_file_bean.setPart_doc_file_rel_id(part_doc_file_rel_id);
                 part_doc_file_bean.setList_order(i + 1);
+                part_doc_file_bean.setCreate_user_pkid(send_user_pkid);
+                part_doc_file_bean.setCreate_user_ip(ip);
                 // 保存零件圖檔文件
                 Integer save_part_doc_file_flag = mapper.save_PART_DOC_FILE(part_doc_file_bean);
                 if(save_part_doc_file_flag <= 0) {

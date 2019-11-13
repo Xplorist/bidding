@@ -3,6 +3,7 @@ package com.foxconn.bidding.controller;
 import com.foxconn.bidding.model.BaseInfoParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.service.BaseInfoService;
+import com.foxconn.bidding.util.Client_Real_IP_Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -78,6 +79,15 @@ public class BaseInfoController {
     @RequestMapping("/query_dept_name_by_dept_no")
     public ResultParam query_dept_name_by_dept_no(@RequestBody BaseInfoParam param, HttpServletRequest request) {
         ResultParam result = svc.query_dept_name_by_dept_no(param, request);
+
+        return result;
+    }
+
+    // 【test】測試IP
+    @RequestMapping("/testIP")
+    public ResultParam testIP(HttpServletRequest request) {
+        String ip = Client_Real_IP_Util.getRealIP(request);
+        ResultParam result = ResultParam.of("1", "IP:" + ip);
 
         return result;
     }

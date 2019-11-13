@@ -2,6 +2,7 @@ package com.foxconn.bidding.service;
 
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
+import com.foxconn.bidding.model.VERIFICATION_CODE_bean;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -26,4 +27,13 @@ public interface UserService {
 
     // 更改用戶信息
     ResultParam update_user_info(USER_INFO_bean param, HttpServletRequest request);
+
+    // 【07】忘記密碼，生成驗證碼
+    ResultParam generate_code(USER_INFO_bean param, HttpServletRequest request);
+
+    // 【08】忘記密碼，檢查驗證碼是否正確
+    ResultParam check_code(VERIFICATION_CODE_bean param, HttpServletRequest request);
+
+    // 【09】忘記密碼，提交更新密碼
+    ResultParam update_password(VERIFICATION_CODE_bean param, HttpServletRequest request);
 }

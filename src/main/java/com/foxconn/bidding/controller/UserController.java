@@ -3,6 +3,7 @@ package com.foxconn.bidding.controller;
 import com.foxconn.bidding.model.RequestParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
+import com.foxconn.bidding.model.VERIFICATION_CODE_bean;
 import com.foxconn.bidding.service.UserService;
 import com.foxconn.bidding.util.VerifyToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +64,32 @@ public class UserController {
         return result;
     }
 
+    // 【07】忘記密碼，生成驗證碼
+    @RequestMapping("/generate_code")
+    public ResultParam generate_code(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
+        ResultParam result = svc.generate_code(param, request);
+
+        return result;
+    }
+
+    // 【08】忘記密碼，檢查驗證碼是否正確
+    @RequestMapping("/check_code")
+    public ResultParam check_code(@RequestBody VERIFICATION_CODE_bean param, HttpServletRequest request) {
+        ResultParam result = svc.check_code(param, request);
+
+        return result;
+    }
+
+    // 【09】忘記密碼，提交更新密碼
+    @RequestMapping("/update_password")
+    public ResultParam update_password(@RequestBody VERIFICATION_CODE_bean param, HttpServletRequest request) {
+        ResultParam result = svc.update_password(param, request);
+
+        return result;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
-    // 模板,放在最後
+    // 【】模板,放在最後
     @VerifyToken
     @RequestMapping("/template")
     public ResultParam template(@RequestBody RequestParam param, HttpServletRequest request) {

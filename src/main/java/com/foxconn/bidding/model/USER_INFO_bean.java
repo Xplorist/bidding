@@ -38,4 +38,13 @@ public class USER_INFO_bean<T> {
     private String f_win_bid;// 是否中標標誌（Y:是，N:否）
     private List<RECV_MNUFC_RANGE_bean> recv_range_list;// 接單方加工範圍list
     private List<T> get_eval_list;// 收到的評價list
+    private String au_status;// 賬號狀態，0：為審核，1：通過，2：駁回
+    private String au_type;// 審核類型，1：通過，2：駁回
+    private String rej_msg;// 駁回信息
+
+    // 分頁字段
+    private Integer pageIndex;// 分頁頁碼
+    private Integer pageSize;// 每頁數據條數
+    private Integer row_num;// 第幾行
+    private Integer row_total;// 總行數
 }

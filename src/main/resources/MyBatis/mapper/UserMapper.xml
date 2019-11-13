@@ -8,9 +8,9 @@
         select count(*) from USER_INFO t where t.username = #{username}
     </select>
 
-    <!-- 新增用戶信息 -->
-    <insert id="add_USER_INFO" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
-        insert into USER_INFO
+    <!-- 新增臨時用戶信息 -->
+    <insert id="add_USER_TEMP" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
+        insert into USER_TEMP
           (username,
            password,
            in_out_type,
@@ -54,6 +54,64 @@
            #{phone},
            #{dept_code},
            #{user_pic_file_pkid})
+    </insert>
+
+    <!-- 修改臨時用戶表狀態 -->
+    <update id="update_user_temp_au_status" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
+        update USER_TEMP set au_status = #{au_status}, rej_msg = #{rej_msg} where pkid = #{pkid}
+    </update>
+
+    <!-- 根據pkid查詢臨時用戶 -->
+    <select id="query_user_temp_by_pkid" parameterType="String" resultType="com.foxconn.bidding.model.USER_INFO_bean">
+        select t.* from USER_TEMP t where t.pkid = #{pkid}
+    </select>
+
+    <!-- 新增用戶信息 -->
+    <insert id="add_user_info" parameterType="com.foxconn.bidding.model.USER_INFO_bean">
+        insert into USER_INFO
+        (username,
+         password,
+         in_out_type,
+         send_recv_type,
+         fctry_zone,
+         secn_cmpy,
+         entrps_group,
+         pd_office,
+         dept_name,
+         legal_person,
+         cost_code,
+         recv_mnufc_range_rel_id,
+         bank_name,
+         bank_acunt,
+         busis_mngr,
+         tel,
+         email,
+         summary,
+         phone,
+         dept_code,
+         user_pic_file_pkid)
+        values
+        (#{username},
+         #{password},
+         #{in_out_type},
+         #{send_recv_type},
+         #{fctry_zone},
+         #{secn_cmpy},
+         #{entrps_group},
+         #{pd_office},
+         #{dept_name},
+         #{legal_person},
+         #{cost_code},
+         #{recv_mnufc_range_rel_id},
+         #{bank_name},
+         #{bank_acunt},
+         #{busis_mngr},
+         #{tel},
+         #{email},
+         #{summary},
+         #{phone},
+         #{dept_code},
+         #{user_pic_file_pkid})
     </insert>
 
     <!-- 新增用戶頭像文件信息 -->
@@ -149,6 +207,31 @@
         group by t.email
         order by t.email
     </select>
+
+    <!-- 將此賬號的驗證碼狀態更新為非最新狀態 -->
+    <update id="update_user_verification_code_not_newest" parameterType="String">
+        update VERIFICATION_CODE set f_newest = 'N' where user_pkid = #{user_pkid}
+    </update>
+
+    <!-- 新增驗證碼和用戶pkid到驗證碼表中 -->
+    <insert id="add_verification_code" parameterType="com.foxconn.bidding.model.VERIFICATION_CODE_bean">
+        insert into VERIFICATION_CODE (user_pkid, code) values (#{user_pkid}, #{code})
+    </insert>
+
+    <!-- 根據用戶id查詢最新的驗證碼 -->
+    <select id="query_newest_code_by_user_pkid" parameterType="String" resultType="String">
+        select t.code from VERIFICATION_CODE t where t.user_pkid = #{user_pkid} and t.f_newest = 'Y'
+    </select>
+
+    <!-- 更新此驗證碼不為最新 -->
+    <update id="update_code_not_newest" parameterType="com.foxconn.bidding.model.VERIFICATION_CODE_bean">
+        update VERIFICATION_CODE set f_newest = 'N' where user_pkid = #{user_pkid} and code = #{code}
+    </update>
+
+    <!-- 更新用戶密碼 -->
+    <update id="update_password" parameterType="com.foxconn.bidding.model.VERIFICATION_CODE_bean">
+        update USER_INFO set password = #{password} where username = #{username}
+    </update>
 
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

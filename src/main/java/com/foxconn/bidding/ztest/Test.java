@@ -4,6 +4,7 @@ import com.foxconn.bidding.model.BILL_bean;
 import com.foxconn.bidding.model.EmailContent;
 import com.foxconn.bidding.model.GIVE_PRICE_MSTR_bean;
 import com.foxconn.bidding.util.EmailUtil;
+import com.foxconn.bidding.util.SimpleEncodeUtil;
 import org.springframework.beans.BeanUtils;
 
 import java.text.ParseException;
@@ -11,12 +12,25 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class Test {
     public static void main(String[] args) {
         // test();
         // test2();
-        testSendEmail();
+        //testSendEmail();
+        //testRandomCode();
+        testDecodePassword();
+    }
+
+    public static void testDecodePassword() {
+        String encode = SimpleEncodeUtil.encode("\u0017\u001B\fVJHIH");
+        System.out.println(encode);
+    }
+
+    public static void testRandomCode() {
+        Integer random_code = new Random().nextInt(888889) + 111111;
+        System.out.println(random_code);
     }
 
     public static void testSendEmail() {

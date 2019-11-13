@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,6 +32,24 @@ public class FTP_File_Util {
         } catch (IOException e) {
             e.printStackTrace();
             return new ResultParam("0", "上傳文件失敗", null);
+        }
+
+        // 將DWG文件轉換成PDF文件
+        OutputStream output = null;
+        int lastIndexOfDot = file_origin_name.lastIndexOf(".");
+        if(lastIndexOfDot != -1) {
+            String suffix = file_origin_name.substring(lastIndexOfDot);
+            if(".dwg".equals(suffix)) {
+                output = new ByteArrayOutputStream();
+                try {
+                    input = Out_to_In_stream_Util.convert_out_to_in(DWG_to_PDF_Util.convert_DWG_to_PDF(input, output));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(file_origin_name + "上傳失敗，此DWG文件無法轉換成PDF文件，請檢查此DWG文件是否損壞");
+                }
+                String prefix = file_origin_name.substring(0, lastIndexOfDot);
+                file_origin_name = prefix + ".pdf";
+            }
         }
 
         String FTP_Address = util.getAddress();

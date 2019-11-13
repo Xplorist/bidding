@@ -115,6 +115,12 @@
             <artifactId>font-asian</artifactId>
             <version>7.1.8</version>
         </dependency>
+        <!-- https://github.com/aspose-cad/Aspose.CAD-for-Java -->
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-cad</artifactId>
+            <version>19.9</version>
+        </dependency>
     </dependencies>
 
     <!-- 開發時，dev為true，release為false -->
@@ -174,5 +180,4 @@
 
         <finalName>bidding</finalName>
     </build>
-
 </project>

@@ -12,14 +12,18 @@
            file_save_name,
            file_save_path,
            part_amunt,
-           list_order)
+           list_order,
+           create_user_pkid,
+           create_user_ip)
         values
           (#{part_doc_file_rel_id},
            #{file_origin_name},
            #{file_save_name},
            #{file_save_path},
            #{part_amunt},
-           #{list_order})
+           #{list_order},
+           #{create_user_pkid},
+           #{create_user_ip})
     </insert>
 
     <!-- 保存訂單主表數據 -->
