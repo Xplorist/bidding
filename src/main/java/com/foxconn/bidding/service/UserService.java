@@ -1,5 +1,6 @@
 package com.foxconn.bidding.service;
 
+import com.foxconn.bidding.model.RequestParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
 import com.foxconn.bidding.model.VERIFICATION_CODE_bean;
@@ -36,4 +37,13 @@ public interface UserService {
 
     // 【09】忘記密碼，提交更新密碼
     ResultParam update_password(VERIFICATION_CODE_bean param, HttpServletRequest request);
+
+    // 【10】條件分頁查詢用戶list
+    ResultParam queryUserList(USER_INFO_bean param, HttpServletRequest request);
+
+    // 【11】刪除賬號
+    ResultParam deleteUser(RequestParam param, HttpServletRequest request);
+
+    // 【12】統計所有賬號的相關信息
+    ResultParam queryAllUsersStatistics(RequestParam param, HttpServletRequest request);
 }

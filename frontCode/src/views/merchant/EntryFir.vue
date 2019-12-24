@@ -9,10 +9,10 @@
           <!-- 頂部 -->
           <div class="gen_title">
             <span>模治檢具订单信息服務平台【厂商入駐】</span>
-            <span>数据截至到2019-08-31 24:00:00</span>
+            <!-- <span>数据截至到2019-08-31 24:00:00</span> -->
           </div>
           <!-- 交易總額 -->
-          <div class="gen_amount">
+          <!-- <div class="gen_amount">
             <span>平台交易總額</span>
             <div class="gen_am_number">
               <span>￥</span>
@@ -24,7 +24,7 @@
               <span>加工廠商: 159個</span>
               <span>需求廠商: 159個</span>
             </div>
-          </div>
+          </div> -->
         </div>
         <div class="slogan">加入我们,让您遇见更好的伙伴</div>
         <!-- 選擇 -->
@@ -55,7 +55,7 @@
           </div>
           <div class="cho_nextBtn">
             <router-link
-              :to="{path: 'merchant/entrySec', query: {category : category.checked ? 'recv':'send'}}"
+              :to="{path: 'merchant/entrySec', query: {}}"
             >
               <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
                 <polygon
@@ -116,9 +116,13 @@ export default {
   methods: {
     changCategory(val) {
       this.category.checked = val;
-      // console.log(this.category.checked);
+      val = val ? 'recv' : 'send'
+      sessionStorage.setItem('merchangtCategory', val)
       return;
     }
+  },
+  created(){
+    sessionStorage.setItem('merchangtCategory', 'recv')
   },
   components: {
     Top,
@@ -143,7 +147,7 @@ export default {
   }
   // 基本信息
   .general {
-    height: 260px;
+    height: 100px;
     padding: 20px 30px;
     box-sizing: border-box;
     background-color: #0096ff;
@@ -198,7 +202,7 @@ export default {
     background-repeat: no-repeat;
     background-image: url("../../assets/imgs/merchant/sloganBG.png");
     position: absolute;
-    top: 258px;
+    top: 98px;
     left: 50%;
     transform: translateX(-50%);
     color: #d3dfe7;
@@ -285,7 +289,6 @@ export default {
         width: 75px;
         height: 75px;
         background-repeat: no-repeat;
-        // background-image: url();
       }
     }
   }

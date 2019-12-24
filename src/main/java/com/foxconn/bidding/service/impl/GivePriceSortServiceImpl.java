@@ -24,6 +24,7 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
     @Autowired
     private UserMapper userMapper;
 
+    // 綜合排序查詢報價list
     @Override
     public List<GIVE_PRICE_MSTR_bean> query_give_price_list_complex(GIVE_PRICE_MSTR_bean param) {
         List<GIVE_PRICE_MSTR_bean> give_price_list = null;
@@ -37,7 +38,8 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         List<GIVE_PRICE_MSTR_bean> zone_3 = new ArrayList<>();// 【-5% <=  價差比 <= 0】的集合
         List<GIVE_PRICE_MSTR_bean> zone_4 = new ArrayList<>();// 【0 < 價差比 <= 5%】的集合
         List<GIVE_PRICE_MSTR_bean> zone_5 = new ArrayList<>();// 【5% < 價差比 <= 10%】的集合
-        List<GIVE_PRICE_MSTR_bean> zone_6 = new ArrayList<>();// 【價差比 > 10%】的集合
+        List<GIVE_PRICE_MSTR_bean> zone_6 = new ArrayList<>();// 【 10% < 價差比 < 50%】的集合
+        List<GIVE_PRICE_MSTR_bean> zone_7 = new ArrayList<>();// 【價差比 >= 50%】的集合
 
         // 1.根據報價進行排序（從小到大）
         give_price_list = mapper.query_give_price_list(bill_pkid);
@@ -53,14 +55,14 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
 
         /* 這是以接單方最小的報價最為標準來進行排序的算法 */
         Integer send_total_price = 0;
-        if(!give_price_list.isEmpty()) {
+        if (!give_price_list.isEmpty()) {
             send_total_price = give_price_list.get(0).getTotal_price();
         }
 
-        if(send_total_price == null || send_total_price == 0) {
+        if (send_total_price == null || send_total_price == 0) {
             send_total_price = 100000;// 如果發單方沒有填寫接受總價，默認為100000，這樣導致排序算法肯定有問題，後面再改
         }
-        for(int i = 0; i < give_price_list.size(); i++) {
+        for (int i = 0; i < give_price_list.size(); i++) {
             GIVE_PRICE_MSTR_bean give_price = give_price_list.get(i);
             Integer recv_total_price = give_price.getTotal_price();
             Float diff_ratio = (recv_total_price - send_total_price) / (float) send_total_price;
@@ -71,22 +73,26 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         }
 
         // 劃分區間
-        for(int i = 0; i < give_price_list.size(); i++) {
+        for (int i = 0; i < give_price_list.size(); i++) {
             GIVE_PRICE_MSTR_bean give_price = give_price_list.get(i);
+            give_price.setF_valid("Y");// 默認有效，能夠選擇
             Float diff_ratio = give_price.getDiff_ratio();
 
-            if(diff_ratio < -0.10f) {
+            if (diff_ratio < -0.10f) {
                 zone_1.add(give_price);
-            } else if(diff_ratio >= -0.10f && diff_ratio < -0.05f) {
+            } else if (diff_ratio >= -0.10f && diff_ratio < -0.05f) {
                 zone_2.add(give_price);
-            } else if(diff_ratio >= -0.05f && diff_ratio <= 0.00f) {
+            } else if (diff_ratio >= -0.05f && diff_ratio <= 0.00f) {
                 zone_3.add(give_price);
-            } else if(diff_ratio > 0.00f && diff_ratio <= 0.05f) {
+            } else if (diff_ratio > 0.00f && diff_ratio <= 0.05f) {
                 zone_4.add(give_price);
-            } else if(diff_ratio > 0.05f && diff_ratio <= 0.10f) {
+            } else if (diff_ratio > 0.05f && diff_ratio <= 0.10f) {
                 zone_5.add(give_price);
-            } else if(diff_ratio > 0.10f) {
+            } else if (diff_ratio > 0.10f && diff_ratio < 0.50f) {
                 zone_6.add(give_price);
+            } else if (diff_ratio >= 0.50f) {
+                give_price.setF_valid("N");// 超過50%，不能選此標
+                zone_7.add(give_price);
             }
         }
 
@@ -114,17 +120,18 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         add_listA_into_listB(zone_4, result);
         add_listA_into_listB(zone_5, result);
         add_listA_into_listB(zone_6, result);
+        add_listA_into_listB(zone_7, result);
 
         // 分頁
         Integer row_total = result.size();
         Integer fromIndex = (pageIndex - 1) * pageSize;
         Integer toIndex = pageIndex * pageSize;// 因為subList(fromIndex, toIndex)的取值範圍為閉開區間，不用減1
 
-        fromIndex = fromIndex >= row_total? 0: fromIndex;
-        toIndex = toIndex >= row_total? row_total: toIndex;
+        fromIndex = fromIndex >= row_total ? 0 : fromIndex;
+        toIndex = toIndex >= row_total ? row_total : toIndex;
 
         result = result.subList(fromIndex, toIndex);
-        if(!result.isEmpty()) {
+        if (!result.isEmpty()) {
             GIVE_PRICE_MSTR_bean bean = result.get(0);
             bean.setRow_total(row_total);
         }
@@ -134,7 +141,7 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
 
     // 遍歷list並加到另外一個list中
     public List<GIVE_PRICE_MSTR_bean> add_listA_into_listB(List<GIVE_PRICE_MSTR_bean> src, List<GIVE_PRICE_MSTR_bean> tar) {
-        for(int i = 0; i < src.size(); i++) {
+        for (int i = 0; i < src.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = src.get(i);
             tar.add(bean);
         }
@@ -144,8 +151,8 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
 
     // 按交期排序
     public List<GIVE_PRICE_MSTR_bean> sort_by_deliver_date(List<GIVE_PRICE_MSTR_bean> zone) {
-        for(int i = 0; i < zone.size() - 1; i++) {
-            for(int j = i + 1; j < zone.size(); j++) {
+        for (int i = 0; i < zone.size() - 1; i++) {
+            for (int j = i + 1; j < zone.size(); j++) {
                 GIVE_PRICE_MSTR_bean bean_i = zone.get(i);
                 GIVE_PRICE_MSTR_bean bean_j = zone.get(j);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -162,7 +169,7 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
                 BeanUtils.copyProperties(bean_i, i_bean);
                 BeanUtils.copyProperties(bean_j, j_bean);
 
-                if(deliver_date_i.after(deliver_date_j)) {
+                if (deliver_date_i.after(deliver_date_j)) {
                     zone.set(i, j_bean);
                     zone.set(j, i_bean);
                 } else {
@@ -180,22 +187,22 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         List<GIVE_PRICE_MSTR_bean> sec_cmp_in = new ArrayList<>();
         List<GIVE_PRICE_MSTR_bean> sec_cmp_out = new ArrayList<>();
 
-        for(int i = 0; i < zone.size(); i++) {
+        for (int i = 0; i < zone.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = zone.get(i);
             USER_INFO_bean recv_user = bean.getRecv_user();
             String recv_secn_cmpy = recv_user.getSecn_cmpy();
-            if(send_secn_cmpy.equals(recv_secn_cmpy)) {
+            if (send_secn_cmpy.equals(recv_secn_cmpy)) {
                 sec_cmp_in.add(bean);
             } else {
                 sec_cmp_out.add(bean);
             }
         }
         zone = new ArrayList<>();
-        for(int i = 0; i < sec_cmp_in.size(); i++) {
+        for (int i = 0; i < sec_cmp_in.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = sec_cmp_in.get(i);
             zone.add(bean);
         }
-        for(int i = 0; i < sec_cmp_out.size(); i++) {
+        for (int i = 0; i < sec_cmp_out.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = sec_cmp_out.get(i);
             zone.add(bean);
         }
@@ -208,26 +215,56 @@ public class GivePriceSortServiceImpl implements GivePriceSortService {
         List<GIVE_PRICE_MSTR_bean> entrps_group_in = new ArrayList<>();
         List<GIVE_PRICE_MSTR_bean> entrps_group_out = new ArrayList<>();
 
-        for(int i = 0; i < zone.size(); i++) {
+        for (int i = 0; i < zone.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = zone.get(i);
             USER_INFO_bean recv_user = bean.getRecv_user();
             String recv_entrps_group = recv_user.getEntrps_group();
-            if(send_entrps_group.equals(recv_entrps_group)) {
+            if (send_entrps_group.equals(recv_entrps_group)) {
                 entrps_group_in.add(bean);
             } else {
                 entrps_group_out.add(bean);
             }
         }
         zone = new ArrayList<>();
-        for(int i = 0; i < entrps_group_in.size(); i++) {
+        for (int i = 0; i < entrps_group_in.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = entrps_group_in.get(i);
             zone.add(bean);
         }
-        for(int i = 0; i < entrps_group_out.size(); i++) {
+        for (int i = 0; i < entrps_group_out.size(); i++) {
             GIVE_PRICE_MSTR_bean bean = entrps_group_out.get(i);
             zone.add(bean);
         }
 
         return zone;
+    }
+
+    // 非綜合排序時，判斷各報價是否有效
+    @Override
+    public List<GIVE_PRICE_MSTR_bean> decide_give_price_valid(List<GIVE_PRICE_MSTR_bean> give_price_list) {
+        Integer send_total_price = 0;
+        if (!give_price_list.isEmpty()) {
+            send_total_price = give_price_list.get(0).getTotal_price();
+            // 找出最小的報價send_total_price
+            for (int i = 0; i < give_price_list.size(); i++) {
+                GIVE_PRICE_MSTR_bean give_price = give_price_list.get(i);
+                Integer recv_total_price = give_price.getTotal_price();
+                if (recv_total_price < send_total_price) {
+                    send_total_price = recv_total_price;
+                }
+            }
+        }
+
+        for (int i = 0; i < give_price_list.size(); i++) {
+            GIVE_PRICE_MSTR_bean give_price = give_price_list.get(i);
+            give_price.setF_valid("Y");
+            Integer recv_total_price = give_price.getTotal_price();
+            Float diff_ratio = (recv_total_price - send_total_price) / (float) send_total_price;
+            give_price.setDiff_ratio(diff_ratio);
+            if (diff_ratio >= 0.5f) {
+                give_price.setF_valid("N");
+            }
+        }
+
+        return give_price_list;
     }
 }

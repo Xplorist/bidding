@@ -42,7 +42,12 @@
               <el-input type="textarea" placeholder="请输入您對商家的評價" v-model="comments"></el-input>
               <!-- 匿名 -->
               <div class="anonymity">
-                <el-checkbox label="匿名評價" name="type" @change="anonymityFlag = !anonymityFlag" :checked="anonymityFlag"></el-checkbox>
+                <el-checkbox
+                  label="匿名評價"
+                  name="type"
+                  @change="anonymityFlag = !anonymityFlag"
+                  :checked="anonymityFlag"
+                ></el-checkbox>
                 <div>匿名評價不會再個人主頁中展示昵称</div>
               </div>
             </div>
@@ -137,14 +142,14 @@ export default {
         if (res.code === "1") {
           this.orderInfo = res.t;
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
 
     // 按鈕
     comfirm() {
-      if(!this.rate.comprehensive || !this.rate.speed || !this.rate.attitude) {
+      if (!this.rate.comprehensive || !this.rate.speed || !this.rate.attitude) {
         return this.$message.warning("評分未完成");
       }
       if (!this.comments) return this.$message.warning("評價未完成");
@@ -166,7 +171,7 @@ export default {
           this.$message.success("評價成功");
           this.$router.push("/personal");
         } else {
-          this.$message.error("出錯啦，稍後再試試吧");
+          this.$message.error(res.msg);
         }
       });
     }

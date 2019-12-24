@@ -62,6 +62,7 @@ export default {
   }
   /deep/ .btn-next,
   /deep/ .btn-prev {
+    user-select: none;
     padding: 0 10px;
     width: 70px;
     height: 30px;

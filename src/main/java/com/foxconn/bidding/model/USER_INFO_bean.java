@@ -32,6 +32,8 @@ public class USER_INFO_bean<T> {
     private String create_date;//創建時間
     private String phone;// 聯繫電話（移動電話）
     private String dept_code;// 單位代碼
+    private String f_valid;// 賬號有效標誌（Y：有效，N：無效）
+    private String latest_login_time;// 賬號最近登錄時間
 
     // 非表中字段
     private USER_PIC_FILE_bean user_pic_file;// 用戶頭像文件
@@ -41,10 +43,15 @@ public class USER_INFO_bean<T> {
     private String au_status;// 賬號狀態，0：為審核，1：通過，2：駁回
     private String au_type;// 審核類型，1：通過，2：駁回
     private String rej_msg;// 駁回信息
+    private String f_active;// 活躍標誌, Y:活躍，N:不活躍
 
     // 分頁字段
     private Integer pageIndex;// 分頁頁碼
     private Integer pageSize;// 每頁數據條數
     private Integer row_num;// 第幾行
     private Integer row_total;// 總行數
+
+    // 統計數據
+    private SendUserStatistics send_user_statistics;// 發單用戶統計數據
+    private RecvUserStatistics recv_user_statistics;// 接單用戶統計數據
 }

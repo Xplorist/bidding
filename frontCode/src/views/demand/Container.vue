@@ -2,8 +2,10 @@
   <div class="container" v-if="userInfo">
     <el-container>
       <el-header height="60px">
-        <router-link to="/"></router-link>
-        <div>
+        <div class="head_left">
+          <router-link to="/"></router-link>
+        </div>
+        <div class="head_right">
           <!-- 搜索欄 -->
           <div class="search-box">
             <input type="text" class="search-text" placeholder="請輸入信息" />
@@ -53,7 +55,7 @@
           <div class="side_navigate">
             <router-link
               v-for="(item, index) in list"
-              to=""
+              to
               :key="index"
               :class="{active: chooseItem == item.ename }"
               @click.native="navigatTo(item.ename)"
@@ -92,19 +94,39 @@ export default {
       chooseItem: "/demand/order"
     };
   },
-  mounted() {
+  created() {
+    let item = this.$router.history.current.name.split("-")[1];
+    switch (item) {
+      case "order":
+      case "postEva":
+      case "publish":
+      case "chooseDetails":
+        this.chooseItem = "/demand/order";
+        break;
+      case "information":
+        this.chooseItem = "/demand/information";
+        break;
+      case "evaluation":
+        this.chooseItem = "/demand/evaluation";
+        break;
+      case "setting":
+        this.chooseItem = "/demand/setting";
+        break;
+      default:
+        return;
+    }
   },
   methods: {
     // 点击修改
     navigatTo(val) {
-      if(this.chooseItem == val) return
+      if (this.chooseItem == val) return;
       this.chooseItem = val;
       this.$router.push(val);
     },
     // 退出
-    quit(){
-      this.$router.push('/login')
-      this.$store.commit("LOG_OUT")
+    quit() {
+      this.$router.push("/login");
+      this.$store.commit("LOG_OUT");
     }
   },
   computed: {
@@ -125,17 +147,25 @@ export default {
 .el-header {
   display: flex;
   padding: 0;
-  > a {
-    display: block;
+  user-select: none;
+  > .head_left {
     width: 280px;
     height: 100%;
     background-color: rgba(0, 146, 255, 1);
-    background-image: url("../../assets/imgs/demand/logo.png");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    a {
+      display: block;
+      width: 142px;
+      height: 50px;
+      background-image: url("../../assets/imgs/demand/logo.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
   }
-  > div {
+  > .head_right {
     flex: 1;
     height: 100%;
     background-color: rgba(215, 239, 255, 1);
@@ -214,7 +244,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  img{
+  user-select: none;
+  img {
     object-fit: cover;
   }
 }
@@ -237,6 +268,7 @@ export default {
 .side_navigate {
   margin-top: 26px;
   width: 100%;
+  user-select: none;
   > a {
     display: block;
     width: 100%;

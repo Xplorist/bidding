@@ -44,7 +44,7 @@
                   <el-select
                     v-model="form.factory"
                     @click.native="_query_factory_list()"
-                    placeholder="請依次選擇"
+                    placeholder
                   >
                     <el-option
                       v-for="(item, index) in factory_list"
@@ -55,12 +55,8 @@
                   </el-select>
                 </el-form-item>
                 <!-- 次集團 -->
-                <el-form-item label="次集團:" class="group" prop="group">
-                  <el-select
-                    v-model="form.group"
-                    @click.native="_query_SECN_CMPY_list()"
-                    placeholder="請依次選擇"
-                  >
+                <!-- <el-form-item label="次集團:" class="group" prop="group">
+                  <el-select v-model="form.group" disabled>
                     <el-option
                       v-for="(item, index) in SECN_CMPY_list"
                       :key="item.pkid || index"
@@ -68,13 +64,22 @@
                       :value="item.name"
                     ></el-option>
                   </el-select>
-                </el-form-item>
+                </el-form-item>-->
                 <!-- 事業群 -->
                 <el-form-item label="事業群:" class="bussiness" prop="bussiness">
-                  <el-select
+                  <!-- 帶輸入建議的輸入框 -->
+                  <el-autocomplete
+                    class="inline-input"
+                    v-model.trim="form.bussiness"
+                    :fetch-suggestions="querySearchGroup"
+                    @select="_query_PD_OFFICE_list()"
+                    @change.native="_query_PD_OFFICE_list()"
+                  ></el-autocomplete>
+
+                  <!-- <el-select
                     v-model="form.bussiness"
+                    placeholder
                     @click.native="_query_ENTRPS_GROUP_list()"
-                    placeholder="請依次選擇"
                   >
                     <el-option
                       v-for="(item, index) in ENTRPS_GROUP_list"
@@ -82,14 +87,20 @@
                       :label="item.name"
                       :value="item.name"
                     ></el-option>
-                  </el-select>
+                  </el-select>-->
                 </el-form-item>
                 <!-- 處 -->
                 <el-form-item label="產品處:" class="bureau" prop="bureau">
-                  <el-select
+                  <!-- 帶輸入建議的輸入框 -->
+                  <el-autocomplete
+                    class="inline-input"
+                    v-model.trim="form.bureau"
+                    :fetch-suggestions="querySearchOffice"
+                  ></el-autocomplete>
+                  <!-- <el-select
                     v-model="form.bureau"
                     @click.native="_query_PD_OFFICE_list()"
-                    placeholder="請依次選擇"
+                    placeholder
                   >
                     <el-option
                       v-for="(item, index) in PD_OFFICE_list"
@@ -97,15 +108,17 @@
                       :label="item.name"
                       :value="item.name"
                     ></el-option>
-                  </el-select>
+                  </el-select>-->
                 </el-form-item>
                 <!-- 單位代碼 -->
                 <el-form-item label="單位代碼:" class="departCode" prop="departCode">
-                  <el-input v-model="form.departCode" @focus="form.departName = ''" @blur="queryDeptName"></el-input>
+                  <el-input v-model.trim="form.departCode"></el-input>
+                  <!-- @blur="queryDeptName" -->
+                  <!-- @focus="form.departName = ''" -->
                 </el-form-item>
                 <!-- 單位名稱 -->
                 <el-form-item label="單位名稱:" class="departName" prop="departName">
-                  <el-input v-model="form.departName" disabled=""></el-input>
+                  <el-input v-model="form.departName"></el-input>
                 </el-form-item>
               </el-form>
             </div>
@@ -114,11 +127,15 @@
               <el-form ref="formTwo" status-icon :model="form" :rules="rules" label-width="80px">
                 <!-- 交易法人 -->
                 <el-form-item label="交易法人:" class="corporate" prop="corporate">
-                  <el-input v-model="form.corporate"></el-input>
+                  <el-autocomplete
+                    v-model.trim="form.corporate"
+                    :fetch-suggestions="querySearchLegalList"
+                    @select="handleSelectLegal"
+                  ></el-autocomplete>
                 </el-form-item>
                 <!-- 費用代碼 -->
                 <el-form-item label="費用代碼:" class="costCode" prop="costCode">
-                  <el-input v-model="form.costCode"></el-input>
+                  <el-input v-model.trim="form.costCode"></el-input>
                 </el-form-item>
                 <!-- 加工範圍 -->
                 <el-form-item
@@ -127,25 +144,35 @@
                   class="processRange"
                   prop="processRange"
                 >
-                  <el-select multiple v-model="form.processRange" @click.native="getRange" placeholder="請選擇加工範圍">
-                    <el-option v-for="item in rangeOptions" :key="item.pkid" :label="item.name" :value="item.name"></el-option>
+                  <el-select
+                    multiple
+                    v-model="form.processRange"
+                    @click.native="getRange"
+                    placeholder="請選擇加工範圍"
+                  >
+                    <el-option
+                      v-for="item in rangeOptions"
+                      :key="item.pkid"
+                      :label="item.name"
+                      :value="item.name"
+                    ></el-option>
                   </el-select>
                 </el-form-item>
                 <!-- 業務窗口 -->
                 <el-form-item label="業務窗口:" class="manager" prop="manager">
-                  <el-input v-model="form.manager"></el-input>
+                  <el-input v-model.trim="form.manager"></el-input>
                 </el-form-item>
                 <!-- 固定電話 -->
                 <el-form-item label="固定電話:" class="tel" prop="tel">
-                  <el-input v-model="form.tel"></el-input>
+                  <el-input v-model.trim="form.tel" placeholder="廠區內電話"></el-input>
                 </el-form-item>
                 <!-- 移動電話 -->
                 <el-form-item label="移動電話:" class="tel" prop="mobile">
-                  <el-input v-model="form.mobile"></el-input>
+                  <el-input v-model.trim="form.mobile"></el-input>
                 </el-form-item>
                 <!-- Email -->
-                <el-form-item label="Email:" class="email" prop="email">
-                  <el-input v-model="form.email" placeholder="請輸入內部郵箱號"></el-input>
+                <el-form-item label="公司郵箱:" class="email" prop="email">
+                  <el-input v-model="form.email" placeholder="請輸入內部Email"></el-input>
                 </el-form-item>
                 <!-- 簡介 -->
                 <el-form-item label="簡介:" class="intro" prop="intro">
@@ -168,7 +195,7 @@
                   style="fill:none;stroke:#3FB0FF;stroke-width:2;"
                 />
               </svg>
-              <span>立即註冊</span>
+              <span>提交審核</span>
             </router-link>
           </div>
         </div>
@@ -187,22 +214,23 @@ import Footer from "../../components/Footer";
 import {
   ck_user_is_exist,
   query_factory_list,
-  query_SECN_CMPY_list,
   query_ENTRPS_GROUP_list,
   query_PD_OFFICE_list,
   query_pd_type_list,
   query_dept_name_by_dept_no,
-  register
+  register,
+  fuzzy_search_legal_person
 } from "@/api/formInfo";
+// query_SECN_CMPY_list,
 import { file_upload } from "@/api/file";
 
 export default {
   data: function() {
     var validatePass = (rule, value, callback) => {
       if (value === "") {
-        callback(new Error("请再次输入密码"));
+        callback(new Error("請再次輸入密碼"));
       } else if (value !== this.form.psd) {
-        callback(new Error("两次输入密码不一致!"));
+        callback(new Error("兩次輸入密碼不一致!"));
       } else {
         callback();
       }
@@ -210,8 +238,8 @@ export default {
     var validatorName = (rule, value, callback) => {
       if (value === "") {
         callback(new Error("请輸入名稱"));
-      } else if (value.length < 3 || value.length > 10) {
-        callback(new Error("长度在 3 到 10 个字符"));
+      } else if (value.length < 4 || value.length > 16) {
+        callback(new Error("長度在 4 到 16 個字符"));
       } else {
         // 如果 value 不為空，發起請求判斷重複
         this.ck_user(this.form.name, callback);
@@ -231,9 +259,10 @@ export default {
         // 廠區
         factory: "",
         // 次集團
-        group: "",
+        group: "富士康次集團",
         // 事業群
         bussiness: "",
+        currentBussiness: "",
         // 產品處
         bureau: "",
         // 單位名稱
@@ -268,26 +297,35 @@ export default {
           }
         ],
         // 密码
-        psd: [{ required: true, message: "请输入密碼", trigger: "blur" }],
+        psd: [
+          { required: true, message: "请输入密碼", trigger: "blur" },
+          { min: 4, max: 16, message: "密碼長度為4-16" }
+        ],
         // 确认密码
         conpsd: [{ required: true, validator: validatePass, trigger: "blur" }],
         // 廠區
         factory: [{ required: true, message: "请選擇廠區", trigger: "change" }],
         // 次集團
-        group: [{ required: true, message: "请選擇廠區", trigger: "change" }],
+        group: [{ required: true, message: "请輸入次集團", trigger: "change" }],
         // 事業群
         bussiness: [
-          { required: true, message: "请選擇廠區", trigger: "change" }
+          { required: true, message: "请選擇事業群", trigger: "change" }
         ],
         // 產品處
-        bureau: [{ required: true, message: "请選擇廠區", trigger: "change" }],
+        bureau: [
+          { required: true, message: "请選擇事業群", trigger: "change" }
+        ],
         // 單位代碼
         departCode: [
-          { required: true, message: "單位代碼不能為空", trigger: "blur" },
+          { required: true, message: "單位代碼不能為空", trigger: "blur" }
         ],
         // 單位名
         departName: [
-          { required: true, message: "未查詢到单位名称，請檢查", trigger: "blur" },
+          {
+            required: true,
+            message: "单位名称不能為空",
+            trigger: "blur"
+          }
         ],
         // 交易法人
         corporate: [
@@ -311,9 +349,7 @@ export default {
           // { type: "number", message: "號碼必须为数字值" }
         ],
         // 移動電話
-        mobile: [
-          { required: true, message: "號碼不能为空", trigger: "blur" }
-        ],
+        mobile: [{ required: true, message: "號碼不能为空", trigger: "blur" }],
         // email
         email: [
           { required: true, message: "邮箱地址不能為空", trigger: "blur" },
@@ -327,52 +363,80 @@ export default {
         intro: [{ max: 100, message: "最長100個字符", trigger: "blur" }]
       },
       // 加工範圍
-      rangeOptions:[],
+      rangeOptions: [],
       // url中獲取 接單方 | 需求方
       category: "",
       // 查詢回來的廠區列表
-      factory_list: null,
+      factory_list: [],
       // 查詢回來的次集團列表
-      SECN_CMPY_list: null,
+      SECN_CMPY_list: [],
       // 查詢回來的事業群列表
-      ENTRPS_GROUP_list: null,
+      ENTRPS_GROUP_list: [],
       // 查詢回來的產品處列表
-      PD_OFFICE_list: null,
+      PD_OFFICE_list: [],
       // 存儲頭像信息
       user_pic_file: null
     };
   },
   created() {
-    // 獲取查詢參數值並存放在data中
-    function getQuery(keyName) {
-      var reg = new RegExp("(^|&)" + keyName + "=([^&]*)(&|$)"),
-        r = window.location.search.substr(1).match(reg);
-      if (r != null) return decodeURI(r[2]);
-      return null;
+    let categoryVal = sessionStorage.getItem("merchangtCategory");
+    if (categoryVal) {
+      this.category = categoryVal;
+    } else {
+      this.$router.push("/merchant");
     }
-    this.category = getQuery("category");
+
+    this._query_ENTRPS_GROUP_list();
   },
   methods: {
-    // 查詢單位名稱
-    queryDeptName(){
-      if(!this.form.factory) return this.$message.error('請先選擇廠區！')
-      query_dept_name_by_dept_no(this.form.departCode, this.form.factory).then(res => {
-        if(res.code === '1'){
-          this.form.departName = res.t.dept_name
+    // 拉取法人列表
+    querySearchLegalList(queryString, cb) {
+      if(queryString == '') return cb([])
+      const data = { legal_person: queryString };
+      fuzzy_search_legal_person(data).then(res => {
+        if (res.code === "1") {
+          if(res.t.length <= 0) return cb([{value: '暫無數據'}])
+          let resData = res.t;
+          let list = [];
+          for (let item of resData) {
+            const obj = {
+              value: item.legal_person,
+              pkid: item.pkid
+            };
+            list.push(obj);
+          }
+          cb(list);
         }else{
-          this.form.departName = ''
-          this.$message.error("查詢失敗，請檢查單位代碼輸入正確！")
+          cb([{value:'無數據'}])
         }
-      })
+      });
     },
-    
+    handleSelectLegal() {},
+    // 查詢單位名稱
+    queryDeptName() {
+      if (!this.form.factory) return this.$message.error("請先選擇廠區！");
+      this.form.departCode = this.form.departCode.toUpperCase();
+      query_dept_name_by_dept_no(this.form.departCode, this.form.factory).then(
+        res => {
+          if (res.code === "1") {
+            this.form.departName = res.t.dept_name;
+          } else {
+            this.form.departName = "";
+            this.$message.error("查詢失敗，請檢查單位代碼輸入正確！");
+          }
+        }
+      );
+    },
+
     // 獲取加工範圍
     getRange() {
       query_pd_type_list().then(res => {
-        if(res.code === "1"){
-          this.rangeOptions = res.t
+        if (res.code === "1") {
+          this.rangeOptions = res.t;
+        } else {
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
 
     // 觸發 ref='fileInp' 的點擊事件
@@ -381,7 +445,6 @@ export default {
     },
 
     getFile() {
-      // console.log(this.$refs.fileInp.files[0])
       // 獲取到 input 選中的文件信息
       const inputFile = this.$refs.fileInp.files[0];
 
@@ -407,6 +470,8 @@ export default {
         file_upload(data).then(res => {
           if (res.code === "1") {
             this.user_pic_file = res.t;
+          } else {
+            this.$message.error(res.msg);
           }
         });
       }
@@ -426,80 +491,136 @@ export default {
     },
 
     // 查询厂区列表
-        // 廠區
-        // factory: "",
-        // 次集團
-        // group: "",
-        // 事業群
-        // bussiness: "",
-        // 產品處
-        // bureau: "",
+    // 廠區
+    // factory: "",
+    // 次集團
+    // group: "",
+    // 事業群
+    // bussiness: "",
+    // 產品處
+    // bureau: "",
     _query_factory_list() {
       query_factory_list().then(res => {
         if (res.code === "1") {
           this.factory_list = res.t;
         } else {
-          // console.log("error");
+          this.$message.error(res.msg);
         }
       });
     },
 
     // 查詢次集團信息
     _query_SECN_CMPY_list() {
-      query_SECN_CMPY_list().then(res => {
-        if (res.code === "1") {
-          this.SECN_CMPY_list = res.t;
-          this.form.bussiness = ''
-          this.form.bureau = ''
-        } 
-      });
+      // query_SECN_CMPY_list().then(res => {
+      //   if (res.code === "1") {
+      //     this.SECN_CMPY_list = res.t;
+      //     this.form.bussiness = "";
+      //     this.form.bureau = "";
+      //   } else {
+      //     this.$message.error(res.msg);
+      //   }
+      // });
     },
 
     // 查詢事業群列表信息
     _query_ENTRPS_GROUP_list() {
-      var data = ''
-      for(let item of this.SECN_CMPY_list){
-        if(item.name == this.form.group){
-          data = item.pkid
-        }
-      }
+      var data = "";
+      // for (let item of this.SECN_CMPY_list) {
+      //   if (item.name == this.form.group) {
+      //     data = item.pkid;
+      //   }
+      // }
+      data = "Foxconn";
       query_ENTRPS_GROUP_list(data).then(res => {
         if (res.code === "1") {
           this.ENTRPS_GROUP_list = res.t;
-          this.form.bureau = ''
+          this._query_PD_OFFICE_list();
         } else {
-          // console.log("error");
+          this.$message.error(res.msg);
         }
       });
     },
 
+    querySearchGroup(queryString, cb) {
+      var groupList = [];
+      if (this.ENTRPS_GROUP_list.length > 0) {
+        for (let item of this.ENTRPS_GROUP_list) {
+          const obj = {
+            value: item.name,
+            id: item.pkid
+          };
+          groupList.push(obj);
+        }
+      }
+
+      // 调用 callback 返回建议列表的数据
+      cb(groupList);
+    },
     // 查詢產品處列表信息
     _query_PD_OFFICE_list() {
-      var data = ''
-      for(let item of this.ENTRPS_GROUP_list){
-        if(item.name == this.form.bussiness){
-          data = item.pkid
+      var data = "";
+      for (let item of this.ENTRPS_GROUP_list) {
+        if (item.name == this.form.bussiness) {
+          data = item.pkid;
         }
+      }
+      if (!data) {
+        return (this.PD_OFFICE_list = []);
       }
       query_PD_OFFICE_list(data).then(res => {
         if (res.code === "1") {
           this.PD_OFFICE_list = res.t;
         } else {
-          // console.log("error");
+          this.$message.error(res.msg);
         }
       });
     },
 
-    submit(nameOne, nameTwo) {
-      // 修改 processRange 
-      var recv_range_list = []
-      for(let item of this.form.processRange){
-        recv_range_list.push({name:item})
+    querySearchOffice(queryString, cb) {
+      var officeList = [];
+      if (this.PD_OFFICE_list.length > 0) {
+        for (let item of this.PD_OFFICE_list) {
+          const obj = {
+            value: item.name,
+            id: item.pkid
+          };
+          officeList.push(obj);
+        }
       }
 
-      var obj = {
+      // 调用 callback 返回建议列表的数据
+      cb(officeList);
+    },
+
+    // 驗證
+    submit(nameOne, nameTwo) {
+      if (!this.category) return this.$message.error("請選擇賬號類型！");
+      console.log(this.category);
+      this.$refs[nameOne].validate(valid => {
+        if (valid) {
+          this.$refs[nameTwo].validate(valid => {
+            if (valid) {
+              this.upload();
+            } else {
+              return false;
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+    },
+
+    // 提交
+    upload() {
+      let recv_range_list = [];
+      for (let item of this.form.processRange) {
+        recv_range_list.push({ name: item });
+      }
+
+      let obj = {
         username: this.form.name,
-        password: this.form.psd,
+        password: this.$md5(this.form.psd),
         in_out_type: "in",
         // 接單方 | 需求方
         send_recv_type: this.category,
@@ -523,32 +644,14 @@ export default {
         recv_range_list: recv_range_list
       };
 
-      this.$refs[nameOne].validate(valid => {
-        if (valid) {
-          this.$refs[nameTwo].validate(valid => {
-            if (valid) {
-              register(obj).then(res => {
-                if (res.code === "1") {
-                  this.$router.push("/login");
-                } else {
-                  alert("異常，請稍後重試！");
-                }
-              });
-            } else {
-              // console.log("error submit!!");
-              return false;
-            }
-          });
+      register(obj).then(res => {
+        if (res.code === "1") {
+          this.$message.success("信息提交成功，請等待管理員審核！");
+          this.$router.push("/login");
         } else {
-          // console.log("error submit!!");
-          return false;
+          this.$message.error(res.msg);
         }
       });
-    },
-
-    // 測試使用，生產刪除
-    test() {
-      // console.log(this.$md5(this.form.psd))
     }
   },
   components: {
@@ -618,8 +721,8 @@ export default {
       width: 50%;
     }
   }
-  .departName{
-    /deep/ .el-input.is-disabled .el-input__inner{
+  .departName {
+    /deep/ .el-input.is-disabled .el-input__inner {
       color: #606266;
     }
   }

@@ -25,3 +25,23 @@ export function update_user_info(data) {
   const url = '/api/user/update_user_info'
   return $axios.postWithToken(url, data)
 }
+
+// 忘記密碼：生成驗證碼
+export function generate_code(data) {
+  const url = '/api/user/generate_code'
+  return $axios.post(url, data)
+}
+
+// 驗證驗證碼
+export function check_code(data) {
+  const url = '/api/user/check_code'
+  return $axios.post(url, data)
+}
+
+// 更新密碼
+export function update_password(data) {
+  const url = '/api/user/update_password'
+  return $axios.post(url, data)
+}
+
+

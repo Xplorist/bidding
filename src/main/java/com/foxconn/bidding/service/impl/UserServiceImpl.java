@@ -8,12 +8,15 @@ import com.foxconn.bidding.service.UserService;
 import com.foxconn.bidding.util.SimpleEncodeUtil;
 import com.foxconn.bidding.util.TokenUtil;
 import com.foxconn.bidding.util.UUID_Util;
+import com.foxconn.bidding.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -91,14 +94,23 @@ public class UserServiceImpl implements UserService {
     public ResultParam login(USER_INFO_bean param, HttpServletRequest request) {
         USER_INFO_bean user = mapper.query_user_by_username(param.getUsername());
         String encodedPSW = SimpleEncodeUtil.encode(param.getPassword());
+        String userPkid = user.getPkid();
 
         if(user == null) {
-            return ResultParam.of("0", "用戶不存在");
+            //return ResultParam.of("0", "用戶不存在");
+            return ResultParam.of("0", "用戶或密碼錯誤");
         }
         if(!encodedPSW.equals(user.getPassword())) {
-            return ResultParam.of("0", "密碼錯誤");
+            //return ResultParam.of("0", "密碼錯誤");
+            return ResultParam.of("0", "用戶或密碼錯誤");
         }
         String token = TokenUtil.getToken(user.getPkid(), param.getPassword());// token必須用前端傳遞的param中傳遞的password
+
+        // 更新賬號最近登錄時間
+        Integer updateFlag = mapper.updateUserLatestLoginTime(userPkid);
+        if (updateFlag <= 0) {
+            throw new RuntimeException("更新賬號最近登錄時間失敗");
+        }
 
         return new ResultParam("1", "登錄成功", token);
     }
@@ -134,16 +146,39 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    // 【05】根據用戶id查詢用戶信息
+    /**
+     * 根據用戶id查詢用戶信息
+     * @param param
+     * USER_INFO_bean param 屬性list:
+     * String pkid;//用戶信息表主鍵id
+     * @param request
+     * @return
+     * ResultParam 屬性list:
+     * private String code;// 返回參數代碼
+     * private String msg;// 返回參數信息
+     * private T t;// 返回參數泛型對象
+     * t: USER_INFO_bean
+     *
+     */
     @Override
     public ResultParam query_user_info_by_pkid(USER_INFO_bean param, HttpServletRequest request) {
+        if (param == null) {
+            throw new RuntimeException("參數不能為空");
+        }
         String pkid = param.getPkid();
+        if (pkid == null || "".equals(pkid)) {
+            throw new RuntimeException("用戶pkid不能為空");
+        }
+        // 通過id查找用戶
         USER_INFO_bean user_info_bean = mapper.findUserById(pkid);
-        if(user_info_bean == null) {
+        if (user_info_bean == null) {
             throw new RuntimeException("根據用戶id查詢用戶信息失敗");
         }
+
         // 查詢用戶頭像
         String user_pic_file_pkid = user_info_bean.getUser_pic_file_pkid();
-        if(user_pic_file_pkid != null && !"".equals(user_pic_file_pkid)) {
+        if (user_pic_file_pkid != null && !"".equals(user_pic_file_pkid)) {
             USER_PIC_FILE_bean user_pic_file_bean = mapper.query_user_pic_file(user_pic_file_pkid);
             user_info_bean.setUser_pic_file(user_pic_file_bean);
         } else {
@@ -152,13 +187,13 @@ public class UserServiceImpl implements UserService {
         }
         // 查詢接單方的加工範圍list
         String recv_mnufc_range_rel_id = user_info_bean.getRecv_mnufc_range_rel_id();
-        if(recv_mnufc_range_rel_id != null && !"".equals(recv_mnufc_range_rel_id)) {
+        if (recv_mnufc_range_rel_id != null && !"".equals(recv_mnufc_range_rel_id)) {
             List<RECV_MNUFC_RANGE_bean> recv_range_list = mapper.query_recv_range_list(recv_mnufc_range_rel_id);
             user_info_bean.setRecv_range_list(recv_range_list);
         }
 
         String send_recv_type = user_info_bean.getSend_recv_type();
-        if("send".equals(send_recv_type)) {
+        if ("send".equals(send_recv_type)) {
             // 查詢發單方收到的評價list
             List<RECV_EVAL_bean> send_get_eval_list = billMapper.query_send_get_eval_list_nopagi(pkid);
             user_info_bean.setGet_eval_list(send_get_eval_list);
@@ -168,7 +203,55 @@ public class UserServiceImpl implements UserService {
                 USER_INFO_bean user = mapper.findUserById(recv_user_pkid);
                 recv_eval_bean.setUser(user);
             }
-        } else if("recv".equals(send_recv_type)) {
+
+            /*--查詢發單方的統計數據--*/
+            // 統計發單方發單量和發單總金額
+            SendUserStatistics sendUserStatistics = mapper.queryUserSendBillAmountAndMoney(pkid);
+            Integer send_amount = sendUserStatistics.getSend_amount();
+            // 統計發單方選標金額
+            Long pick_money = mapper.queryUserPickMoney(pkid);
+            sendUserStatistics.setPick_money(pick_money);
+            // 統計發單方棄標量
+            Integer abandon_amount = mapper.queryUserAbandonBidAmount(pkid);
+            Float abandon_rate = 0f;
+            if (send_amount != 0) {
+                abandon_rate = (float)abandon_amount / send_amount;
+                abandon_rate = (float)Math.round(abandon_rate * 10000) / 10000;
+            }
+            sendUserStatistics.setAbandon_rate(abandon_rate);
+            // 統計發單方流標量
+            Integer flow_amount = mapper.queryUserFlowBidAmount(pkid);
+            Float flow_rate = 0f;
+            if (send_amount != 0) {
+                flow_rate = (float)flow_amount / send_amount;
+                flow_rate = (float)Math.round(flow_rate * 10000) / 10000;
+            }
+            sendUserStatistics.setFlow_rate(flow_rate);
+            // 統計發單方選標量
+            Integer pick_amount = mapper.queryUserPickBidAmount(pkid);
+            Float pick_rate = 0f;
+            if (send_amount != 0) {
+                pick_rate = (float)pick_amount / send_amount;
+                pick_rate = (float)Math.round(pick_rate * 10000) /  10000;
+            }
+            sendUserStatistics.setPick_rate(pick_rate);
+            // 統計發單方的客戶評分
+            Float user_score = mapper.querySendUserGetScore(pkid);
+            sendUserStatistics.setUser_score(user_score);
+            // 查詢發單方最近發單時間
+            String latest_send_bill_time = mapper.querySendUserLatestSendBillTime(pkid);
+            sendUserStatistics.setLatest_send_bill_time(latest_send_bill_time);
+            // 查詢最近登錄時間
+            sendUserStatistics.setLatest_login_time(user_info_bean.getLatest_login_time());
+            // 查詢發單方信用（發單方信用 = 中標量 - 棄標量 * （1 + 棄標量 / （棄標量 + 中標量）））
+            float reputation = 0f;
+            if ((abandon_amount + pick_amount) != 0) {
+                reputation = pick_amount - abandon_amount * (1 + (float)abandon_amount / (abandon_amount + pick_amount));
+                reputation = (float)Math.round(reputation * 100) / 100;
+            }
+            sendUserStatistics.setReputation(reputation);
+            user_info_bean.setSend_user_statistics(sendUserStatistics);
+        } else if ("recv".equals(send_recv_type)) {
             // 查詢接單方收到的評價list
             List<SEND_EVAL_bean> recv_get_eval_list = billMapper.query_recv_get_eval_list_nopagi(pkid);
             user_info_bean.setGet_eval_list(recv_get_eval_list);
@@ -178,6 +261,31 @@ public class UserServiceImpl implements UserService {
                 USER_INFO_bean user = mapper.findUserById(send_user_pkid);
                 send_eval_bean.setUser(user);
             }
+
+            /*--查詢接單方的統計數據--*/
+            // 接單方統計接單量和報價金額
+            RecvUserStatistics recvUserStatistics = mapper.queryRecvUserOfferAmountAndMoney(pkid);
+            Integer recv_amount = recvUserStatistics.getRecv_amount();
+            // 統計接單方中標金額
+            Long win_bid_money = mapper.queryRecvUserWinBidMoney(pkid);
+            recvUserStatistics.setWin_bid_money(win_bid_money);
+            // 統計接單方競標成功量
+            Integer win_bid_amount = mapper.queryRecvUserWinBidAmount(pkid);
+            Float win_bid_rate = 0f;
+            if (recv_amount != 0) {
+                win_bid_rate = (float)win_bid_amount / recv_amount;
+                win_bid_rate = (float)Math.round(win_bid_rate * 10000) /  10000;
+            }
+            recvUserStatistics.setWin_bid_rate(win_bid_rate);
+            // 統計接單方的客戶評分
+            Float user_score = mapper.queryRecvUserGetScore(pkid);
+            recvUserStatistics.setUser_score(user_score);
+            // 查詢接單方最近接單時間
+            String latest_recv_bill_time = mapper.queryRecvUserLatestOfferTime(pkid);
+            recvUserStatistics.setLatest_recv_bill_time(latest_recv_bill_time);
+            // 查詢最近登錄時間
+            recvUserStatistics.setLatest_login_time(user_info_bean.getLatest_login_time());
+            user_info_bean.setRecv_user_statistics(recvUserStatistics);
         }
 
         return new ResultParam("1", "根據用戶id查詢用戶信息成功", user_info_bean);
@@ -219,12 +327,12 @@ public class UserServiceImpl implements UserService {
             if(f_delete_recv_range_list <= 0) {
                 throw new RuntimeException("刪除接單方加工範圍失敗");
             }
-            for(int i = 0; i < recv_range_list.size(); i++) {
+            for (int i = 0; i < recv_range_list.size(); i++) {
                 RECV_MNUFC_RANGE_bean range_bean = recv_range_list.get(i);
                 range_bean.setRecv_mnufc_range_rel_id(recv_mnufc_range_rel_id);
                 range_bean.setList_order(i + 1);
                 Integer f_add_recv_mnufc_range = mapper.add_recv_mnufc_range(range_bean);
-                if(f_add_recv_mnufc_range <= 0) {
+                if (f_add_recv_mnufc_range <= 0) {
                     throw new RuntimeException("新增接單方加工範圍失敗");
                 }
             }
@@ -360,5 +468,170 @@ public class UserServiceImpl implements UserService {
         }
 
         return new ResultParam("1", "提交更新密碼成功", null);
+    }
+
+    // 【10】條件分頁查詢用戶list
+    /*
+     請求參數：USER_INFO_bean param
+    【非空】private String send_recv_type;//發單接單類別(send：發單方，recv：接單方)
+    【非空】private String fctry_zone;//所屬廠區
+    【非空】private String secn_cmpy;//所屬次集團
+    【非空】private String entrps_group;//所屬事業群
+    【非空】private String pd_office;//所屬產品處
+    【非空】private Integer pageIndex;// 分頁頁碼
+    【非空】private Integer pageSize;// 每頁數據條數
+
+     返回結果：Map<String, Object> map
+      key: "row_total", value:// 總行數
+      key: "page_total", value:// 總頁數
+      key: "list", value:// 用戶list
+     */
+    @Override
+    public ResultParam queryUserList(USER_INFO_bean param, HttpServletRequest request) {
+        // 權限判斷
+        String user_pkid = (String) request.getAttribute("user_pkid");
+        USER_INFO_bean user = mapper.findUserById(user_pkid);
+        String username = user.getUsername();
+        if (!"admin".equals(username)) {
+            throw new RuntimeException("當前用戶非管理員，無權限查詢");
+        }
+
+        // 請求參數非空判斷
+        if (param == null) {
+            throw new RuntimeException("參數不能為空");
+        }
+        String send_recv_type = param.getSend_recv_type();
+        String fctry_zone = param.getFctry_zone();
+        String secn_cmpy = param.getSecn_cmpy();
+        String entrps_group = param.getEntrps_group();
+        String pd_office = param.getPd_office();
+        Integer pageIndex = param.getPageIndex();
+        Integer pageSize = param.getPageSize();
+        if(send_recv_type == null || "".equals(send_recv_type)
+        || fctry_zone == null || "".equals(fctry_zone)
+        || secn_cmpy == null || "".equals(secn_cmpy)
+        || entrps_group == null || "".equals(entrps_group)
+        || pd_office == null || "".equals(pd_office)
+        || pageIndex == null || pageSize == null) {
+            throw new RuntimeException("參數不能為空");
+        }
+
+        if ("發單方".equals(send_recv_type)) {
+            send_recv_type = "send";
+        } else if ("接單方".equals(send_recv_type)) {
+            send_recv_type = "recv";
+        } else {
+            send_recv_type = "全部";
+        }
+        param.setSend_recv_type(send_recv_type);
+
+        Integer row_total = 0;// 總行數
+        Integer page_total = 1;// 總頁數
+       // 條件分頁查詢用戶list
+        List<USER_INFO_bean> list = mapper.queryUserList(param);
+        if (!list.isEmpty()) {
+            USER_INFO_bean bean = list.get(0);
+            row_total = bean.getRow_total();
+            page_total = row_total % pageSize == 0 ? row_total / pageSize : (row_total / pageSize) + 1;
+        }
+
+        // 判斷用戶是否活躍
+        for (int i = 0; i < list.size(); i++) {
+            USER_INFO_bean bean = list.get(i);
+            String bean_pkid = bean.getPkid();
+            String user_type = bean.getSend_recv_type();
+            if ("send".equals(user_type)) {
+                // 判斷發單用戶是否活躍 (count > 0 代表活躍)
+                Integer activeFlag = mapper.querySendUserIsActive(bean_pkid);
+                if (activeFlag > 0) {
+                    bean.setF_active("Y");
+                } else {
+                    bean.setF_active("N");
+                }
+            } else if ("recv".equals(user_type)) {
+                // 判斷接單用戶是否活躍(count > 0 代表活躍)
+                Integer activeFlag = mapper.queryRecvUserIsActive(bean_pkid);
+                if (activeFlag > 0) {
+                    bean.setF_active("Y");
+                } else {
+                    bean.setF_active("N");
+                }
+            }
+        }
+
+        // 返回結果聲明
+        Map<String, Object> map = new HashMap<>();
+        map.put("row_total", row_total);
+        map.put("page_total", page_total);
+        map.put("list", list);
+
+        return new ResultParam("1", "【10】條件分頁查詢用戶list成功", map);
+    }
+
+    // 【11】刪除賬號
+    @Transactional
+    @Override
+    public ResultParam deleteUser(RequestParam param, HttpServletRequest request) {
+        // 判斷用戶權限
+        String loginUserPkid = UserUtil.getLoginUserPkid(request);
+        USER_INFO_bean loginUser = mapper.findUserById(loginUserPkid);
+        String loginUsername = loginUser.getUsername();
+        if (!"admin".equals(loginUsername)) {
+            throw new RuntimeException("當前用戶非管理員，無權限刪除賬號");
+        }
+
+        // 判斷參數非空
+        if (param == null) {
+            throw new RuntimeException("JSON參數不能為空");
+        }
+        String user_pkid = param.getUser_pkid();
+        if (user_pkid == null || "".equals(user_pkid)) {
+            throw new RuntimeException("需要刪除的用戶pkid不能為空");
+        }
+        // 邏輯刪除用戶賬號
+        Integer updateFlag = mapper.updateUserInvalid(user_pkid);
+        if (updateFlag <= 0) {
+            throw new RuntimeException("邏輯刪除用戶賬號失敗");
+        }
+
+        return new ResultParam("1", "【11】刪除賬號成功", null);
+    }
+
+    // 【12】統計所有賬號的相關信息
+    @Override
+    public ResultParam queryAllUsersStatistics(RequestParam param, HttpServletRequest request) {
+        // 判斷用戶權限
+        String loginUserPkid = UserUtil.getLoginUserPkid(request);
+        USER_INFO_bean loginUser = mapper.findUserById(loginUserPkid);
+        String loginUsername = loginUser.getUsername();
+        if (!"admin".equals(loginUsername)) {
+            throw new RuntimeException("當前用戶非管理員，無權限刪除賬號");
+        }
+
+        // 統計註冊賬號總數
+        Integer total_num = mapper.queryUserTotalNum();
+        // 統計發單方賬號總數
+        Integer send_num = mapper.querySendUserNum();
+        // 統計接單方賬號總數
+        Integer recv_num = mapper.queryRecvUserNum();
+        // 統計活躍發單方賬號個數
+        Integer active_send = mapper.queryActiveSendUserNum();
+        // 統計活躍的接單方用戶個數
+        Integer active_recv = mapper.queryActiveRecvUserNum();
+        // 統計待審核賬號總數
+        Integer wait_num = mapper.queryWaitAuUserNum();
+
+        int active_num = active_send + active_recv;
+        int inactive_num = total_num - active_num;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("total_num", total_num);// 註冊賬號總數
+        map.put("send_num", send_num);// 發單方賬號總數
+        map.put("recv_num", recv_num);// 接單方賬號總數
+        map.put("active_num", active_num);// 活躍賬號總數
+        map.put("inactive_num", inactive_num);// 不活躍賬號總數
+        map.put("wait_num", wait_num);// 待審核賬號總數
+
+        return new ResultParam("1", "【12】統計所有賬號的相關信息成功", map);
     }
 }

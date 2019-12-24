@@ -77,3 +77,10 @@ export function query_dept_name_by_dept_no(depr_no, fctry_zone) {
   }
   return $axios.post(url, data)
 }
+
+// 拉取法人列表
+export function fuzzy_search_legal_person(data) {
+  // {"legal_person": ""}
+  const url = '/api/baseInfo/fuzzy_search_legal_person'
+  return $axios.post(url, data)
+}

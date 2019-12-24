@@ -138,16 +138,35 @@
           from (select t1.*, rownum row_num
                   from (select t.*, count(*) over() row_total
                           from BILL t
-                         where t.bill_status &lt;&gt; '0'
+                         where t.bill_status &lt;&gt; 0
+                         <if test="send_user_pkid_list != null and send_user_pkid_list.size() > 0">
+                            and t.send_user_pkid in
+                            <foreach collection="send_user_pkid_list" index="index" item="send_user_pkid" open="(" separator="," close=")">
+                                #{send_user_pkid, jdbcType=VARCHAR}
+                            </foreach>
+                         </if>
+                         <if test="recv_user_pkid_list != null and recv_user_pkid_list.size() > 0">
+                            and recv_user_pkid in
+                            <foreach collection="recv_user_pkid_list" index="index" item="recv_user_pkid" open="(" separator="," close=")">
+                                #{recv_user_pkid, jdbcType=VARCHAR}
+                            </foreach>
+                         </if>
+                         <if test='bill_no != null and bill_no != ""'>
+                             <bind name="b_bill_no" value="'%' + bill_no + '%'"/>
+                             and t.bill_no like #{b_bill_no}
+                         </if>
                          <if test='bid_range != "集團"'>
                              and t.bid_range = #{bid_range}
                          </if>
                          <if test='bill_status != "all" and bill_status == "ing"'>
-                             and t.bill_status = '1'
+                             and t.bill_status = '1' and sysdate &lt; t.bid_end_date
                          </if>
                          <if test='bill_status != "all" and bill_status == "end"'>
                             and (t.bill_status = '2' or t.bill_status = '3' or t.bill_status = '4'
                              or  t.bill_status = '5' or t.bill_status = '6')
+                         </if>
+                         <if test='bill_status != "all" and bill_status != "ing" and bill_status != "end"'>
+                            and t.bill_status = #{bill_status}
                          </if>
                          <if test='deliver_address != "all"'>
                             <bind name="p_deliver_address" value="'%' + deliver_address + '%'"/>
@@ -200,10 +219,19 @@
             t.bill_status = #{bill_status}
             and t.recv_user_pkid &lt;&gt; #{recv_user_pkid}
             and t.pkid in (
-            select g.bill_pkid
-            from GIVE_PRICE_MSTR g
-            where g.recv_user_pkid = #{recv_user_pkid}
+                select g.bill_pkid
+                from GIVE_PRICE_MSTR g
+                where g.recv_user_pkid = #{recv_user_pkid}
+                )
             )
+            or (
+                t.bill_status = #{bill_status}
+                and t.recv_user_pkid is null
+                and t.pkid in (
+                    select g.bill_pkid
+                    from GIVE_PRICE_MSTR g
+                    where g.recv_user_pkid = #{recv_user_pkid}
+                )
             )
         </if>
         <if test='bill_status == "no_recv_eval"'>
@@ -248,10 +276,10 @@
                              and t.bill_status = #{bill_status}
                          </if>
                          <if test='bill_status == "1"'>
-                             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date - 1 / 24)
+                             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date)
                          </if>
                          <if test='bill_status == "1.5"'>
-                             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date - 1 / 24)
+                             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date)
                          </if>
                          <if test='bill_status == "no_send_eval"'>
                              and t.bill_status = '6'
@@ -293,6 +321,15 @@
                                 from GIVE_PRICE_MSTR g
                                 where g.recv_user_pkid = #{recv_user_pkid}
                               )
+            )
+            or (
+                t.bill_status = #{bill_status}
+                and t.recv_user_pkid is null
+                and t.pkid in (
+                select g.bill_pkid
+                from GIVE_PRICE_MSTR g
+                where g.recv_user_pkid = #{recv_user_pkid}
+                )
             )
         </if>
         <if test='bill_status == "no_recv_eval"'>
@@ -342,7 +379,11 @@
             and t.bid_range = #{bid_range}
         </if>
         <if test='bill_status != "all" and bill_status == "ing"'>
-            and t.bill_status = '1'
+            and t.bill_status = '1' and sysdate &lt; t.bid_end_date
+            and t.pkid not in
+            (select g.bill_pkid
+            from GIVE_PRICE_MSTR g
+            where g.recv_user_pkid = #{recv_user_pkid})
         </if>
         <if test='bill_status != "all" and bill_status == "end"'>
             and (t.bill_status = '2' or t.bill_status = '3' or t.bill_status = '4'
@@ -365,11 +406,10 @@
         <if test='pd_type != "all"'>
             and t.pd_type = #{pd_type}
         </if>
-            and t.bill_status = '1'
-            and t.pkid not in
-            (select g.bill_pkid
-            from GIVE_PRICE_MSTR g
-            where g.recv_user_pkid = #{recv_user_pkid})
+        <if test='bill_status == "all"'>
+            and t.bill_status &lt;&gt; '0'
+        </if>
+
         order by t.create_date desc) t1) t2
         where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1 and #{pageIndex} * #{pageSize}
     </select>
@@ -383,10 +423,10 @@
              and t.bill_status = #{bill_status}
          </if>
          <if test='bill_status == "1"'>
-             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date - 1 / 24)
+             and t.bill_status = '1' and sysdate &lt; (t.bid_end_date)
          </if>
          <if test='bill_status == "1.5"'>
-             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date - 1 / 24)
+             and t.bill_status = '1' and sysdate &gt;= (t.bid_end_date)
          </if>
     </select>
 
@@ -684,6 +724,79 @@
           from SEND_EVAL t
          where t.recv_user_pkid = #{recv_user_pkid}
          order by t.create_date desc
+    </select>
+
+    <!-- 查詢昨天發單的總筆數和總金額 -->
+    <select id="query_last_day_send_statistics" resultType="com.foxconn.bidding.model.StatisticsContent">
+        select count(*) total_num, sum(t.total_price) total_money
+        from BILL t
+        where t.create_date &lt; trunc(sysdate)
+        and t.create_date &gt; trunc(sysdate - 1)
+        order by t.create_date desc
+    </select>
+
+    <!-- 查詢截止昨天累計發單的總筆數和總金額 -->
+    <select id="query_total_send_statistics" resultType="com.foxconn.bidding.model.StatisticsContent">
+        select count(*) total_num, sum(t.total_price) total_money
+        from BILL t
+        where t.create_date &lt; trunc(sysdate)
+        order by t.create_date desc
+    </select>
+
+    <!-- 查詢昨天中標的總筆數和總金額 -->
+    <select id="query_last_day_win_bid_statistics" resultType="com.foxconn.bidding.model.StatisticsContent">
+        select count(*) total_num, sum(t.total_price) total_money
+        from GIVE_PRICE_MSTR t
+        where t.f_win_bid = 'Y'
+        and t.create_date &lt; trunc(sysdate)
+        and t.create_date &gt; trunc(sysdate - 1)
+        order by t.create_date desc
+    </select>
+
+    <!-- 查詢截止昨天累計中標的總筆數和總金額 -->
+    <select id="query_total_win_bid_statistics" resultType="com.foxconn.bidding.model.StatisticsContent">
+        select count(*) total_num, sum(t.total_price) total_money
+        from GIVE_PRICE_MSTR t
+        where t.f_win_bid = 'Y'
+        and t.create_date &lt; trunc(sysdate)
+        order by t.create_date desc
+    </select>
+
+    <!-- 查詢老闆郵箱地址list -->
+    <select id="query_boss_email_list" resultType="com.foxconn.bidding.model.BOSS_EMAIL_ADDRESS_bean">
+        select t.* from BOSS_EMAIL_ADDRESS t order by t.list_order asc
+    </select>
+
+    <!-- 查詢此單是否達到競價結束時間 -->
+    <select id="query_is_reach_bid_end_date" parameterType="String" resultType="Integer">
+        select count(*) from BILL t
+        where t.pkid = #{bill_pkid}
+        and t.bill_status = '1'
+        and t.recv_user_pkid is null
+        and t.give_price_mstr_pkid is null
+        and t.bid_end_date &lt;= sysdate
+    </select>
+
+    <!-- 查詢需要選標或棄標的訂單，用來通知發單用戶進行操作 -->
+    <select id="query_need_pick_bid_bill" resultType="com.foxconn.bidding.model.BILL_bean">
+        select t.*
+        from BILL t
+        where t.bid_end_date &lt;= sysdate
+        and t.bill_status = '1'
+        and t.recv_user_pkid is null
+        and t.give_price_mstr_pkid is null
+        and t.pkid in (select g.bill_pkid from GIVE_PRICE_MSTR g)
+    </select>
+
+    <!-- 查詢需要流標的訂單，用來定時器查詢後自動設置流標 -->
+    <select id="query_need_flow_bid_bill" resultType="com.foxconn.bidding.model.BILL_bean">
+        select t.*
+        from BILL t
+        where t.bid_end_date &lt;= sysdate
+        and t.bill_status = '1'
+        and t.recv_user_pkid is null
+        and t.give_price_mstr_pkid is null
+        and t.pkid not in (select g.bill_pkid from GIVE_PRICE_MSTR g)
     </select>
 
     <!-- 注釋模板，放在最後一行 -->

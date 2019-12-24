@@ -5,7 +5,7 @@
 <mapper namespace="com.foxconn.bidding.mapper.UserMapper">
     <!-- 註冊提交前判斷用戶是否存在 -->
     <select id="query_user_is_exist" parameterType="String" resultType="Integer">
-        select count(*) from USER_INFO t where t.username = #{username}
+        select count(*) from USER_INFO t where t.username = #{username} and t.f_valid = 'Y'
     </select>
 
     <!-- 新增臨時用戶信息 -->
@@ -132,7 +132,17 @@
 
     <!-- 通過用戶名查詢用戶 -->
     <select id="query_user_by_username" parameterType="String" resultType="com.foxconn.bidding.model.USER_INFO_bean">
-        select t.* from USER_INFO t where t.username = #{username}
+        select t.* from USER_INFO t where t.username = #{username} and t.f_valid = 'Y'
+    </select>
+
+    <!-- 通過用戶名模糊查詢用戶list -->
+    <select id="listUserByUsernameFuzzy" parameterType="String" resultType="com.foxconn.bidding.model.USER_INFO_bean">
+        <bind name="b_username" value="'%' + username + '%'"/>
+        select t.*
+        from USER_INFO t
+        where t.f_valid = 'Y'
+          and t.username like #{b_username}
+        order by t.username asc
     </select>
 
     <!-- 通過id查找用戶 -->
@@ -192,6 +202,7 @@
         from USER_INFO t, RECV_MNUFC_RANGE r
         where t.recv_mnufc_range_rel_id = r.recv_mnufc_range_rel_id
           and r.name = #{pd_type}
+          and t.f_valid = 'Y'
           <if test='bid_range == "次集團"'>
           and t.secn_cmpy = #{bid_range_value}
           </if>
@@ -230,8 +241,225 @@
 
     <!-- 更新用戶密碼 -->
     <update id="update_password" parameterType="com.foxconn.bidding.model.VERIFICATION_CODE_bean">
-        update USER_INFO set password = #{password} where username = #{username}
+        update USER_INFO set password = #{password} where username = #{username} and f_valid = 'Y'
     </update>
+
+    <!-- 條件分頁查詢用戶list -->
+    <select id="queryUserList" parameterType="com.foxconn.bidding.model.USER_INFO_bean" resultType="com.foxconn.bidding.model.USER_INFO_bean">
+        select t2.* from(select t1.*,rownum row_num from(
+                                    select t.*, count(*) over() row_total
+                                    from USER_INFO t
+                                    where t.f_valid = 'Y'
+                                    <if test='send_recv_type != null and send_recv_type != "" and send_recv_type != "全部"'>
+                                        <bind name="b_send_recv_type" value="'%' + send_recv_type + '%'"/>
+                                          and t.send_recv_type like #{b_send_recv_type}
+                                    </if>
+                                    <if test='fctry_zone != null and fctry_zone != "" and fctry_zone != "全部"'>
+                                        <bind name="b_fctry_zone" value="'%' + fctry_zone + '%'"/>
+                                        and t.fctry_zone like #{b_fctry_zone}
+                                    </if>
+                                    <if test='secn_cmpy != null and secn_cmpy != "" and secn_cmpy != "全部"'>
+                                        <bind name="b_secn_cmpy" value="'%' + secn_cmpy + '%'"/>
+                                        and t.secn_cmpy like #{b_secn_cmpy}
+                                    </if>
+                                    <if test='entrps_group != null and entrps_group != "" and entrps_group != "全部"'>
+                                        <bind name="b_entrps_group" value="'%' + entrps_group + '%'"/>
+                                        and t.entrps_group like #{b_entrps_group}
+                                    </if>
+                                    <if test='pd_office != null and pd_office != "" and pd_office != "全部"'>
+                                        <bind name="b_pd_office" value="'%' + pd_office + '%'"/>
+                                        and t.pd_office like #{b_pd_office}
+                                    </if>
+                                    and t.send_recv_type &lt;&gt; 'system'
+                                    order by t.create_date desc
+                                                        ) t1) t2
+        where t2.row_num between (#{pageIndex} - 1) * #{pageSize} + 1
+                  and #{pageIndex} * #{pageSize}
+    </select>
+
+    <!-- 更新賬號最近登錄時間 -->
+    <update id="updateUserLatestLoginTime" parameterType="String">
+        update USER_INFO t
+        set t.latest_login_time = sysdate
+        where t.pkid = #{user_pkid}
+    </update>
+
+    <!-- 統計發單方發單量和發單總金額 -->
+    <select id="queryUserSendBillAmountAndMoney" parameterType="String" resultType="com.foxconn.bidding.model.SendUserStatistics">
+        select count(*) send_amount, sum(t.total_price) send_money
+        from BILL t
+        where t.send_user_pkid = #{send_user_pkid}
+    </select>
+
+    <!-- 統計發單方選標金額 -->
+    <select id="queryUserPickMoney" parameterType="String" resultType="Long">
+        select sum(g.total_price) pick_money
+        from BILL t, GIVE_PRICE_MSTR g
+        where t.pkid = g.bill_pkid
+          and t.send_user_pkid = #{send_user_pkid}
+          and g.f_win_bid = 'Y'
+    </select>
+
+    <!-- 統計發單方棄標量 -->
+    <select id="queryUserAbandonBidAmount" parameterType="String" resultType="Integer">
+        select count(*) count_abandon
+        from BILL t
+        where t.send_user_pkid = #{send_user_pkid}
+          and t.bill_status = '-2'
+    </select>
+
+    <!-- 統計發單方流標量 -->
+    <select id="queryUserFlowBidAmount" parameterType="String" resultType="Integer">
+        select count(*) count_flow
+        from BILL t
+        where t.send_user_pkid = #{send_user_pkid}
+          and t.bill_status = '-1'
+    </select>
+
+    <!-- 統計發單方選標量 -->
+    <select id="queryUserPickBidAmount" parameterType="String" resultType="Integer">
+        select count(*) count_pick
+        from BILL t
+        where t.send_user_pkid = #{send_user_pkid}
+          and t.bill_status &gt; 1
+    </select>
+
+    <!-- 統計發單方的客戶評分 -->
+    <select id="querySendUserGetScore" parameterType="String" resultType="Float">
+        select round(avg(t.summary_score), 2) user_score
+        from RECV_EVAL t
+        where t.send_user_pkid = #{send_user_pkid}
+    </select>
+
+    <!-- 查詢發單方最近發單時間 -->
+    <select id="querySendUserLatestSendBillTime" parameterType="String" resultType="String">
+        select create_date latest_send_bill_time
+        from (select t.*
+              from BILL t
+              where t.send_user_pkid = #{send_user_pkid}
+              order by t.create_date desc)
+        where rownum = 1
+    </select>
+
+    <!-- 接單方統計接單量和報價金額 -->
+    <select id="queryRecvUserOfferAmountAndMoney" parameterType="String" resultType="com.foxconn.bidding.model.RecvUserStatistics">
+        select count(*) recv_amount, sum(t.total_price) offer_money
+        from GIVE_PRICE_MSTR t
+        where t.recv_user_pkid = #{recv_user_pkid}
+    </select>
+
+    <!-- 統計接單方中標金額 -->
+    <select id="queryRecvUserWinBidMoney" parameterType="String" resultType="Long">
+        select sum(t.total_price) win_bid_money
+        from GIVE_PRICE_MSTR t
+        where t.recv_user_pkid = #{recv_user_pkid}
+          and t.f_win_bid = 'Y'
+    </select>
+
+    <!-- 統計接單方競標成功量 -->
+    <select id="queryRecvUserWinBidAmount" parameterType="String" resultType="Integer">
+        select count(*) count_win
+        from GIVE_PRICE_MSTR t
+        where t.recv_user_pkid = #{recv_user_pkid}
+          and t.f_win_bid = 'Y'
+    </select>
+
+    <!-- 統計接單方的客戶評分 -->
+    <select id="queryRecvUserGetScore" parameterType="String" resultType="Float">
+        select round(avg(t.summary_score), 2) user_score
+        from SEND_EVAL t
+        where t.recv_user_pkid = #{recv_user_pkid}
+    </select>
+
+    <!-- 查詢接單方最近接單時間 -->
+    <select id="queryRecvUserLatestOfferTime" parameterType="String" resultType="String">
+        select create_date latest_recv_bill_time
+        from (select t.*
+              from GIVE_PRICE_MSTR t
+              where t.recv_user_pkid = #{recv_user_pkid}
+              order by t.create_date desc)
+        where rownum = 1
+    </select>
+
+    <!-- 邏輯刪除用戶賬號 -->
+    <update id="updateUserInvalid" parameterType="String">
+        update USER_INFO t set t.f_valid = 'N' where t.pkid = #{user_pkid}
+    </update>
+
+    <!-- 統計註冊賬號總數 -->
+    <select id="queryUserTotalNum" resultType="Integer">
+        select count(*)
+        from USER_INFO t
+        where t.f_valid = 'Y'
+        and t.send_recv_type &lt;&gt; 'system'
+        and t.username &lt;&gt; 'send'
+        and t.username &lt;&gt; 'recv'
+    </select>
+
+    <!-- 統計發單方賬號總數 -->
+    <select id="querySendUserNum" resultType="Integer">
+        select count(*)
+        from USER_INFO t
+        where t.f_valid = 'Y'
+        and t.send_recv_type = 'send'
+        and t.username &lt;&gt; 'send'
+        and t.username &lt;&gt; 'recv'
+    </select>
+
+    <!-- 統計發單方賬號總數 -->
+    <select id="queryRecvUserNum" resultType="Integer">
+        select count(*)
+        from USER_INFO t
+        where t.f_valid = 'Y'
+        and t.send_recv_type = 'recv'
+        and t.username &lt;&gt; 'send'
+        and t.username &lt;&gt; 'recv'
+    </select>
+
+    <!-- 統計活躍發單方賬號個數 -->
+    <select id="queryActiveSendUserNum" resultType="Integer">
+        select count(*)
+        from USER_INFO t
+        where t.pkid in (select u.pkid
+        from BILL b, USER_INFO u
+        where b.send_user_pkid = u.pkid
+        and u.f_valid = 'Y'
+        and b.create_date &gt; (sysdate - 90)
+        group by u.pkid)
+    </select>
+
+    <!-- 統計活躍的接單方用戶個數 -->
+    <select id="queryActiveRecvUserNum" resultType="Integer">
+        select count(*)
+        from USER_INFO t
+        where t.pkid in (select u.pkid
+        from GIVE_PRICE_MSTR g, USER_INFO u
+        where g.recv_user_pkid = u.pkid
+        and u.f_valid = 'Y'
+        and g.create_date &gt; (sysdate - 90)
+        group by u.pkid)
+    </select>
+
+    <!-- 統計待審核賬號總數 -->
+    <select id="queryWaitAuUserNum" resultType="Integer">
+        select count(*) from USER_TEMP t where t.au_status = '0'
+    </select>
+
+    <!-- 判斷發單用戶是否活躍(count > 0 代表活躍) -->
+    <select id="querySendUserIsActive" parameterType="String" resultType="Integer">
+        select count(*)
+        from BILL t
+        where t.send_user_pkid = #{user_pkid}
+          and t.create_date > (sysdate - 90)
+    </select>
+
+    <!-- 判斷接單用戶是否活躍(count > 0 代表活躍) -->
+    <select id="queryRecvUserIsActive" parameterType="String" resultType="Integer">
+        select count(*)
+        from GIVE_PRICE_MSTR t
+        where t.recv_user_pkid = #{user_pkid}
+          and t.create_date > (sysdate - 90)
+    </select>
 
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

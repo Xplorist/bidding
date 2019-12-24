@@ -1,5 +1,6 @@
 package com.foxconn.bidding.controller;
 
+import com.foxconn.bidding.model.BulletinDO;
 import com.foxconn.bidding.model.RequestParam;
 import com.foxconn.bidding.model.ResultParam;
 import com.foxconn.bidding.model.USER_INFO_bean;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 管理員接口Controller
@@ -35,6 +37,23 @@ public class AdminController {
     @RequestMapping("/user_au")
     public ResultParam user_au(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
         ResultParam result = svc.user_au(param, request);
+
+        return result;
+    }
+
+    // 【03】保存公告
+    @VerifyToken
+    @RequestMapping("/saveBulletin")
+    public ResultParam saveBulletin(@RequestBody List<BulletinDO> paramList, HttpServletRequest request) {
+        ResultParam result = svc.saveBulletin(paramList, request);
+
+        return result;
+    }
+
+    // 【04】查詢公告list
+    @RequestMapping("/listBulletin")
+    public ResultParam listBulletin(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.listBulletin(param, request);
 
         return result;
     }

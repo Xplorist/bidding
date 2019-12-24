@@ -37,7 +37,7 @@ public class BillController {
         return result;
     }
 
-    // 未登錄查詢訂單list(分頁查詢)
+    // 【3】未登錄查詢訂單list(分頁查詢)
     @RequestMapping("/query_bill_list_not_login")
     public ResultParam query_bill_list_not_login(@RequestBody BILL_bean param, HttpServletRequest request) {
         ResultParam result = svc.query_bill_list_not_login(param, request);
@@ -227,6 +227,23 @@ public class BillController {
     @RequestMapping("/select_win_bid")
     public ResultParam select_win_bid(@RequestBody GIVE_PRICE_MSTR_bean param, HttpServletRequest request) {
         ResultParam result = svc.select_win_bid(param, request);
+
+        return result;
+    }
+
+    // 【24】棄標
+    @VerifyToken
+    @RequestMapping("/abandon_bid")
+    public ResultParam abandon_bid(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.abandon_bid(param, request);
+
+        return result;
+    }
+
+    // 【25】統計訂單信息
+    @RequestMapping("/queryBillStatistics")
+    public ResultParam queryBillStatistics(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.queryBillStatistics(param, request);
 
         return result;
     }

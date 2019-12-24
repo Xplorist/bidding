@@ -32,16 +32,16 @@
                   <tr>
                     <td>接單方</td>
                     <td>：</td>
-                    <td style="width: 140px">{{recvInfo.dept_name}}</td>
+                    <td style="width: 160px">{{recvInfo.dept_name}}</td>
                     <td></td>
                     <td>發單方</td>
                     <td>：</td>
-                    <td>{{orderInfo.send_user.dept_name}}</td>
+                    <td style="width: 160px">{{orderInfo.send_user.dept_name}}</td>
                   </tr>
                   <tr>
                     <td>聯絡人</td>
                     <td>：</td>
-                    <td style="width: 140px">{{recvInfo.busis_mngr}}</td>
+                    <td>{{recvInfo.busis_mngr}}</td>
                     <td></td>
                     <td>聯絡人</td>
                     <td>：</td>
@@ -50,7 +50,7 @@
                   <tr>
                     <td>聯繫電話</td>
                     <td>：</td>
-                    <td style="width: 140px">{{recvInfo.tel}}</td>
+                    <td>{{recvInfo.tel}}</td>
                     <td></td>
                     <td>聯繫電話</td>
                     <td>：</td>
@@ -59,7 +59,7 @@
                   <tr>
                     <td>費用代碼</td>
                     <td>：</td>
-                    <td style="width: 140px">{{recvInfo.cost_code}}</td>
+                    <td>{{recvInfo.cost_code}}</td>
                     <td></td>
                     <td>費用代碼</td>
                     <td>：</td>
@@ -68,7 +68,7 @@
                   <tr>
                     <td>交易法人</td>
                     <td>：</td>
-                    <td style="width: 140px">{{recvInfo.legal_person}}</td>
+                    <td>{{recvInfo.legal_person}}</td>
                     <td></td>
                     <td>交易法人</td>
                     <td>：</td>
@@ -82,6 +82,12 @@
                   <span>訂單信息</span>
                 </div>
                 <table class="or_content">
+                  <tr>
+                    <td>订单编号</td>
+                    <td>：</td>
+                    <td colspan="5">{{orderInfo.bill_no}}</td>
+                    <!-- <td colspan="4"></td> -->
+                  </tr>
                   <tr>
                     <td>交易類型</td>
                     <td>：</td>
@@ -272,6 +278,8 @@ export default {
         if (res.code === "1") {
           this.orderInfo = res.t;
           this.getRecvInfo();
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -308,6 +316,8 @@ export default {
             };
             this.slav_list.push(obj);
           }
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -349,8 +359,8 @@ export default {
       }
 
       let listS = document.querySelectorAll(".momentSinEle");
-      for(let itemS of listS){
-        itemS.parentNode.removeChild(itemS)
+      for (let itemS of listS) {
+        itemS.parentNode.removeChild(itemS);
       }
     }
   },
@@ -402,6 +412,7 @@ export default {
   display: flex;
   justify-content: space-between;
   padding-bottom: 20px;
+  user-select: none;
   // 左右線條
   .left-line,
   .right-line {
@@ -441,6 +452,7 @@ export default {
 .or_title,
 .qu_title,
 .an_title {
+  user-select: none;
   position: relative;
   width: 100px;
   height: 35px;
@@ -471,11 +483,10 @@ export default {
       }
       &:nth-child(2),
       &:nth-child(6) {
-        width: 20px;
         color: #626f7f;
       }
       &:nth-child(4) {
-        width: 30px;
+        width: 6px;
       }
       &:nth-child(5) {
         font-size: 16px;
@@ -511,7 +522,6 @@ export default {
         text-align-last: justify;
       }
       &:nth-child(2) {
-        width: 20px;
         color: #626f7f;
       }
     }
@@ -544,7 +554,7 @@ export default {
     }
   }
   .sign {
-    // float: right;
+    user-select: none;
     display: inline-block;
     height: 120px;
     line-height: 120px;

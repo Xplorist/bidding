@@ -76,4 +76,14 @@ public interface BillService {
 
     // 【23】選定中標
     ResultParam select_win_bid(GIVE_PRICE_MSTR_bean param, HttpServletRequest request);
+
+    // 自動流標
+    // 查詢當前時間大於等於競標結束時間且無投標的訂單，將其設為流標，並郵件通知
+    ResultParam auto_flow_bid();
+
+    // 【24】棄標
+    ResultParam abandon_bid(RequestParam param, HttpServletRequest request);
+
+    // 【25】統計訂單信息
+    ResultParam queryBillStatistics(RequestParam param, HttpServletRequest request);
 }

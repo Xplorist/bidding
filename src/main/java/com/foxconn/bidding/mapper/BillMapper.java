@@ -148,4 +148,29 @@ public interface BillMapper {
 
     // 查詢接單方收到的評價list(不分頁)
     List<SEND_EVAL_bean> query_recv_get_eval_list_nopagi(String recv_user_pkid);
+
+    // 查詢昨天發單的總筆數和總金額
+    StatisticsContent query_last_day_send_statistics();
+
+    // 查詢截止昨天累計發單的總筆數和總金額
+    StatisticsContent query_total_send_statistics();
+
+    // 查詢昨天中標的總筆數和總金額
+    StatisticsContent query_last_day_win_bid_statistics();
+
+    // 查詢截止昨天累計中標的總筆數和總金額
+    StatisticsContent query_total_win_bid_statistics();
+
+    // 查詢老闆郵箱地址list
+    List<BOSS_EMAIL_ADDRESS_bean> query_boss_email_list();
+
+    // 查詢此單是否達到競價結束時間
+    Integer query_is_reach_bid_end_date(String bill_pkid);
+
+    // 查詢需要選標或棄標的訂單，用來通知發單用戶進行操作
+    List<BILL_bean> query_need_pick_bid_bill();
+
+    // 查詢需要流標的訂單，用來定時器查詢後自動設置流標
+    List<BILL_bean> query_need_flow_bid_bill();
+
 }

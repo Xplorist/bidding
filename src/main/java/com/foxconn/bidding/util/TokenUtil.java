@@ -9,7 +9,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 public class TokenUtil {
     /**
      * 獲取token
-     * @param id 用戶id，使用jwt規定的屬性aud存放用戶id
+     *
+     * @param id  用戶id，使用jwt規定的屬性aud存放用戶id
      * @param sec 密鑰
      * @return token
      */

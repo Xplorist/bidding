@@ -5,11 +5,16 @@ import com.foxconn.bidding.mapper.UserMapper;
 import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.EmailService;
 import com.foxconn.bidding.util.EmailUtil;
+import com.foxconn.bidding.util.MoneyNumberUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @Service
 public class EmailServiceImpl implements EmailService {
     @Autowired
@@ -21,8 +26,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public ResultParam publish_bill_send_email(String bill_pkid) {
         //String address = "";
-        String subject = "【模治檢具訂單管理平台】";
-        String content = "【模治檢具訂單管理平台】";
+        String subject = "【模治檢具訂單信息服務平台】";
+        String content = "【模治檢具訂單信息服務平台】";
 
         BILL_bean bill_bean = billMapper.query_bill_by_pkid(bill_pkid);
         String bill_no = bill_bean.getBill_no();
@@ -86,10 +91,10 @@ public class EmailServiceImpl implements EmailService {
         String address = user_bean.getEmail();
 
         // 郵件主題
-        String subject = "【模治檢具訂單管理平台】忘記密碼-驗證碼";
+        String subject = "【模治檢具訂單信息服務平台】忘記密碼-驗證碼";
 
         // 郵件內容
-        String content = "【模治檢具訂單管理平台】忘記密碼-驗證碼<br>";
+        String content = "【模治檢具訂單信息服務平台】忘記密碼-驗證碼<br>";
         content += "驗證碼為：<b style='color: red;'>" + code + "</b>";
 
         Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
@@ -144,10 +149,10 @@ public class EmailServiceImpl implements EmailService {
         String address = admin_user.getEmail();
 
         // 郵件主題
-        String subject = "【模治檢具訂單管理平台-賬號審核】管理員，你好，有新的賬號註冊需要你審核";
+        String subject = "【模治檢具訂單信息服務平台-賬號審核】管理員，你好，有新的賬號註冊需要你審核";
 
         // 郵件內容
-        String content = "【模治檢具訂單管理平台-賬號審核】管理員，你好，有新的賬號註冊需要你審核<br>";
+        String content = "【模治檢具訂單信息服務平台-賬號審核】管理員，你好，有新的賬號註冊需要你審核<br>";
         content = getUserInfoContent(content, user_bean);
 
         Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
@@ -167,7 +172,7 @@ public class EmailServiceImpl implements EmailService {
         String address = user_bean.getEmail();
 
         // 郵件主題
-        String subject = "【模治檢具訂單管理平台-賬號審核】你提交的賬號註冊,管理員已";
+        String subject = "【模治檢具訂單信息服務平台-賬號審核】你提交的賬號註冊,管理員已";
         subject += au_type_str;
 
         // 郵件內容
@@ -180,5 +185,159 @@ public class EmailServiceImpl implements EmailService {
         }
 
         return new ResultParam("1", "賬號已審核 " + au_type_str + "，發送郵件給該賬號的郵箱成功", null);
+    }
+
+    // 每天早上9點發送發單和中標匯總情況郵件
+    @Override
+    public ResultParam sendStatisticsEmail() {
+        // 查詢昨天發單的總筆數和總金額
+        StatisticsContent last_day_send_statistics = billMapper.query_last_day_send_statistics();
+        last_day_send_statistics = processStatisticsContent(last_day_send_statistics);
+        String num_ls = MoneyNumberUtil.addDot(last_day_send_statistics.getTotal_num());
+        String money_ls = MoneyNumberUtil.addDot(last_day_send_statistics.getTotal_money());
+
+        // 查詢截止昨天累計發單的總筆數和總金額
+        StatisticsContent total_send_statistics = billMapper.query_total_send_statistics();
+        total_send_statistics = processStatisticsContent(total_send_statistics);
+        String num_ts = MoneyNumberUtil.addDot(total_send_statistics.getTotal_num());
+        String money_ts = MoneyNumberUtil.addDot(total_send_statistics.getTotal_money());
+
+        // 查詢昨天中標的總筆數和總金額
+        StatisticsContent last_day_win_bid_statistics = billMapper.query_last_day_win_bid_statistics();
+        last_day_win_bid_statistics = processStatisticsContent(last_day_win_bid_statistics);
+        String num_lw = MoneyNumberUtil.addDot(last_day_win_bid_statistics.getTotal_num());
+        String money_lw = MoneyNumberUtil.addDot(last_day_win_bid_statistics.getTotal_money());
+
+        // 查詢截止昨天累計中標的總筆數和總金額
+        StatisticsContent total_win_bid_statistics = billMapper.query_total_win_bid_statistics();
+        total_win_bid_statistics = processStatisticsContent(total_win_bid_statistics);
+        String num_tw = MoneyNumberUtil.addDot(total_win_bid_statistics.getTotal_num());
+        String money_tw = MoneyNumberUtil.addDot(total_win_bid_statistics.getTotal_money());
+
+        String nowDate = new SimpleDateFormat("yyyy年MM月dd日").format(new Date(new Date().getTime() - 1000 * 60 * 60 * 24));
+
+        // 郵件地址
+        String address = "hzcd-mis-sys4@mail.foxconn.com";
+
+        // 郵件主題
+        String subject = "【模治檢具訂單信息服務平台】" + nowDate + "訂單發單及中標狀況匯總";
+
+        // 郵件內容
+        String content = "<b style='color: blue;'>【模治檢具訂單信息服務平台】" + nowDate + "訂單發單及中標狀況匯總</b><br>";
+        content += "<b style='color: red;'>網址</b>:&nbsp;&nbsp;<a href='http://10.244.168.180/bid'>http://10.244.168.180/bid</a>";
+        content += "&nbsp;&nbsp;&nbsp;&nbsp;(<b style='color: red;'>請用Chrome瀏覽器（谷歌瀏覽器）打開</b>)<br><hr>";
+        content += "<table border=\"1\">\n" +
+                "<tr><td rowspan=\"2\"><b style='color: red;'>昨日匯總</b>，" + nowDate + "當日</td><td>發單筆數:<b style='color: red;'>" + num_ls + "</b>筆</td><td>發單金額:<b style='color: red;'>" + money_ls + "</b>RMB</td></tr>\n" +
+                "<tr><td>中標筆數:<b style='color: red;'>" + num_lw + "</b>筆</td><td>中標金額:<b style='color: red;'>" + money_lw + "</b>RMB</td></tr>\n" +
+                "<tr><td rowspan=\"2\"><b style='color: red;'>累計匯總</b>，截止" + nowDate + "</td><td>發單筆數:<b style='color: red;'>" + num_ts + "</b>筆</td><td>發單金額:<b style='color: red;'>" + money_ts + "</b>RMB</td></tr>\n" +
+                "<tr><td>中標筆數:<b style='color: red;'>" + num_tw + "</b>筆</td><td>中標金額:<b style='color: red;'>" + money_tw + "</b>RMB</td></tr>\n" +
+                "</table>";
+
+        // 查詢老闆郵箱地址list
+        List<BOSS_EMAIL_ADDRESS_bean> boss_email_list = billMapper.query_boss_email_list();
+        for(BOSS_EMAIL_ADDRESS_bean b: boss_email_list) {
+            log.info(b.getEmail());
+        }
+
+        /* 測試代碼開始 */
+        /*
+        boss_email_list = new ArrayList<>();
+        BOSS_EMAIL_ADDRESS_bean boos_email = new BOSS_EMAIL_ADDRESS_bean();
+        boos_email.setEmail(address);
+        boss_email_list.add(boos_email);
+        */
+        /* 測試代碼結束 */
+
+        for(int i = 0; i < boss_email_list.size(); i++) {
+            BOSS_EMAIL_ADDRESS_bean address_bean = boss_email_list.get(i);
+            address = address_bean.getEmail();
+            // 發送郵件
+            Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
+            if(!f_sendEmail) {
+                log.error(nowDate + "早上9點發送發單和中標匯總情況郵件失敗");
+                throw new RuntimeException("每天早上9點發送發單和中標匯總情況郵件失敗");
+            }
+            log.info("<" + address +  ">" + nowDate + "早上9點發送發單和中標匯總情況郵件成功");
+        }
+
+        return new ResultParam("1", "每天早上9點發送發單和中標匯總情況郵件成功", null);
+    }
+
+    // 處理StatisticsContent類對象
+    @Override
+    public StatisticsContent processStatisticsContent(StatisticsContent obj) {
+        if(obj == null) {
+            throw new RuntimeException("StatisticsContent類的示例對象為空");
+        }
+        Long total_money = obj.getTotal_money();
+
+        if(total_money == null) {
+            total_money = 0L;
+            obj.setTotal_money(total_money);
+        }
+
+        return obj;
+    }
+
+    // 郵件通知發單用戶選標
+    @Override
+    public ResultParam noticeSendUserPickBid() {
+        List<BILL_bean> bill_list = billMapper.query_need_pick_bid_bill();
+        for(int i = 0; i < bill_list.size(); i++) {
+            BILL_bean bill_bean = bill_list.get(i);
+            String bill_no = bill_bean.getBill_no();
+            String send_user_pkid = bill_bean.getSend_user_pkid();
+            USER_INFO_bean send_user = userMapper.findUserById(send_user_pkid);
+            String email = send_user.getEmail();
+
+            // 郵件地址
+            String address = email;
+
+            // 郵件主題
+            String subject = "【模治檢具訂單信息服務平台】選標通知-單號[" + bill_no + "]的訂單競價結束，請選標";
+
+            // 郵件內容
+            String content = "<b style='color: blue;'>【模治檢具訂單信息服務平台】選標通知-單號[" + bill_no + "]的訂單競價結束，請選標</b><br>";
+            content += "<b style='color: red;'>網址</b>:&nbsp;&nbsp;<a href='http://10.244.168.180/bid'>http://10.244.168.180/bid</a>";
+            content += "&nbsp;&nbsp;&nbsp;&nbsp;(<b style='color: red;'>請用Chrome瀏覽器（谷歌瀏覽器）打開</b>)<br><hr>";
+
+            // 發送郵件
+            Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
+            if(!f_sendEmail) {
+                log.error("<" + address +  ">郵件通知發單用戶單號[" + bill_no + "]的訂單需要選標失敗");
+                throw new RuntimeException("郵件通知發單用戶選標失敗");
+            }
+            log.info("<" + address +  ">郵件通知發單用戶單號[" + bill_no + "]的訂單需要選標成功");
+        }
+
+        return new ResultParam("1", "郵件通知發單用戶選標成功", null);
+    }
+
+    // 郵件通知發單用戶此訂單流標
+    @Override
+    public ResultParam noticeSendUserBillFlowBid(USER_INFO_bean user_info_bean, BILL_bean bill_bean) {
+        String email = user_info_bean.getEmail();
+        String bill_no = bill_bean.getBill_no();
+
+        // 郵件地址
+        String address = email;
+
+        // 郵件主題
+        String subject = "【模治檢具訂單信息服務平台】流標通知-單號[" + bill_no + "]的訂單競價結束但無用戶接單，已流標";
+
+        // 郵件內容
+        String content = "<b style='color: blue;'>【模治檢具訂單信息服務平台】流標通知-單號[" + bill_no + "]的訂單競價結束但無用戶接單，已流標</b><br>";
+        content += "<b style='color: red;'>網址</b>:&nbsp;&nbsp;<a href='http://10.244.168.180/bid'>http://10.244.168.180/bid</a>";
+        content += "&nbsp;&nbsp;&nbsp;&nbsp;(<b style='color: red;'>請用Chrome瀏覽器（谷歌瀏覽器）打開</b>)<br><hr>";
+
+        // 發送郵件
+        Boolean f_sendEmail = EmailUtil.sendEmail(EmailContent.of(address, subject, content));
+        if(!f_sendEmail) {
+            log.error("<" + address +  ">郵件通知發單用戶單號[" + bill_no + "]的訂單流標失敗");
+            throw new RuntimeException("郵件通知發單用戶此訂單流標失敗");
+        }
+        log.info("<" + address +  ">郵件通知發單用戶單號[" + bill_no + "]的訂單流標成功");
+
+        return new ResultParam("1", "郵件通知發單用戶此訂單流標成功", null);
     }
 }

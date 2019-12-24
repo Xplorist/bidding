@@ -92,6 +92,30 @@ public class BaseInfoController {
         return result;
     }
 
+    // 【09】模糊搜索法人
+    @RequestMapping("/fuzzy_search_legal_person")
+    public ResultParam fuzzy_search_legal_person(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.fuzzy_search_legal_person(param, request);
+
+        return result;
+    }
+
+    // 【10】查詢搜索條件list(管理員賬號管理條件)
+    @RequestMapping("/listQueryConditions")
+    public ResultParam listQueryConditions(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.listQueryConditions(param, request);
+
+        return result;
+    }
+
+    // 【11】查詢訂單狀態list
+    @RequestMapping("/listBillStatus")
+    public ResultParam listBillStatus(@RequestBody BaseInfoParam param, HttpServletRequest request) {
+        ResultParam result = svc.listBillStatus(param, request);
+
+        return result;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
     // 【】模板,放在最後
     @RequestMapping("/template")

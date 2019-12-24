@@ -22,7 +22,7 @@ public class BILL_bean {
     private String f_show_tel;//顯示聯繫電話標誌（y:是，n:否）
     private Integer total_price;//接受總價
     private String money_type;//幣別
-    private String amount;//需求數量
+    private Integer amount;//需求數量
     private String bid_range;//開標範圍（類型）
     private String bid_start_date;//競價開始時間
     private String bid_end_date;//競價結束時間
@@ -47,6 +47,11 @@ public class BILL_bean {
     private SEND_EVAL_bean send_eval;// 發單方評價
     private RECV_EVAL_bean recv_eval;// 接單方評價
     private List<RECV_MNUFC_RANGE_bean> recv_range_list;// 接單方加工範圍list
+    private GIVE_PRICE_MSTR_bean give_price;// 中標用戶的報價信息
+    private String send_user_name;// 發單用戶名
+    private String recv_user_name;// 中標接單用戶名
+    private List<String> send_user_pkid_list;// 發單方用戶pkid的list
+    private List<String> recv_user_pkid_list;// 接單方用戶pkid的list
 
     // 分頁查詢中請求參數需要的字段
     private Integer pageIndex;// 頁碼

@@ -7,10 +7,11 @@ import java.util.UUID;
  */
 public class UUID_Util {
     /**
-     *  獲取UUID
+     * 獲取UUID
+     *
      * @return 返回32位全大寫的UUID
      */
-    public static String getUUID32(){
+    public static String getUUID32() {
         String result = UUID.randomUUID().toString().replace("-", "").toUpperCase();
 
         return result;

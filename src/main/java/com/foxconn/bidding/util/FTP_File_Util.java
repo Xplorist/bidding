@@ -37,9 +37,10 @@ public class FTP_File_Util {
         // 將DWG文件轉換成PDF文件
         OutputStream output = null;
         int lastIndexOfDot = file_origin_name.lastIndexOf(".");
+        String suffix = "";
         if(lastIndexOfDot != -1) {
-            String suffix = file_origin_name.substring(lastIndexOfDot);
-            if(".dwg".equals(suffix)) {
+            suffix = file_origin_name.substring(lastIndexOfDot);
+            /*if(".dwg".equals(suffix)) {
                 output = new ByteArrayOutputStream();
                 try {
                     input = Out_to_In_stream_Util.convert_out_to_in(DWG_to_PDF_Util.convert_DWG_to_PDF(input, output));
@@ -49,7 +50,9 @@ public class FTP_File_Util {
                 }
                 String prefix = file_origin_name.substring(0, lastIndexOfDot);
                 file_origin_name = prefix + ".pdf";
-            }
+            }*/
+        } else {
+            throw new RuntimeException("上傳文件失敗,文件無後綴名");
         }
 
         String FTP_Address = util.getAddress();
@@ -65,8 +68,8 @@ public class FTP_File_Util {
         String month = new SimpleDateFormat("MM").format(date);
         String day = new SimpleDateFormat("dd").format(date);
         String file_save_path = type_base_path + File.separator + year + File.separator + month + File.separator + day;// 取得配置文件路徑
-        String file_save_name = "(" + new SimpleDateFormat("HHmmssSSS").format(new Date()).toString() + ")"
-                + file_origin_name;
+        //String file_save_name = "(" + new SimpleDateFormat("HHmmssSSS").format(new Date()).toString() + ")" + file_origin_name;
+        String file_save_name = UUID_Util.getUUID32() + suffix;
 
         try {
             int replay;

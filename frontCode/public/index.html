@@ -12,17 +12,24 @@
 <body>
   <div id="app"></div>
   <script>
-    if (window.navigator.userAgent.indexOf("Chrome") < 0 && confirm("您當前的瀏覽器版本過低，是否前往下載谷歌瀏覽器！")) {
-      window.location.href =
-        "http://10.244.186.86:8081/api/pic_show/load?file_save_path=browser&file_save_name=GoogleChromePortable_49.0.2.zip&file_origin_name=GoogleChromePortable_49.0.2.zip";
-    }
+    window.onload = function () {
+      if (window.navigator.userAgent.indexOf("Chrome") < 0) {
+        if (confirm("推荐使用谷歌瀏覽器访问，是否前往下載？"))
+          toHref()
+      } else {
+        var str = window.navigator.userAgent;
+        var arr = str.split("Chrome");
+        var version = arr[1].slice(1).split(".")[0];
+        if (version < 49 && confirm("您當前的瀏覽器版本過低，是否前往升级？")) {
+          toHref()
+        }
+      }
 
-    var str = window.navigator.userAgent;
-    var arr = str.split("Chrome");
-    var version = arr[1].slice(1).split(".")[0];
-    if (version < 49 && confirm("您當前的瀏覽器版本過低，是否前往下載谷歌瀏覽器！")) {
-      window.location.href =
-        "http://10.244.186.86:8081/api/pic_show/load?file_save_path=browser&file_save_name=GoogleChromePortable_49.0.2.zip&file_origin_name=GoogleChromePortable_49.0.2.zip";
+      function toHref() {
+        window.location.href =
+          "/bid/api/pic_show/load?file_save_path=browser&file_save_name=GoogleChromePortable_49.0.2.zip&file_origin_name=GoogleChromePortable_49.0.2.zip";
+        return
+      }
     }
   </script>
 </body>

@@ -1,5 +1,5 @@
 <template>
-  <div class="information">
+  <div id="information">
     <Top></Top>
     <Logo></Logo>
     <section id="content" v-if="merchantInfo">
@@ -96,7 +96,6 @@ import { query_user_info_by_pkid } from "@/api/user";
 import { getPorImg } from "@/assets/js/getInfo";
 // import { query_send_get_eval_list, query_recv_get_eval_list} from "@/api/order";
 
-
 export default {
   data: function() {
     return {
@@ -121,22 +120,21 @@ export default {
             param.file_origin_name
           );
 
-          this.comments = []
-          for(let item of this.merchantInfo.get_eval_list){ 
+          this.comments = [];
+          for (let item of this.merchantInfo.get_eval_list) {
             const obj = {
               text: item.summary_text,
               date: item.create_date,
-              belong: item.user.dept_name,
-            }
-            this.comments.push(obj)
-          }  
+              belong: item.user.dept_name
+            };
+            this.comments.push(obj);
+          }
           // this.getEvaluation(data, this.merchantInfo.send_recv_type)
         } else {
-          this.$message.error("出錯啦，稍後再試試吧");
+          this.$message.error(res.msg);
         }
       });
-    },
-
+    }
   },
   components: {
     Top,
@@ -150,6 +148,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+#information {
+  height: 100%;
+  background-color: #12222e;
+}
 // 主體內容
 #content {
   background: #12222e url(../../assets/imgs/particulars/contentBG.png) no-repeat
@@ -208,10 +210,6 @@ export default {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    .range {
-    }
-    .tel {
-    }
   }
   // 客戶評價
   .info_evaluation {

@@ -29,4 +29,13 @@ public interface BaseInfoService {
 
     // 【08】根據單位代碼查詢單位名稱
     ResultParam query_dept_name_by_dept_no(BaseInfoParam param, HttpServletRequest request);
+
+    // 【09】模糊搜索法人
+    ResultParam fuzzy_search_legal_person(BaseInfoParam param, HttpServletRequest request);
+
+    // 【10】查詢搜索條件list(管理員賬號管理條件)
+    ResultParam listQueryConditions(BaseInfoParam param, HttpServletRequest request);
+
+    // 【11】查詢訂單狀態list
+    ResultParam listBillStatus(BaseInfoParam param, HttpServletRequest request);
 }

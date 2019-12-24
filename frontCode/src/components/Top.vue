@@ -68,6 +68,7 @@ export default {
   width: 100%;
   background: #aac0cf; // rgba(170,192,207,1)
   color: #333;
+  user-select: none;
   .top-nav {
     height: 30px;
     display: flex;

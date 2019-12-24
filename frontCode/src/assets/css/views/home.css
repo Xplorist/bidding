@@ -22,6 +22,7 @@
 .panel-title {
   display: flex;
   justify-content: space-between;
+  user-select: none;
 }
 .panel-title .left-line,
 .panel-title .right-line {
@@ -49,6 +50,7 @@
   color: #d7efff;
   font-size: 14px;
   margin-top: 30px;
+  user-select: none;
 }
 .panel-filter .fil-scope,
 .panel-filter .fil-state,
@@ -114,6 +116,7 @@
   justify-content: center;
   align-items: center;
   margin-right: 5px;
+  user-select: none;
 }
 .panel-list .sin_l_info {
   flex: 1;
@@ -136,6 +139,7 @@
 }
 .panel-list .state {
   display: flex;
+  user-select: none;
 }
 .panel-list .state div {
   min-width: 50px;
@@ -218,6 +222,7 @@
   text-align: center;
   line-height: 30px;
   cursor: pointer;
+  user-select: none;
 }
 .panel-list .sin_r_right a {
   display: block;
@@ -275,8 +280,12 @@
   color: black;
 }
 #fixBox .backTop {
-  margin-top: 20px;
+  width: 100%;
   font-size: 14px;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   cursor: pointer;
 }
 #fixBox .backTop .backTop-icon {

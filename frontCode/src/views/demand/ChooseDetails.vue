@@ -13,36 +13,46 @@
       <!-- 排序 -->
       <div class="sort" style="position:relative">
         <!-- 展示按鈕 -->
-        <div class="sort_btn" @click="sortList">
+        <div class="sort_btn" @click="sortFlag = !sortFlag">
           <span>排序：</span>
-          <span>{{sortBy | sortNameFormat}}</span>
+          <span>{{ sortBy | sortNameFormat }}</span>
           <img src="../../assets/imgs/demand/arrow.png" alt />
         </div>
         <div class="classifyList" v-show="sortFlag">
           <span
             v-for="item in classifyList"
             :key="item.id"
-            :class="{active: sortBy==item.val}"
+            :class="{ active: sortBy == item.val }"
             @click="selectClassfiy(item.val)"
-          >{{item.name}}</span>
+            >{{ item.name }}</span
+          >
         </div>
       </div>
     </div>
     <!-- 標題 -->
     <div class="title" v-if="billInfo">
       <div class="tit_text">
-        【模具】需求單號{{billInfo.bill_no}}&nbsp;需求量:{{billInfo.amount}}
-        <router-link :to="'/particulars?pkid=' + pkid" class="title_btn">詳情</router-link>
+        【模具】需求單號{{ billInfo.bill_no }}&nbsp;需求量:{{ billInfo.amount }}
+        <router-link :to="'/particulars?pkid=' + pkid" class="title_btn"
+          >詳情</router-link
+        >
       </div>
-      <div class="tit_info">我的報價: {{billInfo.total_price}}&nbsp;{{billInfo.money_type}}</div>
-      <div class="tit_info">發佈時間: {{billInfo.publish_date}}</div>
+      <div class="tit_info">
+        我的報價: {{ billInfo.total_price }}&nbsp;{{ billInfo.money_type }}
+      </div>
+      <div class="tit_info">發佈時間: {{ billInfo.publish_date }}</div>
       <div class="tit_unit">
         當前項目投標單位數
-        <span>{{billInfo.give_recv_user_list ? billInfo.give_recv_user_list.length : 0}}</span>
+        <span>{{
+          billInfo.give_recv_user_list ? billInfo.give_recv_user_list.length : 0
+        }}</span>
       </div>
     </div>
     <!-- 表格信息 -->
-    <table style="width:100%; text-align:center; border-collapse:collapse;" v-if="give_price_list">
+    <table
+      style="width:100%; text-align:center; border-collapse:collapse;"
+      v-if="give_price_list"
+    >
       <!-- 表頭 -->
       <tr>
         <th style="min-width: 40px;">排名</th>
@@ -50,49 +60,52 @@
         <th style="min-width: 60px;">總報價</th>
         <th style="min-width: 180px;">廠商報價</th>
         <th style="min-width: 100px;">交期</th>
-        <th style="min-width: 280px;">備註</th>
+        <th style="min-width: 140px;">備註</th>
         <th style="min-width: 140px;">操作</th>
       </tr>
       <!--  -->
       <tr v-for="(singleList, index) in give_price_list" :key="singleList.pkid">
-        <td>{{(index + 1)+(currentPage-1)*pageSize}}</td>
+        <td>{{ index + 1 + (currentPage - 1) * pageSize }}</td>
         <td>
           <router-link
-            :to="'/merchant/information?pkid='+singleList.recv_user.pkid"
+            :to="'/merchant/information?pkid=' + singleList.recv_user.pkid"
             style="color:#0096ff"
-          >{{singleList.recv_user.dept_name}}</router-link>
+            >{{ singleList.recv_user.dept_name }}</router-link
+          >
         </td>
-        <td>
-          {{singleList.total_price * billInfo.amount}}
-        </td>
+        <td>{{ singleList.total_price * billInfo.amount }}</td>
         <td>
           <div class="detailList">
-            <span>{{singleList.total_price}}</span>
-            <div
-              class="showList"
-              @click="getSlavList(singleList)"
-            >
+            <span>{{ singleList.total_price }}</span>
+            <div class="showList" @click="getSlavList(singleList)">
               <!-- @click="alertBoxShow(), " -->
               <span></span>
               標書
             </div>
           </div>
         </td>
-        <td>{{singleList.deliver_date.split(' ')[0]}}</td>
-        <td>{{singleList.descp}}</td>
+        <td>{{ singleList.deliver_date.split(" ")[0] }}</td>
+        <td>{{ singleList.descp }}</td>
         <td
           v-if="billInfo.bill_status === '1'"
-          class="chooseToWin"
+          :class="chooseToWinFlag? 'chooseToWin':'chooseToWinDisabled' "
           @click="chooseToWin(singleList.pkid, singleList.recv_user.dept_name)"
-        >选为中标</td>
+        >          
+          选为中标
+        </td>
         <td v-else>
-          <img v-if="singleList.f_win_bid === 'Y'" src="../../assets/imgs/demand/winImg.png" alt />
+          <img
+            v-if="singleList.f_win_bid === 'Y'"
+            src="../../assets/imgs/demand/winImg.png"
+            alt
+          />
         </td>
       </tr>
       <tr v-if="give_price_list.length == 0">
         <td colspan="7">暫無數據</td>
       </tr>
     </table>
+
     <!-- 分頁 -->
     <Paging
       :total="total"
@@ -100,38 +113,6 @@
       :page-size="pageSize"
       @getCurrentPage="getListDate"
     ></Paging>
-
-    <!-- 競價彈窗 -->
-    <section id="alertBox" v-show="alertBoxFlag">
-      <div class="content">
-        <div class="closeBox" @click="alertBoxShow"></div>
-        <!-- 表格一 -->
-        
-        <!-- 表格二 -->
-        <div class="con_form">
-          <div class="list_info">報價清單（單套）:</div>
-          <table class="list_table" cellspacing="0" cellpadding="0">
-            <tr>
-              <th>零件名</th>
-              <!-- <th>零件名（接單方定義）</th> -->
-              <th>數量</th>
-              <th>報價（{{billInfo.money_type}}/個）</th>
-              <th>小計（{{billInfo.money_type}}）</th>
-            </tr>
-            <tr v-for="(item) in slav_list" :key="item.pkid">
-              <!-- <td>{{item.part_doc_file ? item.part_doc_file.file_origin_name.split('.')[0] : '其它'}}</td> -->
-              <td>{{item.part_name.split('.')[0]}}</td>
-              <td>{{item.part_amunt || 0 }}</td>
-              <td>{{item.part_unit_price || 0}}</td>
-              <td>{{item.part_price_sum || 0}}</td>
-            </tr>
-          </table>
-          <span style="display:inline-block; margin-top:20px; color:#0096ff; cursor:pointer;" @click="checkList()">查看標書</span>
-          <br/>
-          <button style="margin-top:40px;" @click="exportExcel">導出Excel</button>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -146,6 +127,8 @@ import {
 export default {
   data() {
     return {
+      // 是否能選標
+      chooseToWinFlag: false,
       sortItem: "",
       // 總數據量
       total: 1,
@@ -158,8 +141,6 @@ export default {
       give_price_list: [],
       // 訂單信息
       billInfo: {},
-      // 是否彈窗
-      alertBoxFlag: false,
       // 零件清單信息
       slav_list: [],
       // 排序
@@ -178,7 +159,7 @@ export default {
       bookType: "xlsx",
       filename: "",
       // ==================
-      recvPkid: ''
+      recvPkid: ""
     };
   },
   methods: {
@@ -186,37 +167,32 @@ export default {
     checkList() {
       sessionStorage.setItem("biddinfdDoc", JSON.stringify(this.billInfo));
       sessionStorage.setItem("recvPkid", JSON.stringify(this.recvPkid));
-      const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
-      window.open(url);
+      // const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
+      let routeData = this.$router.resolve({
+        path: "/biddingDoc",
+        query: { loaded: true, pkid: this.pkid }
+      });
+      window.open(routeData.href, "_blank");
     },
 
-    // 展開 | 關閉 下拉列表
-    sortList() {
-      this.sortFlag = this.sortFlag ? false : true;
-    },
     // 選中的項
     selectClassfiy(val) {
-      console.log(val);
       this.sortBy = val;
       this.sortFlag = false;
     },
 
-    // 彈窗
-    alertBoxShow() {
-      var flag = this.alertBoxFlag ? false : true;
-      return (this.alertBoxFlag = flag);
-    },
-
     // 獲取零件清單信息
     getSlavList(singleList) {
-      const pkid = singleList.pkid
-      this.recvPkid = singleList.recv_user_pkid
-      sessionStorage.setItem('deliverDate', JSON.stringify(singleList.deliver_date))
+      const pkid = singleList.pkid;
+      this.recvPkid = singleList.recv_user_pkid;
+      sessionStorage.setItem(
+        "deliverDate",
+        JSON.stringify(singleList.deliver_date)
+      );
       for (let item of this.give_price_list) {
         if (item.pkid == pkid) {
-          console.log(item.slav_list)
-          sessionStorage.setItem('slavList', JSON.stringify(item.slav_list))
-          this.checkList()
+          sessionStorage.setItem("slavList", JSON.stringify(item.slav_list));
+          this.checkList();
 
           this.slav_list = item.slav_list;
           this.getExcelList(item);
@@ -225,8 +201,22 @@ export default {
       }
     },
 
+    // 判斷是否能選擇中標
+    getTimeStatus() {
+      let endDate = new Date(this.billInfo.bid_end_date);
+      let nowDate = new Date();
+      this.chooseToWinFlag  = nowDate > endDate ?  true : false
+    },
+
     // 選為中標
     chooseToWin(pkid, deptName) {
+      if(!this.chooseToWinFlag){
+        return this.$alert('競標結束時間未到，不能選標！', '警告', {
+          confirmButtonText: '确定',
+          // callback: action => {}
+        });
+      }
+
       this.$confirm('请确认是否将 "' + deptName + '" 选为中标单位?', "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -234,7 +224,6 @@ export default {
       })
         .then(() => {
           select_win_bid(pkid).then(res => {
-            console.log(res);
             if (res.code === "1") {
               this.getBillInfo();
               this.getListDate(
@@ -245,7 +234,7 @@ export default {
                 message: "成功!"
               });
             } else {
-              this.$message.error("網絡開小差了，稍後再試試吧！");
+              this.$message.error(res.msg);
             }
           });
         })
@@ -273,8 +262,9 @@ export default {
           this.give_price_list = [];
           this.total = res.t.row_total;
           const listData = res.t.give_price_list;
-          console.log(listData);
           this.changeListData(listData);
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -284,7 +274,6 @@ export default {
       for (let item of listData) {
         this.give_price_list.push(item);
       }
-      console.log(this.give_price_list);
     },
 
     // 查詢訂單信息
@@ -292,8 +281,10 @@ export default {
       query_bill_by_pkid(this.pkid).then(res => {
         if (res.code === "1") {
           this.billInfo = res.t;
+          this.getTimeStatus();
+        } else {
+          this.$message.error(res.msg);
         }
-        console.log(this.billInfo);
       });
     },
 
@@ -314,7 +305,6 @@ export default {
         list.push(obj);
       }
 
-      console.log(this.billInfo);
       const recv = val.recv_user;
       const send = this.billInfo.send_user;
       const billInfo = this.billInfo;
@@ -453,7 +443,6 @@ export default {
         moudle.export_json_to_excel({
           header: tHeader,
           data,
-          // filename: this.filename === "" ? "filename" : this.filename,
           filename: this.billInfo.bill_no || "filename",
           autoWidth: this.autoWidth,
           bookType: this.bookType
@@ -461,7 +450,6 @@ export default {
       });
     },
     formatJson(filterVal, jsonData) {
-      console.log(jsonData.map(v => filterVal.map(j => v[j])));
       return jsonData.map(v => filterVal.map(j => v[j]));
     }
   },
@@ -498,10 +486,7 @@ export default {
       this.getListDate();
     }
   },
-  computed:{
-    // slav_list
-    // total_price
-  }
+  computed: {}
 };
 </script>
 
@@ -566,7 +551,6 @@ export default {
   left: 50%;
   transform: translateX(-50%);
   background-color: #d7efff;
-  // border-radius: 15px;
   width: 130px;
   z-index: 1;
   span {
@@ -613,7 +597,6 @@ export default {
   margin-top: 10px;
 }
 .tit_unit {
-  // color: #0096ff;
   color: #626f7f;
   margin: 24px 0 16px;
   span {
@@ -664,23 +647,24 @@ table {
     color: #0096ff;
     cursor: pointer;
   }
+  .chooseToWinDisabled{
+    color: #626f7f;
+    cursor: not-allowed;
+  }
 }
 // 分页
 .paging {
   padding: 28px;
   text-align: center;
   height: 50px;
-  // background-color: #d3dfe7;
   /deep/ .number {
     width: 30px;
     height: 30px;
     line-height: 30px;
-    // text-align: center;
     background: url(../../assets/imgs/index/pageIndBG.png) no-repeat center;
     color: #12222e;
     font-size: 14px;
     &.active {
-      // 485463
       color: #fff;
       background: url(../../assets/imgs/index/pageindBG-ac.png) no-repeat center;
     }
@@ -757,7 +741,6 @@ table {
     margin-top: 15px;
     width: 100%;
     border-collapse: collapse;
-    // border: 1px solid #C0C8CF;
     th {
       background-color: #c8d4de;
     }

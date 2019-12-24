@@ -7,15 +7,18 @@
 .container {
   height: 100%;
   position: relative;
-  >.top {
+
+  > .top {
     height: 30px;
     width: 100%;
     background: #AAC0CF; // rgba(170,192,207,1)
     color: #333;
+
     .top-nav {
       height: 30px;
       display: flex;
       justify-content: flex-end;
+
       ul {
         li {
           height: 30px;
@@ -24,6 +27,7 @@
           margin-left: 30px;
           font-size: 14px;
           color: #333333;
+
           a {
             text-decoration: none;
             color: #333;
@@ -33,26 +37,30 @@
     }
   }
 
-  >.logo {
+  > .logo {
     height: 80px;
     background-color: #D7EFFF; //rgba(215,239,255,1)
     display: flex;
-    align-items: : center;
+    align-items:: center;
+
     .logo-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      >a {
+
+      > a {
         display: block;
         width: 127px;
         height: 50px;
         background: url(../../imgs/index/logo.png) no-repeat;
       }
+
       .search-box {
         height: 36px;
         font-size: 0;
         display: flex;
         align-items: center;
+
         .search-text {
           font-size: 16px;
           width: 250px;
@@ -65,6 +73,7 @@
           outline: none;
           font-size: 14px;
         }
+
         .search-btn {
           width: 70px;
           height: 36px;
@@ -79,53 +88,65 @@
     }
   }
 
-  >.content {
+  > .content {
     background: #12222E url(../../imgs/particulars/contentBG.png) no-repeat top center / contain;
     padding-top: 24px;
-    >.main {
+
+    > .main {
       background: rgba(13, 28, 42, 0.2);
       padding: 20px 0;
-      >.warpper {
+
+      > .warpper {
         margin: 0 20px;
         position: relative;
-        >.general {
+
+        > .general {
           height: 260px;
           padding: 20px 30px;
           background-color: #0096FF;
           // 頂部信息
-          >.title {
+          > .title {
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: #fff;
-            span:nth-child(1) {}
+
+            span:nth-child(1) {
+            }
+
             span:nth-child(2) {
               color: #9DCCFF;
               font-size: 12px;
             }
           }
+
           // 總額
-          >.amount {
+          > .amount {
             margin-top: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: #fff;
-            >span {
+
+            > span {
               color: #D9E9F3;
               font-size: 14px;
             }
-            >.number {
+
+            > .number {
               margin-top: 8px;
+
               span:nth-child(1),
               span:nth-child(3) {
                 font-size: 14px;
               }
+
               span:nth-child(2) {
                 font-size: 48px;
               }
             }
-            >.info {
+
+            > .info {
               margin-top: 36px;
               width: 100%;
               display: flex;
@@ -135,7 +156,8 @@
             }
           }
         }
-        >.slogan {
+
+        > .slogan {
           width: 422px;
           height: 45px;
           background: url(../../imgs/merchant/sloganBG.png) no-repeat;
@@ -148,19 +170,23 @@
           text-align: center;
           line-height: 45px;
         }
-        >.formBox {
+
+        > .formBox {
           background-color: #D3DFE7;
           display: flex;
           flex-direction: column;
           align-items: center;
-          >.title {
+
+          > .title {
             margin-top: 60px;
             text-align: center;
-            >span {
+
+            > span {
               color: #0096FF;
               font-size: 18px;
             }
-            >div {
+
+            > div {
               margin-top: 26px;
               background: #C6D4DE;
               text-align: center;
@@ -170,24 +196,29 @@
               flex-direction: column;
               justify-content: center;
               align-items: center;
+
               span:nth-child(1) {
                 color: #12222E;
                 font-size: 20px;
               }
+
               span:nth-child(2) {
                 color: #50616F;
                 font-size: 14px;
               }
             }
           }
-          >.info {
+
+          > .info {
             width: 960px;
             display: flex;
             justify-content: space-between;
             margin-top: 40px;
+
             .formLeft,
             .formRight {
               width: 50%;
+
               /deep/ .el-form {
                 // margin-bottom: 150px;
                 // 單獨列
@@ -202,22 +233,26 @@
                     color: #212F3A;
                     padding: 0;
                   }
+
                   // content全局效果修改
                   .el-form-item__content {
                     font-size: 16px;
                     color: #212F3A;
                     margin-left: 10px !important;
+
                     .el-input {
                       input {
                         background-color: #D3DFE7;
                         border: 1px solid #AFC2CF;
                         border-radius: 0px;
                         width: 326px;
+
                         &:focus {
                           border-color: #0092FF;
                         }
                       }
                     }
+
                     .el-textarea {
                       textarea {
                         background-color: #D3DFE7;
@@ -225,12 +260,14 @@
                         border-radius: 0px;
                         width: 326px;
                         height: 164px;
+
                         &:focus {
                           border-color: #0092FF;
                         }
                       }
                     }
                   }
+
                   // logo
                   &.logo {
                     .el-form-item__content {
@@ -239,6 +276,7 @@
                       justify-content: space-between;
                       align-items: center;
                     }
+
                     span:nth-child(2) {
                       color: #2E6E9E;
                       font-size: 16px;
@@ -250,6 +288,7 @@
                       line-height: 24px;
                       border-radius: 13px;
                     }
+
                     span:nth-child(3) {
                       color: #7D919F;
                       font-size: 14px;
@@ -260,12 +299,14 @@
               }
             }
           }
-          >.chooseBtn {
+
+          > .chooseBtn {
             margin-top: 70px;
             margin-bottom: 40px;
             position: relative;
             cursor: pointer;
-            >a {
+
+            > a {
               span {
                 position: absolute;
                 top: 50%;
@@ -282,45 +323,58 @@
     }
   }
 
-  >.footer {
+  > .footer {
     height: 160px;
     background-color: #12222E;
     color: #2D3B49;
     font-size: 14px;
+
     .foo-content {
       height: 100%;
+
       .foo-warpper {
         height: 100%;
         margin: 0 20px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+
         .technical {
           display: flex;
           align-items: center;
+
           .m-logo {
             width: 35px;
             height: 21px;
             background-image: url(../../imgs/index/m-logo.png);
             margin-right: 10px;
           }
-          .text {}
+
+          .text {
+          }
         }
-        .customer {}
+
+        .customer {
+        }
+
         .blogroll {
           display: flex;
           align-items: center;
+
           div:nth-child(1) {
             margin-right: 8px;
           }
+
           a {
             text-decoration: none;
             out-line: none;
             color: #2D3B49;
+
             &:hover {
               color: #D3DFE7;
             }
           }
+
           .line {
             width: 1px;
             height: 15px;

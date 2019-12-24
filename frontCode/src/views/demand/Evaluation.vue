@@ -77,357 +77,13 @@ export default {
       // 当前页
       currentPage: null,
       // 每页数目
-      pageSize: 5,
+      pageSize: 6,
       // 展现的评价
       comments: [],
       // 收到的評價
-      allReceivedComments: [
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:30",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:31",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:32",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:33",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:34",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:35",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:36",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:38",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:39",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:40",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:41",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:42",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:43",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:44",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:45",
-          belong: "FOXCONN 成都制一处"
-        }
-      ],
+      allReceivedComments: [],
       // 做出的评价
-      allPublishedComments: [
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:00",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:01",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:02",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:03",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:04",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:05",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:06",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:07",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:08",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:09",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:10",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:11",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:12",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:13",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:14",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:15",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:16",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:17",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:18",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:19",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:20",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:21",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:22",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:23",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:24",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:25",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:26",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:27",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:28",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:29",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:30",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:31",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:32",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:33",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:34",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:35",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:36",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:37",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:38",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:39",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:40",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:41",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "与该公司合作的非常愉快，交货时间没有延期，制作的东西非常棒，希望下次有机会再次合作。",
-          date: "2019-08-29 17:22:42",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "很不错，多次合作，一如既往的好。",
-          date: "2019-08-29 17:22:43",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text: "不好说，习惯性好评。",
-          date: "2019-08-29 17:22:44",
-          belong: "FOXCONN 成都制一处"
-        },
-        {
-          text:
-            "虽然出现了一点小状况，但是商家后面还是很耐心的给解决了，给商家服务态度点个赞。",
-          date: "2019-08-29 17:22:45",
-          belong: "FOXCONN 成都制一处"
-        }
-      ],
+      allPublishedComments: [],
       // 选中的侧边栏条目
       silderBarItem: "evaluation",
       // 評價類型
@@ -469,16 +125,17 @@ export default {
       this.currentPage = Number(page);
       sessionStorage.setItem("demandGetEvaCurrentPage", this.currentPage);
       if (this.commentsType == "received") {
-        console.log("received");
         this._query_send_get_eval_list();
       } else if (this.commentsType == "published") {
-        console.log("published");
         this._query_send_make_eval_list();
       } else {
         this._query_send_get_eval_list();
+        this.commentsType = "received";
         query_send_make_eval_list(this.currentPage, this.pageSize).then(res => {
           if (res.code === "1") {
             this.publishedNum = res.t.row_total;
+          } else {
+            this.$message.error(res.msg);
           }
         });
       }
@@ -494,13 +151,14 @@ export default {
           this.receivedNum = res.t.row_total;
           const listData = res.t.send_get_eval_list;
           this.changeListData(listData);
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
     // published
     _query_send_make_eval_list() {
       query_send_make_eval_list(this.currentPage, this.pageSize).then(res => {
-        console.log(res);
         if (res.code === "1") {
           // 清空原有數據
           this.comments = [];
@@ -508,6 +166,8 @@ export default {
           this.publishedNum = res.t.row_total;
           const listData = res.t.send_make_eval_list;
           this.changeListData(listData);
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -518,7 +178,7 @@ export default {
         const obj = {
           text: item.summary_text,
           date: item.create_date,
-          belong: item.recv_user.dept_name
+          belong: item.recv_user ? item.recv_user.dept_name : "此賬號已註銷"
         };
         this.comments.push(obj);
       }
@@ -528,15 +188,16 @@ export default {
     getRate() {
       query_send_get_eval_avg().then(res => {
         if (res.code === "1") {
-          if(!res.t) return
+          if (!res.t) return;
           this.rate.list[0].value = Number(res.t.pay_rate_avg);
           this.rate.list[1].value = Number(res.t.svc_atitu_avg);
+        } else {
+          this.$message.error(res.msg);
         }
       });
     }
   },
   created() {
-    // this.getPage();
     // 獲取分頁數據
     let page = Number(sessionStorage.getItem("demandGetEvaCurrentPage"));
     page = page ? page : 1;
@@ -575,6 +236,7 @@ export default {
   display: flex;
   align-items: center;
   cursor: pointer;
+  user-select: none;
   div {
     width: 200px;
     height: 36px;
@@ -582,6 +244,7 @@ export default {
     text-align: center;
     background-color: #c8d4de;
     color: #212f3a;
+    transition-duration: 0.2s;
     &.active,
     &:hover {
       background-color: #2e6e9e;
@@ -592,6 +255,7 @@ export default {
 // 評分
 .main_rate {
   margin-top: 16px;
+  user-select: none;
   > .single {
     display: flex;
     align-items: center;
@@ -628,6 +292,4 @@ export default {
     bottom: 20px;
   }
 }
-// 分頁
-// .main_paging {}
 </style>

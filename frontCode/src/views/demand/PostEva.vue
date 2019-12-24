@@ -34,7 +34,12 @@
         <el-input type="textarea" placeholder="请输入您對商家的評價" v-model="comments"></el-input>
         <!-- 匿名 -->
         <div class="anonymity">
-          <el-checkbox label="匿名評價" name="type" @change="anonymityFlag = !anonymityFlag" :checked="anonymityFlag"></el-checkbox>
+          <el-checkbox
+            label="匿名評價"
+            name="type"
+            @change="anonymityFlag = !anonymityFlag"
+            :checked="anonymityFlag"
+          ></el-checkbox>
           <div>匿名評價不會再個人主頁中展示昵称</div>
         </div>
       </div>
@@ -107,7 +112,7 @@ export default {
         if (res.code === "1") {
           this.orderInfo = res.t;
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -117,7 +122,7 @@ export default {
       for (let item of this.rateList) {
         if (!item.val) return this.$message.warning("評分未完成");
       }
-      if(!this.comments) return this.$message.warning("評價未完成");
+      if (!this.comments) return this.$message.warning("評價未完成");
       this.postEva();
     },
 
@@ -130,14 +135,14 @@ export default {
         out_qual_score: this.rateList[2].val,
         svc_atitu_score: this.rateList[3].val,
         summary_text: this.comments,
-        f_anomus: (this.anonymityFlag ? "Y" : "N")
+        f_anomus: this.anonymityFlag ? "Y" : "N"
       };
       save_send_eval(data).then(res => {
-        if(res.code === "1"){
-          this.$message.success("評價成功")
-          this.$router.push('/demand')
-        }else{
-          this.$message.error("出錯啦，稍後再試試吧")
+        if (res.code === "1") {
+          this.$message.success("評價成功");
+          this.$router.push("/demand");
+        } else {
+          this.$message.error(res.msg);
         }
       });
     }

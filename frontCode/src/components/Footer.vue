@@ -3,10 +3,10 @@
         <div class="foo-warpper type-area">
           <div class="technical">
             <div class="m-logo"></div>
-            <div class="text">技術服務: 只能雲網絡開發成都分部</div>
+            <div class="text">技術服務: 智能雲網絡開發成都分部</div>
           </div>
           <div class="customer">
-            客戶服務: 5073-66811
+            客戶服務: 5073-66645
           </div>
           <div class="blogroll">
             <div>友情鏈接: </div>

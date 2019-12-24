@@ -30,4 +30,22 @@ public interface BaseInfoMapper {
 
     // 根據單位代碼查詢單位名稱
     B_DEPT_bean query_dept_name_by_dept_no(String dept_no);
+
+    // 模糊搜索法人
+    List<BaseInfoParam> query_legal_person(String legal_person);
+
+    // 查詢廠區條件子項
+    List<QueryConditionSub> listFactorySub();
+
+    // 查詢事業群條件子項
+    List<QueryConditionSub> listBusinessSub();
+
+    // 查詢產品處條件子項
+    List<QueryConditionSub> listProductSub();
+
+    // 查詢類型條件子項
+    List<QueryConditionSub> listTypeSub();
+
+    // 查詢訂單狀態list
+    List<BillStatusDO> listBillStatus();
 }

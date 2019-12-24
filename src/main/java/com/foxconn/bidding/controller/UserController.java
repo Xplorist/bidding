@@ -47,7 +47,7 @@ public class UserController {
         return svc.login_user_info(param, request);
     }
 
-    // 根據用戶id查詢用戶信息
+    // 【05】根據用戶id查詢用戶信息
     @RequestMapping("/query_user_info_by_pkid")
     public ResultParam query_user_info_by_pkid(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
         ResultParam result = svc.query_user_info_by_pkid(param, request);
@@ -84,6 +84,33 @@ public class UserController {
     @RequestMapping("/update_password")
     public ResultParam update_password(@RequestBody VERIFICATION_CODE_bean param, HttpServletRequest request) {
         ResultParam result = svc.update_password(param, request);
+
+        return result;
+    }
+
+    // 【10】條件分頁查詢用戶list
+    @VerifyToken
+    @RequestMapping("/queryUserList")
+    public ResultParam queryUserList(@RequestBody USER_INFO_bean param, HttpServletRequest request) {
+        ResultParam result = svc.queryUserList(param, request);
+
+        return result;
+    }
+
+    // 【11】刪除賬號
+    @VerifyToken
+    @RequestMapping("/deleteUser")
+    public ResultParam deleteUser(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.deleteUser(param, request);
+
+        return result;
+    }
+
+    // 【12】統計所有賬號的相關信息
+    @VerifyToken
+    @RequestMapping("/queryAllUsersStatistics")
+    public ResultParam queryAllUsersStatistics(@RequestBody RequestParam param, HttpServletRequest request) {
+        ResultParam result = svc.queryAllUsersStatistics(param, request);
 
         return result;
     }

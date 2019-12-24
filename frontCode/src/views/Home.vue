@@ -5,11 +5,11 @@
     <section id="content">
       <!-- 左上角tag -->
       <div class="con-tag type-area">
-        <ul>
+        <!-- <ul>
           <li>交易總額: ￥95,371,863元</li>
           <li>需求總量: 3,537個</li>
           <li>競標單位: 26個</li>
-        </ul>
+        </ul>-->
       </div>
       <!-- 主體內容：模治檢具任務需求 -->
       <div class="con-req type-area">
@@ -32,10 +32,7 @@
         <div class="panel-filter">
           <div class="fil-purpose">
             <div>類型:</div>
-            <select
-              @change="change_classify('purpose')"
-              v-model="filterCondition.purpose"
-            >
+            <select v-model="filterCondition.purpose">
               <option value="all">全部</option>
               <option
                 v-for="item in typeList"
@@ -47,7 +44,7 @@
           </div>
           <div class="fil-scope">
             <div>開標範圍:</div>
-            <select @change="change_classify('scope')" v-model="filterCondition.scope">
+            <select v-model="filterCondition.scope">
               <option
                 v-for="item in rangeList"
                 :key="item.pkid"
@@ -58,10 +55,7 @@
           </div>
           <div class="fil-state">
             <div>狀態:</div>
-            <select
-              @change="change_classify('state')"
-              v-model="filterCondition.state"
-            >
+            <select v-model="filterCondition.state">
               <option value="all">全部</option>
               <option value="ing">競標中</option>
               <option value="end">已結束</option>
@@ -69,7 +63,7 @@
           </div>
           <div class="fil-site">
             <div>交貨地點:</div>
-            <select @change="change_classify('site')" v-model="filterCondition.site">
+            <select v-model="filterCondition.site">
               <option value="all">全部</option>
               <option
                 v-for="item in addressList"
@@ -81,10 +75,7 @@
           </div>
           <div class="fil-time">
             <div>交貨時間:</div>
-            <select
-              @click="change_classify('time')"
-              v-model="filterCondition.time"
-            >
+            <select v-model="filterCondition.time">
               <option value="all">默認</option>
               <option value="0_5">0-5天</option>
               <option value="5_10">5-10天</option>
@@ -184,7 +175,7 @@
         </div>
       </div>
       <!-- 返回頂端 -->
-      <div class="backTop" @click="backTop()">
+      <div class="backTop" v-show="backFlag" @click="backTop()">
         <div class="backTop-icon"></div>
         <div class="backTop-text">返回頂端</div>
       </div>
@@ -234,7 +225,9 @@ export default {
       // 目標範圍
       rangeList: [],
       // 交貨地點
-      addressList: []
+      addressList: [],
+      // 返回顯示
+      backFlag: false
     };
   },
   components: {
@@ -244,6 +237,14 @@ export default {
     Paging
   },
   methods: {
+    // 處理滾動
+    handleScroll() {
+      if (window.scrollY > 400) {
+        this.backFlag = true;
+      } else {
+        this.backFlag = false;
+      }
+    },
     // 返回頂端
     backTop() {
       if (document.documentElement.scrollTop > 0) {
@@ -265,28 +266,26 @@ export default {
       query_pd_type_list().then(res => {
         if (res.code === "1") {
           this.typeList = res.t;
-          console.log(this.typeList);
+        } else {
+          this.$message.error(res.msg);
         }
       });
 
       query_bid_range_list().then(res => {
         if (res.code === "1") {
           this.rangeList = res.t;
-          console.log(this.rangeList);
+        } else {
+          this.$message.error(res.msg);
         }
       });
 
       query_deliver_address_list().then(res => {
         if (res.code === "1") {
           this.addressList = res.t;
-          console.log(this.addressList);
+        } else {
+          this.$message.error(res.msg);
         }
       });
-    },
-    // 修改篩選信息
-    change_classify(type) {
-      console.log(this.filterCondition);
-      console.log(type);
     },
     // // 修改條件後重新獲取數據
     // changeData() {
@@ -349,21 +348,23 @@ export default {
       if (this.userInfo && this.userInfo.send_recv_type === "recv") {
         // 接單方
         query_bill_list_recv_main(data).then(res => {
-          console.log(res);
           if (res.code === "1") {
             this.total = res.t.row_total;
             var result = res.t.bill_list;
             this.changeListData(result);
+          } else {
+            this.$message.error(res.msg);
           }
         });
       } else {
         // 未登錄
         query_bill_list_not_login(data).then(res => {
-          console.log(res);
           if (res.code === "1") {
             this.total = res.t.row_total;
             var result = res.t.bill_list;
             this.changeListData(result);
+          } else {
+            this.$message.error(res.msg);
           }
         });
       }
@@ -429,7 +430,6 @@ export default {
         };
         this.listData.push(obj);
       }
-      console.log(data)
     }
   },
   created() {
@@ -439,6 +439,12 @@ export default {
 
     this.query_classify();
   },
+  mounted() {
+    window.addEventListener("scroll", this.handleScroll, true);
+  },
+  destroyed() {
+    window.removeEventListener("scroll", this.handleScroll);
+  },
   computed: {
     ...mapState({
       porImgUrl: state => state.porImgUrl,
@@ -446,9 +452,9 @@ export default {
     })
   },
   watch: {
-    filterCondition:{
-      handler : function() {
-        this.getListDate()
+    filterCondition: {
+      handler: function() {
+        this.getListDate();
       },
       deep: true
     }

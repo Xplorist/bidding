@@ -50,7 +50,7 @@ export default {
           sub: ""
         },
         // { ename: "news", name: "消息", path: "", sub: "2" },
-        { ename: "", name: "收藏", path: "", sub: "" },
+        // { ename: "", name: "收藏", path: "", sub: "" },
         { ename: "setting", name: "設置", path: "/personal/setting", sub: "" }
       ]
     };
@@ -80,7 +80,6 @@ export default {
   width: 240px;
   // 設置最小高度
   min-height: 800px;
-  // height: 950px;
   background-color: #d3dfe7;
   display: flex;
   flex-direction: column;
@@ -96,6 +95,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  user-select: none;
   .porImg {
     width: 120px;
     height: 120px;
@@ -128,6 +128,7 @@ export default {
 .side_navigate {
   margin-top: 26px;
   width: 100%;
+  user-select: none;
   > a {
     display: block;
     width: 100%;

@@ -23,6 +23,7 @@ public class GIVE_PRICE_MSTR_bean {
     private List<GIVE_PRICE_SLAV_bean> slav_list;// 報價明細list（從表list）
     private String sort_way;// 排序方式（complex: 綜合排序，price: 報價排序，date: 交期排序）
     private USER_INFO_bean recv_user;// 接單用戶
+    private String f_valid;// 有效標誌（Y-有效，能選； N-無效，不能選）
 
     // 分頁查詢參數字段
     private Integer pageIndex;// 分頁頁碼

@@ -9,12 +9,10 @@ import htmlToPdf from './assets/js/htmlToPdf'
 
 Vue.config.productionTip = false
 
-// Vue.prototype.axios = axios
 Vue.prototype.$md5 = md5
 
 Vue.use(ElementUI)
 Vue.use(htmlToPdf)
-// Vue.use()
 
 new Vue({
   router,

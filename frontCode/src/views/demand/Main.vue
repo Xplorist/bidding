@@ -217,7 +217,6 @@ export default {
   methods: {
     // 操作處理
     handleOperation(to, pkid) {
-      console.log(to, pkid);
       let data = {
         pkid: pkid,
         bill_status: ""
@@ -254,11 +253,10 @@ export default {
     // 變更狀態
     updataStatus(data) {
       update_bill_status(data).then(res => {
-        console.log(res);
         if (res.code === "1") {
           this.getListDate(this.currentPage);
         } else {
-          this.$message.error("出錯啦，稍後再試試吧");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -274,7 +272,6 @@ export default {
     getListDate(page = 1) {
       this.currentPage = Number(page);
       sessionStorage.setItem("demandMainCurrentPage", this.currentPage);
-      console.log()
       query_bill_list_send_user(
         this.classify,
         this.currentPage,
@@ -286,6 +283,8 @@ export default {
           this.total = res.t.row_total;
           const listData = res.t.bill_list;
           this.changeListData(listData);
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -372,7 +371,7 @@ export default {
               case "1":
                 this.classifyList[i].num = result.num_status_1;
                 break;
-                case "1.5":
+              case "1.5":
                 this.classifyList[i].num = result.num_status_1_5;
                 break;
               case "2":
@@ -397,6 +396,8 @@ export default {
                 break;
             }
           }
+        } else {
+          this.$message.error(res.msg);
         }
       });
     }
@@ -407,13 +408,13 @@ export default {
     // 獲取分頁數據
     let page = Number(sessionStorage.getItem("demandMainCurrentPage"));
     let classify = sessionStorage.getItem("demandMainCurrentClassify");
-    
+
     this.currentPage = page || 1;
 
-    if(classify && classify !== 'all'){
-      this.initPage = this.currentPage
-      this.classify = classify
-    }else{
+    if (classify && classify !== "all") {
+      this.initPage = this.currentPage;
+      this.classify = classify;
+    } else {
       this.getListDate(this.currentPage);
     }
   },
@@ -424,11 +425,11 @@ export default {
   watch: {
     classify: function() {
       sessionStorage.setItem("demandMainCurrentClassify", this.classify);
-      if(this.initPage == 1){
+      if (this.initPage == 1) {
         this.getListDate();
-      }else{
+      } else {
         this.getListDate(this.initPage);
-        this.initPage = 1
+        this.initPage = 1;
       }
     }
   }
@@ -527,11 +528,9 @@ export default {
     &:hover {
       background-color: #e1e9ef;
     }
-    // align-items: center;
   }
   // 左側
   .list_left {
-    // min-width: 40%;
     display: flex;
     justify-content: space-between;
   }
@@ -585,7 +584,6 @@ export default {
   .restTime {
     min-width: 250px;
     padding: 0 5px;
-    // height: 30px;
     line-height: 30px;
     text-align: center;
   }
@@ -630,6 +628,7 @@ export default {
     text-align: center;
     line-height: 30px;
     cursor: pointer;
+    user-select: none;
     img {
       margin-left: 5px;
     }

@@ -10,7 +10,7 @@ const $axios = axios.create({
   // 設置超時時間
   timeout: 30000,
   // 基礎url，在請求url中自動添加前置鏈接
-  // baseURL: 'http://10.244.186.86:8081'
+  baseURL: '/bid'
 })
 
 
@@ -48,14 +48,13 @@ $axios.interceptors.response.use(
     if (loading) {
       loading.close()
     }
-    // console.log(error)
     if (error.response) {
       switch (error.response.status) {
         case 404:
-          Message.error('網絡請求不存在')
+          Message.error('網絡請求不存在！')
           break
         case 500:
-          Message.error('服務器崩潰啦')
+          Message.error('服務器崩潰啦，請稍後再試！')
           break
         default:
           Message.error(error.response.data.message)
@@ -63,9 +62,9 @@ $axios.interceptors.response.use(
     } else {
       // 請求超時或者網絡有問題
       if (error.message.includes('timeout')) {
-        Message.error('請求超時！請檢查網絡是否正常')
+        Message.error('請求超時，請檢查網絡是否正常！')
       } else {
-        Message.error('請求失敗！請檢查網絡是否連接')
+        Message.error('請求失敗，請檢查網絡是否連接！')
       }
     }
     return Promise.reject(error)
@@ -81,8 +80,7 @@ export default {
       data: data,
       headers: {
         'Content-Type': (headers || 'application/json')
-        // 'Content-Type': 'application/json'
-        // 'Content-Type': 'multipart/form-data'
+        // 'application/json' || 'multipart/form-data'
       }
     })
   },

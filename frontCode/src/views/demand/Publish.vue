@@ -10,7 +10,11 @@
         <!-- 表單 -->
         <el-form ref="form1" :model="form" :rules="rules" label-width="130px">
           <el-form-item label="類型:" prop="purpose">
-            <el-select type="select" v-model="form.purpose" @click.native="getRange">
+            <el-select
+              type="select"
+              v-model="form.purpose"
+              @click.native="getRange"
+            >
               <el-option
                 v-for="item in rangeOptions"
                 :key="item.pkid"
@@ -29,18 +33,23 @@
           </el-form-item>
           <el-form-item label="競價持續時間:" prop="durTime">
             <el-select
-            type="select"
+              type="select"
               v-model="form.durTime"
               @change="getEndTime"
             >
-              <el-option v-for="item in durTimeList" :key="item.id" :value="item.val" :label="item.val+'小時'"></el-option>
+              <el-option
+                v-for="item in durTimeList"
+                :key="item.id"
+                :value="item.val"
+                :label="item.val + '小時'"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="競價結束時間:" prop="endTime">
             <el-date-picker
               v-model="form.endTime"
               type="datetime"
-              disabled=""
+              disabled
             ></el-date-picker>
           </el-form-item>
           <el-form-item label="交貨日期:" prop="deliveryTime">
@@ -55,20 +64,33 @@
             <!-- 帶輸入建議的輸入框 -->
             <el-autocomplete
               class="inline-input"
-              v-model="form.place"
+              v-model.trim="form.place"
               :fetch-suggestions="querySearch"
-              @select="handleSelect"
             ></el-autocomplete>
+            <!-- @select="handleSelect" -->
           </el-form-item>
           <el-form-item label="聯繫電話:">
-            <span style="margin-right:10px;">{{userInfo.tel}}</span>
-            <el-checkbox label="顯示聯繫電話" v-model="form.telCheck" name="type"></el-checkbox>
+            <span style="margin-right:10px;">{{ userInfo.tel }}</span>
+            <el-checkbox
+              label="顯示聯繫電話"
+              v-model="form.telCheck"
+              name="type"
+            ></el-checkbox>
           </el-form-item>
           <el-form-item label="需求數量:" prop="quantity">
-            <el-input v-model="form.quantity" type="number"></el-input>
+            <el-input
+              v-model="form.quantity"
+              type="number"
+              oninput="this.value = this.value.replace(/[^1-9]/g, '');"
+            ></el-input>
           </el-form-item>
           <el-form-item label="接受總價:" prop="price">
-            <el-input v-model="form.price" type="number" style="width:120px;"></el-input>
+            <el-input
+              v-model="form.price"
+              type="number"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+              style="width:120px;"
+            ></el-input>
             <!-- <el-form-item label="幣別:" prop="currencyType"> -->
             <el-radio
               label="RMB"
@@ -86,14 +108,22 @@
           </el-form-item>
 
           <el-form-item label="接單範圍:" prop="scope">
-            <el-select type="select" v-model="form.scope" @click.native="query_info('range')">
-              <el-option v-for="item in rangeList" :key="item.pkid" :value="item.name"></el-option>
+            <el-select
+              type="select"
+              v-model="form.scope"
+              @click.native="query_info('range')"
+            >
+              <el-option
+                v-for="item in rangeList"
+                :key="item.pkid"
+                :value="item.name"
+              ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="交貨模式:" prop="deliveryMode">
             <el-select type="select" v-model="form.deliveryMode">
               <el-option value="貨交工廠" selected></el-option>
-              <el-option value="工廠交貨" selected></el-option>
+              <!-- <el-option value="工廠交貨" selected></el-option> -->
             </el-select>
           </el-form-item>
         </el-form>
@@ -107,7 +137,7 @@
               <el-input
                 type="textarea"
                 v-model="form.requirement"
-                :autosize="{minRows:8}"
+                :autosize="{ minRows: 8 }"
                 placeholder="請填寫製作要求"
               ></el-input>
             </el-form-item>
@@ -123,10 +153,16 @@
                 <img src="../../assets/imgs/demand/add_white.png" alt />
                 <span>批量添加</span>
               </button>
-              <input type="file" ref="uploadFile" @change="getFile" multiple style="display: none" />
+              <input
+                type="file"
+                ref="uploadFile"
+                @change="getFile"
+                multiple
+                style="display: none"
+              />
             </div>
             <div class="info_right">
-              <div @click="accessFlag = true">
+              <!-- <div @click="accessFlag = true">
                 <img v-show="accessFlag" src="../../assets/imgs/demand/checked.png" alt />
                 <img v-show="!accessFlag" src="../../assets/imgs/demand/unchecked.png" alt />
                 <span>公開</span>
@@ -135,22 +171,32 @@
                 <img v-show="!accessFlag" src="../../assets/imgs/demand/checked.png" alt />
                 <img v-show="accessFlag" src="../../assets/imgs/demand/unchecked.png" alt />
                 <span>隱藏</span>
-              </div>（隱藏后只對中標單位公開圖檔）
+              </div>（隱藏后只對中標單位公開圖檔）-->
             </div>
           </div>
-          <span style="color: #F56C6C;fontSize: 14px;">* 請選擇pdf/dwg/xls文檔</span>
+          <span style="color: #F56C6C;fontSize: 14px;"
+            >* 請選擇體積小於100M的文檔</span
+          >
           <div class="accessContent">
             <!-- single -->
-            <div class="fileBox" v-for="(item, index) in accessList" :key="item.id">
-              <img src="../../assets/imgs/demand/img_pdf.png" alt />
-              <span class="fileName">{{item.file_origin_name}}</span>
-              <!-- <input type="text" v-model="item.part_amunt" /> -->
-              <img
-                class="close"
-                src="../../assets/imgs/demand/close.png"
-                @click="deleteFile(index)"
-              />
-            </div>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              placement="top-start"
+              v-for="(item, index) in accessList"
+              :key="item.id"
+              :content="'文件全稱：' + item.file_origin_name"
+            >
+              <div class="fileBox">
+                <img src="../../assets/imgs/particulars/File.png" alt />
+                <span class="fileName">{{ item.file_origin_name }}</span>
+                <img
+                  class="close"
+                  src="../../assets/imgs/demand/close.png"
+                  @click="deleteFile(index)"
+                />
+              </div>
+            </el-tooltip>
           </div>
           <!-- <div class="accessOperation">
             <div class="upList">
@@ -166,7 +212,12 @@
     <!-- 按鈕 -->
     <div class="btn">
       <div class="saveBtn" @click="check('form1', 'form2', 'save')">
-        <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="265px"
+          height="65px"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <!-- 外邊 -->
           <polygon
             points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
@@ -183,7 +234,12 @@
         <span>保存</span>
       </div>
       <div class="publishBtn" @click="check('form1', 'form2', 'publish')">
-        <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          width="265px"
+          height="65px"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <polygon
             points="0,5 5,0 260,0 265,5 265,60 260,65 5,65 0,60 0,5"
             style="fill:none;stroke:0096ff;stroke-width:1"
@@ -242,8 +298,8 @@ export default {
     var validatePrice = (rule, value, callback) => {
       if (this.form.price < 0) {
         callback(new Error("不能小於零！"));
-      } else{
-        callback()
+      } else {
+        callback();
       }
     };
 
@@ -251,8 +307,8 @@ export default {
     var validateQuantity = (rule, value, callback) => {
       if (this.form.quantity < 1) {
         callback(new Error("不能小於一！"));
-      } else{
-        callback()
+      } else {
+        callback();
       }
     };
 
@@ -293,7 +349,10 @@ export default {
           { required: true, message: "不能为空", trigger: "blur" },
           { validator: validateQuantity, trigger: "blur" }
         ],
-        price: [{ validator: validatePrice, trigger: "blur" }],
+        price: [
+          { required: true, message: "不能为空", trigger: "blur" },
+          { validator: validatePrice, trigger: "blur" }
+        ],
         currencyType: [],
         scope: [{ required: true, message: "不能為空", trigger: "blur" }],
         startTime: [{ required: true, validator: validateST, trigger: "blur" }],
@@ -307,30 +366,30 @@ export default {
       },
       // 持續時間列表
       durTimeList: [
-        {val: 24, id: 24},
-        {val: 23, id: 23},
-        {val: 22, id: 22},
-        {val: 21, id: 21},
-        {val: 20, id: 20},
-        {val: 19, id: 19},
-        {val: 18, id: 18},
-        {val: 17, id: 17},
-        {val: 16, id: 16},
-        {val: 15, id: 15},
-        {val: 14, id: 14},
-        {val: 13, id: 13},
-        {val: 12, id: 12},
-        {val: 11, id: 11},
-        {val: 10, id: 10},
-        {val: 9, id: 9},
-        {val: 8, id: 8},
-        {val: 7, id: 7},
-        {val: 6, id: 6},
-        {val: 5, id: 5},
-        {val: 4, id: 4},
-        {val: 3, id: 3},
-        {val: 2, id: 2},
-        {val: 1, id: 1},
+        { val: 24, id: 24 },
+        { val: 23, id: 23 },
+        { val: 22, id: 22 },
+        { val: 21, id: 21 },
+        { val: 20, id: 20 },
+        { val: 19, id: 19 },
+        { val: 18, id: 18 },
+        { val: 17, id: 17 },
+        { val: 16, id: 16 },
+        { val: 15, id: 15 },
+        { val: 14, id: 14 },
+        { val: 13, id: 13 },
+        { val: 12, id: 12 },
+        { val: 11, id: 11 },
+        { val: 10, id: 10 },
+        { val: 9, id: 9 },
+        { val: 8, id: 8 },
+        { val: 7, id: 7 },
+        { val: 6, id: 6 },
+        { val: 5, id: 5 },
+        { val: 4, id: 4 },
+        { val: 3, id: 3 },
+        { val: 2, id: 2 },
+        { val: 1, id: 1 }
       ],
       // 文件數量
       fileNum: "1",
@@ -358,26 +417,27 @@ export default {
     // 獲取默認開始時間
     getStartTime() {
       this.form.startTime = new Date();
-      this.getEndTime()
+      this.getEndTime();
     },
 
     // 獲取默認結束時間
     getEndTime() {
-      const dHour = this.form.durTime
+      const dHour = this.form.durTime;
       if (!this.form.startTime) return;
-      const startTime = new Date(this.form.startTime).getTime()
-      console.log(startTime)
-      this.form.endTime = new Date(startTime + dHour*60*60*1000);
-      console.log(this.form.endTime)
+      const startTime = new Date(this.form.startTime).getTime();
+      this.form.endTime = new Date(startTime + dHour * 60 * 60 * 1000);
     },
 
     // 獲取默認交貨時間
     getDeliTime() {
-      if(!this.form.startTime) return
-      let startTime = this.form.startTime
-      let reTime = ((startTime.getHours() * 60 + startTime.getMinutes()) * 60 + startTime.getSeconds()) * 1000
-      let dayTime = Date.parse(startTime) - reTime
-      this.form.deliveryTime = new Date(dayTime + 172800000)
+      if (!this.form.startTime) return;
+      let startTime = this.form.startTime;
+      let reTime =
+        ((startTime.getHours() * 60 + startTime.getMinutes()) * 60 +
+          startTime.getSeconds()) *
+        1000;
+      let dayTime = Date.parse(startTime) - reTime;
+      this.form.deliveryTime = new Date(dayTime + 172800000);
     },
 
     // 獲取類型範圍
@@ -385,6 +445,8 @@ export default {
       query_pd_type_list().then(res => {
         if (res.code === "1") {
           this.rangeOptions = res.t;
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -398,32 +460,44 @@ export default {
     getFile() {
       var inputFiles = this.$refs.uploadFile.files;
       for (let item of inputFiles) {
-        const fileSuffix = item.name.split(".");
-        const isDwg = fileSuffix[fileSuffix.length - 1] === "dwg";
-        const isPdf = item.type === "application/pdf";
-        const isXls = item.type === "application/vnd.ms-excel";
-        const isXlsx =
-          item.type ===
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        if (isPdf || isDwg || isXls || isXlsx) {
-          if (this.accessList.length == 0) {
-            this.uploadFile(item);
-          } else {
-            this.isRepetName(item);
-          }
-        } else {
-          this.$message.error("請選擇pdf/dwg/xls文檔");
+        if (item.size > 20 * 1024 * 1024) {
+          alert("文件：" + item.name + "，體積過大，請檢查！");
+          continue;
         }
+        if (this.accessList.length == 0) {
+          this.uploadFile(item);
+        } else {
+          this.isRepetName(item);
+        }
+        // const fileSuffix = item.name.split(".");
+        // const isDwg = fileSuffix[fileSuffix.length - 1].toUpperCase() === "DWG";
+        // const isPdf = item.type === "application/pdf";
+        // const isXls = item.type === "application/vnd.ms-excel";
+        // const isXlsx =
+        //   item.type ===
+        //   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        // if (isPdf || isDwg || isXls || isXlsx) {
+        //   if (this.accessList.length == 0) {
+        //     this.uploadFile(item);
+        //   } else {
+        //     this.isRepetName(item);
+        //   }
+        // } else {
+        //   this.$message.error("請選擇pdf/dwg/xls文檔");
+        // }
       }
+
       // 清除 input 的 value 值，避免选择重复文件而不触发change事件
       this.$refs.uploadFile.value = null;
     },
 
-    // 是否重名 TODO
+    // 是否重名
     isRepetName(item) {
       for (let single of this.accessList) {
         if (single.file_origin_name == item.name) {
-          alert("重复文件：" + item.name + "，若需更換文件請先手動刪除原文件");
+          alert(
+            "發現重复文件：" + item.name + "，若需更換文件請先手動刪除原文件"
+          );
           return;
         }
       }
@@ -432,12 +506,13 @@ export default {
 
     // 上傳文件
     uploadFile(file) {
+      console.log(file.size);
       var data = new FormData();
       data.append("file", file);
       data.append("file_type", "part_doc");
       file_upload(data).then(res => {
-        if (res.code == 1) {
-          this.$message.success("上傳成功");
+        if (res.code === "1") {
+          // this.$message.success("上傳成功");
           this.accessList.push({
             id: JSON.stringify(new Date()),
             part_amunt: "1",
@@ -446,7 +521,7 @@ export default {
             file_origin_name: res.t.file_origin_name
           });
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -462,7 +537,7 @@ export default {
           if (res.code === "1") {
             this.deleteFileFromFTP(index);
           } else {
-            this.$message.error("出錯啦，稍後再試試吧！");
+            this.$message.error(res.msg);
           }
         });
       } else {
@@ -479,10 +554,10 @@ export default {
         file_origin_name: this.accessList[index].file_origin_name
       };
       file_delete(data).then(res => {
-        if (res.code == 1) {
+        if (res.code === "1") {
           this.accessList.splice(index, 1);
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -573,30 +648,37 @@ export default {
 
     // 保存
     save(data) {
-      console.log(this.form);
       saveBill(data, this.token).then(res => {
-        console.log(res);
-        if (res.code == "1") {
+        if (res.code === "1") {
           this.$message.success("保存成功!");
           this.$router.push("/demand/order");
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
 
     // 發佈
     pulish(data) {
-      console.log("pulish");
-      submitBill(data).then(res => {
-        console.log(res);
-        if (res.code === "1") {
-          this.$message.success("發佈成功!");
-          this.$router.push("/demand/order");
-        } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
-        }
-      });
+      this.$confirm("發佈後無法更改內容，是否已確認信息無誤？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          console.log("確認");
+          submitBill(data).then(res => {
+            if (res.code === "1") {
+              this.$message.success("發佈成功!");
+              this.$router.push("/demand/order");
+            } else {
+              this.$message.error(res.msg);
+            }
+          });
+        })
+        .catch(() => {
+          console.log("取消");
+        });
     },
 
     // 查詢保存的訂單信息
@@ -627,7 +709,7 @@ export default {
           this.create_date = data.create_date;
           this.accessList = data.file_list;
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -639,6 +721,8 @@ export default {
           query_deliver_address_list().then(res => {
             if (res.code === "1") {
               this.addressList = res.t;
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
@@ -646,6 +730,8 @@ export default {
           query_bid_range_list().then(res => {
             if (res.code === "1") {
               this.rangeList = res.t;
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
@@ -663,23 +749,15 @@ export default {
         addressList.push(obj);
       }
 
-      // var results = queryString
-      //   ? addressList.filter(this.createFilter(queryString))
-      //   : addressList;
-      // cb(results);
       // 调用 callback 返回建议列表的数据
       cb(addressList);
     },
     createFilter(queryString) {
       return address => {
-        console.log(address);
         return (
           address.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
         );
       };
-    },
-    handleSelect(item) {
-      console.log(item);
     }
   },
   created() {
@@ -763,6 +841,7 @@ export default {
     justify-content: center;
     border: none;
     cursor: pointer;
+    user-select: none;
     /deep/.el-upload {
       display: flex;
       align-items: center;
@@ -773,12 +852,6 @@ export default {
     span {
       color: #fff;
     }
-    // .el-button{
-    //   background-color: rgba(0, 0, 0, 0);
-    //   border: none;
-    //   padding: 0;
-    //   color: #fff;
-    // }
   }
   .info_right {
     display: flex;
@@ -796,7 +869,6 @@ export default {
     }
   }
   > .accessContent {
-    // 400px
     display: flex;
     flex-wrap: wrap;
     margin-top: 20px;
@@ -832,6 +904,8 @@ export default {
     .fileName {
       width: 66%;
       overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .close {
       display: block;
@@ -886,21 +960,19 @@ export default {
   margin-top: 30px;
   display: flex;
   justify-content: center;
+  user-select: none;
   .saveBtn,
   .publishBtn {
     color: #fff;
     position: relative;
     transform: scale(0.8);
     font-size: 24px;
-    > svg {
-      cursor: pointer;
-    }
+    cursor: pointer;
     > span {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      cursor: pointer;
     }
   }
 }
@@ -913,6 +985,7 @@ export default {
   font-size: 16px;
   color: #212f3a;
   text-align: right;
+  user-select: none;
   // text-justify: distribute-all-lines; /*ie6-8*/
   // text-align-last: justify; /* ie9*/
   // -moz-text-align-last: justify; /*ff*/

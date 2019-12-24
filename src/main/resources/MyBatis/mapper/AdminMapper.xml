@@ -15,5 +15,23 @@
                   and #{pageIndex} * #{pageSize}
     </select>
 
+    <!-- 保存公告 -->
+    <insert id="saveBulletin" parameterType="com.foxconn.bidding.model.BulletinDO">
+        insert into BULLETIN
+            (list_content, list_order)
+        values
+            (#{list_content}, #{list_order})
+    </insert>
+
+    <!-- 刪除公告 -->
+    <delete id="deleteBulletin">
+        delete from BULLETIN
+    </delete>
+
+    <!-- 查詢公告list -->
+    <select id="listBulletin" resultType="com.foxconn.bidding.model.BulletinDO">
+        select t.* from BULLETIN t order by t.list_order asc
+    </select>
+
     <!-- 注釋模板，放在最後一行 -->
 </mapper>

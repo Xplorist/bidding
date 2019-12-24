@@ -108,13 +108,14 @@
                     <div class="btn">
                       <router-link :to="item.href +'?pkid='+ item.pkid">{{item.status.btnText}}</router-link>
                     </div>
+                    <!-- <div class="showDoc">查看标书</div> -->
                   </div>
                 </div>
               </div>
               <!-- listEnd -->
-
-              <!-- 分頁 -->
             </div>
+
+            <!-- 分頁 -->
             <div class="paging">
               <Paging
                 :total="total"
@@ -123,6 +124,7 @@
                 @getCurrentPage="getListDate"
               ></Paging>
             </div>
+            
           </div>
         </div>
       </div>
@@ -281,7 +283,7 @@ export default {
             }
           }
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -295,8 +297,6 @@ export default {
         this.currentPage,
         this.pageSize
       ).then(res => {
-        console.log(res)
-        console.log(this.classify)
         if (res.code === "1") {
           // 清空原有數據 獲取總數據長度
           this.orderList = [];
@@ -305,7 +305,7 @@ export default {
           const listData = res.t.bill_list;
           this.changeListData(listData);
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -403,7 +403,7 @@ export default {
     this.currentPage = page || 1;
 
     if (classify && classify !== "all") {
-      this.initPage = this.currentPage
+      this.initPage = this.currentPage;
       this.classify = classify;
     } else {
       this.getListDate(this.currentPage);
@@ -425,11 +425,11 @@ export default {
   watch: {
     classify: function() {
       sessionStorage.setItem("personalMainCurrentClassify", this.classify);
-      if(this.initPage == 1){
+      if (this.initPage == 1) {
         this.getListDate();
-      }else{
+      } else {
         this.getListDate(this.initPage);
-        this.initPage = 1
+        this.initPage = 1;
       }
     }
   }
@@ -613,6 +613,7 @@ export default {
   justify-content: center;
   align-items: center;
   margin-right: 5px;
+  user-select: none;
 }
 // 基本信息
 .sin_left_info {
@@ -689,6 +690,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
   // &.failed {
   // }
   &.deliver {
@@ -735,7 +737,7 @@ export default {
     font-size: 16px;
   }
   > .btn {
-    margin-top: 14px;
+    margin: 12px 0;
     color: #fff;
     background-color: #2e6e9e;
     width: 80px;
@@ -750,6 +752,10 @@ export default {
       width: 100%;
       height: 100%;
     }
+  }
+  > .showDoc {
+    color: #0096ff;
+    cursor: pointer;
   }
 }
 </style>

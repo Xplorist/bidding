@@ -4,7 +4,7 @@ import JsPDF from 'jspdf'
 
 export default {
   install: function (Vue) {
-  // install: function (Vue, options) {
+  // install: function (Vue, options)
     Vue.prototype.$getPdf = function (id, title) {
       window.pageYOffset = 0;
       document.documentElement.scrollTop = 0
@@ -35,10 +35,7 @@ export default {
       // 避免簽字位置被分割
       let remainHofSign = sign.offsetTop - node.offsetTop
       let itemHofSign = sign.clientHeight
-      console.log(remainHofSign + itemHofSign)
-      console.log(pageH * currentPage)
       if( (remainHofSign + itemHofSign) > pageH * currentPage ){
-        console.log('haha')
         currentPage ++
         this.addElement(sign, itemHofSign, 'sign')
       }

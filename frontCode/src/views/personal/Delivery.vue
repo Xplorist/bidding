@@ -18,9 +18,7 @@
             </div>
             <div class="main_head_title">
               <div class="head_tit_text">【模具】需求單號{{orderInfo.bill_no}}</div>
-              <div
-                class="head_tit_time"
-              >交貨時間: {{orderInfo.deliver_date.split(" ")[0]}}</div>
+              <div class="head_tit_time">交貨時間: {{orderInfo.deliver_date.split(" ")[0]}}</div>
             </div>
           </div>
           <!-- 基本信息 -->
@@ -100,7 +98,7 @@
             </p>
             <p>制作已用时间：20天17小时25分39秒</p>
             <div>申请延迟交货</div>
-          </div> -->
+          </div>-->
           <!-- 確認交貨按鈕 -->
           <div class="main_confirm">
             <div class="main_con_upload">
@@ -153,31 +151,32 @@ export default {
         if (res.code === "1") {
           this.orderInfo = res.t;
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
 
     // 按鈕
-    confirm(){
-      this.updataStatus()
+    confirm() {
+      this.updataStatus();
     },
 
     // 提交狀態
-    updataStatus(){
+    updataStatus() {
       const data = {
         pkid: this.orderInfo.pkid,
-        bill_status: 3,
-      }
-      update_bill_status(data).then(res =>{
-        if(res.code === "1"){
-          this.$router.push('/personal')
+        bill_status: 3
+      };
+      update_bill_status(data).then(res => {
+        if (res.code === "1") {
+          this.$router.push("/personal");
+        } else {
+          this.$message.error(res.msg);
         }
-      })
+      });
     }
   },
   created() {
-    // console.log(this.$router.history.current.query.pkid)
     this.getOrderInfo(this.$router.history.current.query.pkid);
   },
   components: {

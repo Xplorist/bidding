@@ -25,18 +25,17 @@ import SilderBar from "../../components/personal/SilderBar";
 
 import { mapState } from "vuex";
 
-
 export default {
   data: function() {
     return {
       // 侧边栏选中条目
-      silderBarItem: "setting",
+      silderBarItem: "setting"
     };
   },
   methods: {
-    quit(){
-      this.$router.push('/login')
-      this.$store.commit("LOG_OUT")
+    quit() {
+      this.$router.push("/login");
+      this.$store.commit("LOG_OUT");
     }
   },
   components: {
@@ -82,6 +81,7 @@ export default {
   margin-bottom: 20px;
   border-bottom: 1px solid #afc2cf;
 }
+
 /deep/ .el-form-item {
   display: flex;
   align-items: center;
@@ -90,128 +90,6 @@ export default {
   &.properties {
     span {
       color: #0092ff;
-    }
-  }
-  // 頭像欄修改
-  &.portrait {
-    .el-form-item__content {
-      display: flex;
-      align-items: center;
-    }
-    .el-image {
-      border-radius: 50%;
-      margin-right: 20px;
-    }
-    span {
-      display: inline-block;
-      margin: 0 auto;
-      color: #0092ff;
-      cursor: pointer;
-    }
-  }
-  // 所屬單位修改
-  &.department {
-    .el-select {
-      margin-right: 10px;
-    }
-    .el-input {
-      input {
-        width: 100px;
-      }
-    }
-  }
-  // 費用代碼修改
-  // 加工範圍修改
-  // 銀行賬號修改
-  &.costCode,
-  &.processRange,
-  &.bankAccount {
-    .operation {
-      color: #0092ff;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-  }
-  // 聯繫電話
-  &.tel {
-    .el-form-item__content {
-      display: flex;
-      align-items: center;
-    }
-    .el-checkbox {
-      margin-left: 20px;
-    }
-    .el-checkbox__inner {
-      background-color: #d3dfe7;
-      border: 1px dashed #afc2cf;
-      &:after {
-        border-color: #0092ff;
-      }
-    }
-    .el-checkbox__label {
-      font-size: 16px;
-      color: #212f3a;
-    }
-  }
-  // email
-  &.email {
-    .el-input {
-      input {
-        width: 320px;
-      }
-    }
-  }
-  // 簡介
-  &.intro {
-    .el-textarea {
-      textarea {
-        width: 700px;
-        background-color: #d3dfe7;
-        border-color: #afc2cf;
-        text-indent: 2rem;
-        border-radius: 0px;
-        &:focus {
-          border-color: #0092ff;
-        }
-      }
-    }
-  }
-}
-// label全局效果修改
-/deep/ .el-form-item__label {
-  width: 100px !important;
-  text-align: left;
-  font-size: 16px;
-  color: #212f3a;
-}
-// content全局效果修改
-/deep/ .el-form-item__content {
-  font-size: 16px;
-  color: #212f3a;
-  margin-left: 10px !important;
-  .el-input {
-    input {
-      background-color: #d3dfe7;
-      border: 1px solid #afc2cf;
-      border-radius: 0px;
-      width: 320px;
-      &:focus {
-        border-color: #0092ff;
-      }
-    }
-  }
-}
-
-// 彈出對話框樣式
-/deep/ .el-dialog {
-  width: 460px;
-  position: absolute;
-  top: 23%;
-  left: 50%;
-  transform: translateX(-50%);
-  .el-dialog__body {
-    .el-input__inner {
-      background-color: #fff;
     }
   }
 }

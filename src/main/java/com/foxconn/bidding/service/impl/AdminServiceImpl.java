@@ -2,11 +2,10 @@ package com.foxconn.bidding.service.impl;
 
 import com.foxconn.bidding.mapper.AdminMapper;
 import com.foxconn.bidding.mapper.UserMapper;
-import com.foxconn.bidding.model.RECV_MNUFC_RANGE_bean;
-import com.foxconn.bidding.model.ResultParam;
-import com.foxconn.bidding.model.USER_INFO_bean;
+import com.foxconn.bidding.model.*;
 import com.foxconn.bidding.service.AdminService;
 import com.foxconn.bidding.service.EmailService;
+import com.foxconn.bidding.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,5 +120,49 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return new ResultParam("1", "管理員審核通過", null);
+    }
+
+    // 【03】保存公告
+    @Transactional
+    @Override
+    public ResultParam saveBulletin(List<BulletinDO> paramList, HttpServletRequest request) {
+        // 判斷權限
+        String loginUserPkid = UserUtil.getLoginUserPkid(request);
+        USER_INFO_bean loginUser = userMapper.findUserById(loginUserPkid);
+        String loginUsername = loginUser.getUsername();
+        if (!"admin".equals(loginUsername)) {
+            throw new RuntimeException("當前賬號不是管理員賬號，無權限操作");
+        }
+
+        // 保存前先刪除
+        // 刪除公告
+        mapper.deleteBulletin();
+
+        // 保存公告
+        Integer count = 1;
+        for (int i = 0; i < paramList.size(); i++) {
+            BulletinDO bulletin = paramList.get(i);
+            String list_content = bulletin.getList_content();
+            if (list_content == null || "".equals(list_content)) {
+                continue;
+            }
+            bulletin.setList_order(count);
+            Integer saveFlag = mapper.saveBulletin(bulletin);
+            if (saveFlag <= 0) {
+                throw new RuntimeException("保存公告失敗");
+            }
+            count++;
+        }
+
+        return new ResultParam("1", "【03】保存公告成功", null);
+    }
+
+    // 【04】查詢公告list
+    @Override
+    public ResultParam listBulletin(RequestParam param, HttpServletRequest request) {
+        // 查詢公告list
+        List<BulletinDO> list = mapper.listBulletin();
+
+        return new ResultParam("1", "【04】查詢公告list成功", list);
     }
 }

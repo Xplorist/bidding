@@ -16,9 +16,9 @@
               <div>收藏</div>
             </li>-->
             <li>
-              <div class="tag_icon tag_browse"></div>
+              <!-- <div class="tag_icon tag_browse"></div>
               <div>瀏覽:</div>
-              <div class="tag_browseNum">{{Math.floor(Math.random()*99)+1}}次</div>
+              <div class="tag_browseNum">{{Math.floor(Math.random()*99)+1}}次</div>-->
             </li>
           </ul>
         </div>
@@ -140,10 +140,16 @@
                   <span>圖檔附件</span>
                 </div>
                 <div class="ac_content">
-                  <div
-                    class="ac_con_item"
+                  <el-tooltip
+                    class="item"
+                    effect="dark"
+                    placement="top-start"
                     v-for="(item) in orderInfo.file_list"
                     :key="item.pkid"
+                    :content="'文件全稱：'+item.file_origin_name"
+                  >
+                  <div
+                    class="ac_con_item"
                     :style="{cursor: send_recv_type == 'recv' || send_recv_type == 'send' ? 'pointer': 'not-allowed'}"
                     @click="downloadOne(item.file_save_path, item.file_save_name, item.file_origin_name)"
                   >
@@ -153,6 +159,8 @@
                       <!-- <div class="itemNum">{{item.part_amunt}}</div> -->
                     </div>
                   </div>
+                  </el-tooltip>
+
                 </div>
                 <div
                   class="ac_allDownload"
@@ -233,6 +241,7 @@
               <div class="eva_content">
                 <p v-if="orderInfo.send_eval">需求方：{{orderInfo.send_eval.summary_text}}</p>
                 <p v-if="orderInfo.recv_eval">接單方：{{orderInfo.recv_eval.summary_text}}</p>
+                <p v-if="!orderInfo.send_eval && !orderInfo.recv_eval" style="color:#626f7f;">暫無評價</p>
               </div>
             </div>
           </div>
@@ -314,6 +323,7 @@
                     type="number"
                     class="el-input-text-center"
                     style="width: 100px;"
+                    oninput="this.value = this.value.replace(/[^1-9]/g, '');"
                   ></el-input>
                 </td>
                 <td v-if="joinFlag">{{item.price}}</td>
@@ -323,6 +333,7 @@
                     type="number"
                     class="el-input-text-center"
                     style="width: 160px;"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                   ></el-input>
                 </td>
                 <td>{{item.num * item.price}}</td>
@@ -358,7 +369,7 @@
                     type="number"
                     class="el-input-text-center"
                     style="width: 100px;"
-                    placeholder="1"
+                    oninput="this.value = this.value.replace(/[^1-9]/g, '');"
                     :disabled="joinFlag"
                   ></el-input>
                 </td>
@@ -371,6 +382,7 @@
                     style="width: 160px;"
                     placeholder="0"
                     :disabled="joinFlag"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                   ></el-input>
                 </td>
                 <td>{{item.num * item.price}}</td>
@@ -547,8 +559,13 @@ export default {
     checkList(val) {
       if (val === "uploaded") {
         sessionStorage.setItem("biddinfdDoc", JSON.stringify(this.orderInfo));
-        const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
-        window.open(url);
+        // const url = "/biddingDoc?loaded=true&pkid=" + this.pkid;
+        // let routeData = this.$router.resolve({ path: url});
+        let routeData = this.$router.resolve({
+          path: "/biddingDoc",
+          query: { loaded: true, pkid: this.pkid }
+        });
+        window.open(routeData.href, "_blank");
       } else {
         this.isCheckList = true;
         let slav_list = [];
@@ -588,7 +605,8 @@ export default {
         };
         sessionStorage.setItem("biddinfdDoc", JSON.stringify(data));
         const url = "/biddingDoc?loaded=false";
-        window.open(url);
+        let routeData = this.$router.resolve({ path: url });
+        window.open(routeData.href, "_blank");
       }
     },
     // 添加自定義清單
@@ -681,6 +699,8 @@ export default {
             this.componentAllOptions.push(obj);
           }
           this.detachment();
+        } else {
+          this.$message.error(res.msg);
         }
       });
     },
@@ -703,19 +723,19 @@ export default {
             this.quotatList.push(component);
           }
       }
-    }, 
+    },
 
     // 下載文件
     downloadOne(path, name, originName) {
       if (this.send_recv_type == "recv" || this.send_recv_type == "send") {
+        // console.log(getAccess(path, name, originName))
         downLoad(getAccess(path, name, originName)).then(res => {
-          console.log(res);
           let blob = new Blob([res], { type: res.type });
           let objectUrl = URL.createObjectURL(blob); //生成一个url
 
           let link = document.createElement("a");
           link.href = objectUrl;
-          link.setAttribute( "download", originName);
+          link.setAttribute("download", originName);
           link.click();
         });
       } else {
@@ -826,7 +846,7 @@ export default {
           // 關閉窗口
           this.$router.push("/");
         } else {
-          this.$message.error("出錯啦，請稍後重試");
+          this.$message.error(res.msg);
         }
       });
     },
@@ -1036,6 +1056,7 @@ export default {
   .req_title,
   .bid_title,
   .eva_title {
+    user-select: none;
     position: relative;
     width: 100px;
     height: 35px;
@@ -1127,7 +1148,7 @@ export default {
     .item-wrapper {
       position: relative;
       display: flex;
-      justify-content: space-between;
+      justify-content: space-around;
       align-items: center;
       width: 150px;
       margin: 0 auto;
@@ -1147,14 +1168,16 @@ export default {
       }
     }
     .itemIcon {
-      width: 32px;
-      height: 27px;
-      background: url(../../assets/imgs/particulars/Excel.png) no-repeat;
+      width: 21px;
+      height: 21px;
+      background: url(../../assets/imgs/particulars/File.png) no-repeat;
     }
     .itemName {
       width: 60%;
       overflow: hidden;
+      white-space: nowrap;
       margin-right: 10px;
+      text-overflow: ellipsis;
     }
     // .itemNum {
     //   width: 22px;
@@ -1178,6 +1201,7 @@ export default {
     text-align: center;
     line-height: 44px;
     cursor: pointer;
+    user-select: none;
   }
 
   // 【製作要求】
@@ -1185,7 +1209,6 @@ export default {
     margin-top: 30px;
     .req_content {
       margin-top: 22px;
-      user-select: text;
     }
     p {
       color: #212f3a;
@@ -1211,6 +1234,7 @@ export default {
     color: #fff;
     font-size: 20px;
     cursor: pointer;
+    user-select: none;
     position: relative;
     > span {
       position: absolute;
@@ -1262,10 +1286,8 @@ export default {
     }
   }
   // 【項目評價】
-  // .evaluate {
-  // }
   .eva_content {
-    margin-top: 22px;
+    padding-top: 22px;
     > p {
       font-size: 16px;
       color: #626f7f;
@@ -1324,6 +1346,7 @@ export default {
       height: 24px;
       background: url(../../assets/imgs/particulars/closeAlertBox.png) no-repeat;
       cursor: pointer;
+      user-select: none;
     }
   }
   // 表單信息
@@ -1420,6 +1443,7 @@ export default {
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    user-select: none;
     > .addIcon {
       width: 15px;
       height: 15px;
@@ -1459,6 +1483,7 @@ export default {
     font-size: 20px;
     position: relative;
     cursor: pointer;
+    user-select: none;
     > span {
       position: absolute;
       top: 50%;

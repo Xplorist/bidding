@@ -4,6 +4,7 @@ import com.foxconn.bidding.model.BILL_bean;
 import com.foxconn.bidding.model.EmailContent;
 import com.foxconn.bidding.model.GIVE_PRICE_MSTR_bean;
 import com.foxconn.bidding.util.EmailUtil;
+import com.foxconn.bidding.util.MoneyNumberUtil;
 import com.foxconn.bidding.util.SimpleEncodeUtil;
 import org.springframework.beans.BeanUtils;
 
@@ -20,7 +21,24 @@ public class Test {
         // test2();
         //testSendEmail();
         //testRandomCode();
-        testDecodePassword();
+        //testDecodePassword();
+        //testNumberOperation();
+        //testNumberUtil();
+        testDate();
+    }
+
+    public static void testDate() {
+        String lastDay = new SimpleDateFormat("yyy-MM-dd").format(new Date(new Date().getTime() - 1000 * 60 * 60 * 24));
+        System.out.println(lastDay);
+    }
+
+    public static void testNumberUtil() {
+        Long money = 3124124831465738446L;
+        System.out.println(MoneyNumberUtil.addDot(money));
+    }
+
+    public static void testNumberOperation() {
+        System.out.println(2 % 3);
     }
 
     public static void testDecodePassword() {

@@ -34,7 +34,7 @@
             </el-form-item>
             <!-- 所屬單位 -->
             <el-form-item label="所屬單位:" class="department">
-              <el-select v-model="form.secn_cmpy" @click.native="query_department('SECN_CMPY')">
+              <!-- <el-select v-model="form.secn_cmpy" @click.native="query_department('SECN_CMPY')">
                 <el-option
                   v-for="(item) in form.secn_cmpy_list"
                   :key="item.pkid"
@@ -60,7 +60,21 @@
                   :label="item.name"
                   :value="item.name"
                 ></el-option>
-              </el-select>
+              </el-select>-->
+              <!-- <el-input v-model="form.secn_cmpy" style="display:inline;" disabled></el-input> -->
+              <el-autocomplete
+                class="inline-input"
+                v-model.trim="form.entrps_group"
+                :fetch-suggestions="querySearchGroup"
+                @select="query_department('PD_OFFICE')"
+                @change.native="query_department('PD_OFFICE')"
+                style="margin-right:10px;"
+              ></el-autocomplete>
+              <el-autocomplete
+                class="inline-input"
+                v-model.trim="form.pd_office"
+                :fetch-suggestions="querySearchOffice"
+              ></el-autocomplete>
             </el-form-item>
             <!-- 賬號名稱 -->
             <el-form-item label="賬號名稱:" prop="name">
@@ -68,11 +82,15 @@
             </el-form-item>
             <!-- 單位代碼 -->
             <el-form-item label="單位代碼:" prop="departCode">
-              <el-input v-model="form.departCode" @focus="form.departName = ''" @blur="queryDeptName"></el-input>
+              <el-input
+                v-model.trim="form.departCode"
+              ></el-input>
+                <!-- @focus="form.departName = ''" -->
+                <!-- @blur="queryDeptName" -->
             </el-form-item>
             <!-- 單位名稱 -->
             <el-form-item label="單位名稱:" prop="departName">
-              <el-input v-model="form.departName" disabled=""></el-input>
+              <el-input v-model="form.departName"></el-input>
             </el-form-item>
             <!-- 交易法人 -->
             <el-form-item label="交易法人:">
@@ -96,19 +114,19 @@
             </el-form-item>
             <!-- 業務經理 -->
             <el-form-item label="業務經理:" prop="manager">
-              <el-input v-model="form.manager"></el-input>
+              <el-input v-model.trim="form.manager"></el-input>
             </el-form-item>
             <!-- 固定電話 -->
             <el-form-item label="固定電話:" class="tel" prop="telNum">
-              <el-input v-model="form.telNum"></el-input>
+              <el-input v-model.trim="form.telNum"></el-input>
               <!-- <el-checkbox label="在主頁中顯示" @change="form.tel.check = !form.tel.check" :checked="form.tel.check" name="type"></el-checkbox> -->
             </el-form-item>
             <!-- 移動電話 -->
             <el-form-item label="移動電話:" class="tel" prop="mobileNum">
-              <el-input v-model="form.mobileNum"></el-input>
+              <el-input v-model.trim="form.mobileNum"></el-input>
             </el-form-item>
             <!-- Email -->
-            <el-form-item label="Email:" class="email" prop="email">
+            <el-form-item label="公司郵箱:" class="email" prop="email">
               <el-input v-model="form.email"></el-input>
             </el-form-item>
             <!-- 簡介 -->
@@ -228,7 +246,11 @@ export default {
         ],
         // 单位名称
         departName: [
-          { required: true, message: "未查詢到单位名称，請檢查", trigger: "blur" }
+          {
+            required: true,
+            message: "未查詢到单位名称，請檢查",
+            trigger: "blur"
+          }
         ],
         // 费用代码
         costCode: [
@@ -272,28 +294,35 @@ export default {
   },
   mounted() {
     this.initData();
+    this.query_department("ENTRPS_GROUP");
   },
   methods: {
     // 查詢單位名稱
-    queryDeptName(){
-      if(!this.form.factory) return this.$message.error('請先選擇廠區！')
-      query_dept_name_by_dept_no(this.form.departCode, this.form.fctry_zone).then(res => {
-        if(res.code === '1'){
-          this.form.departName = res.t.dept_name
-        }else{
-          this.form.departName = ''
-          this.$message.error("查詢失敗，請檢查單位代碼是否輸入正確！")
+    queryDeptName() {
+      if (!this.form.fctry_zone) return this.$message.error("請先選擇廠區！");
+      this.form.departCode = this.form.departCode.toUpperCase();
+      query_dept_name_by_dept_no(
+        this.form.departCode,
+        this.form.fctry_zone
+      ).then(res => {
+        if (res.code === "1") {
+          this.form.departName = res.t.dept_name;
+        } else {
+          this.form.departName = "";
+          this.$message.error("查詢失敗，請檢查單位代碼是否輸入正確！");
         }
-      })
+      });
     },
 
     // 查詢加工範圍
-    getRange(){
+    getRange() {
       query_pd_type_list().then(res => {
-        if(res.code === "1"){
-          this.rangeOptions = res.t
+        if (res.code === "1") {
+          this.rangeOptions = res.t;
+        } else {
+          this.$message.error(res.msg);
         }
-      })
+      });
     },
 
     // 查詢 廠區 單位
@@ -304,6 +333,8 @@ export default {
           query_factory_list().then(res => {
             if (res.code === "1") {
               this.form.fctry_zone_list = res.t;
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
@@ -314,25 +345,30 @@ export default {
               // 清空 事業群 產品處
               this.form.entrps_group = "";
               this.form.pd_office = "";
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
         case "ENTRPS_GROUP":
-          for (let item of this.form.secn_cmpy_list) {
-            if (this.form.secn_cmpy == item.name) {
-              data = item.pkid;
-            }
-          }
+          // for (let item of this.form.secn_cmpy_list) {
+          //   if (this.form.secn_cmpy == item.name) {
+          //     data = item.pkid;
+          //   }
+          // }
+          data = "Foxconn";
           query_ENTRPS_GROUP_list(data).then(res => {
             if (res.code === "1") {
               this.form.entrps_group_list = res.t;
               // 清空 產品處
-              this.form.pd_office = "";
+              // this.form.pd_office = "";
+              this.query_department("PD_OFFICE");
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
         case "PD_OFFICE":
-          // var data = ''
           for (let item of this.form.entrps_group_list) {
             if (this.form.entrps_group == item.name) {
               data = item.pkid;
@@ -341,10 +377,46 @@ export default {
           query_PD_OFFICE_list(data).then(res => {
             if (res.code === "1") {
               this.form.pd_office_list = res.t;
+            } else {
+              this.$message.error(res.msg);
             }
           });
           break;
       }
+    },
+
+    // 查詢事業群
+    querySearchGroup(queryString, cb) {
+      var groupList = [];
+      if (this.form.entrps_group_list.length > 0) {
+        for (let item of this.form.entrps_group_list) {
+          const obj = {
+            value: item.name,
+            id: item.pkid
+          };
+          groupList.push(obj);
+        }
+      }
+
+      // 调用 callback 返回建议列表的数据
+      cb(groupList);
+    },
+
+    // 查詢產品處
+    querySearchOffice(queryString, cb) {
+      var officeList = [];
+      if (this.form.pd_office_list.length > 0) {
+        for (let item of this.form.pd_office_list) {
+          const obj = {
+            value: item.name,
+            id: item.pkid
+          };
+          officeList.push(obj);
+        }
+      }
+
+      // 调用 callback 返回建议列表的数据
+      cb(officeList);
     },
 
     // 查詢名稱是否重複
@@ -370,7 +442,6 @@ export default {
 
           this.updateInfo();
         } else {
-          // console.log("error submit!!");
           return false;
         }
       });
@@ -428,7 +499,8 @@ export default {
             if (res.code === "1") {
               this.$store.dispatch("get_userInfo", res.t);
               this.$store.dispatch("get_porImgUrl", getPorImg());
-
+            } else {
+              this.$message.error(res.msg);
             }
           });
         } else {
@@ -465,8 +537,10 @@ export default {
         data.append("file_type", "user_pic");
 
         file_upload(data).then(res => {
-          if (res.code == 1) {
+          if (res.code === "1") {
             this.user_pic_file = res.t;
+          } else {
+            this.$message.error(res.msg);
           }
         });
       }
@@ -486,7 +560,8 @@ export default {
         // 廠區
         (this.form.fctry_zone = this.userInfo.fctry_zone),
         // 次集團
-        (this.form.secn_cmpy = this.userInfo.secn_cmpy),
+        // (this.form.secn_cmpy = this.userInfo.secn_cmpy),
+        (this.form.secn_cmpy = "富士康次集團"),
         // 事業群
         (this.form.entrps_group = this.userInfo.entrps_group),
         // 產品處
@@ -529,7 +604,7 @@ export default {
         inputErrorMessage: text + "格式不正确"
       })
         .then(({ value }) => {
-          if (!value) return this.$message.warning("费用代码不能为空");
+          if (!value.trim()) return this.$message.warning("费用代码不能为空");
           this.$message({
             type: "success",
             message: "已修改" + text + "為: " + value
@@ -618,6 +693,7 @@ export default {
   }
   // 頭像欄修改
   &.portrait {
+    user-select: none;
     .el-form-item__content {
       display: flex;
       align-items: center;
@@ -692,7 +768,6 @@ export default {
         width: 700px;
         background-color: #d3dfe7;
         border-color: #afc2cf;
-        text-indent: 2rem;
         border-radius: 0px;
         &:focus {
           border-color: #0092ff;
@@ -707,6 +782,7 @@ export default {
   text-align: left;
   font-size: 16px;
   color: #212f3a;
+  user-select: none;
 }
 // content全局效果修改
 /deep/ .el-form-item__content {
@@ -744,6 +820,7 @@ export default {
 /deep/ .el-form-item__label {
   &:before {
     content: "" !important;
+    margin: 0 !important;
   }
 }
 </style>

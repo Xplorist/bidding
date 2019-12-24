@@ -117,9 +117,9 @@
                 </tr>
               </table>
             </div>
-          </div> -->
+          </div>-->
           <!-- 確認交貨按鈕 -->
-          <div class="main_confirm" >
+          <div class="main_confirm">
             <p>请先确认自己账户是否已收到对方汇款</p>
             <div class="main_con_conBtn" @click="comfirm">
               <svg width="265px" height="65px" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -167,26 +167,28 @@ export default {
         if (res.code === "1") {
           this.orderInfo = res.t;
         } else {
-          this.$message.error("出錯啦，稍後再試試吧！");
+          this.$message.error(res.msg);
         }
       });
     },
     // 按鈕
-    comfirm(){
-      this.updataStatus()
+    comfirm() {
+      this.updataStatus();
     },
-    
+
     // 提交狀態
-    updataStatus(){
+    updataStatus() {
       const data = {
         pkid: this.orderInfo.pkid,
-        bill_status: 6,
-      }
-      update_bill_status(data).then(res =>{
-        if(res.code === "1"){
-          this.$router.push('/personal')
+        bill_status: 6
+      };
+      update_bill_status(data).then(res => {
+        if (res.code === "1") {
+          this.$router.push("/personal");
+        } else {
+          this.$message.error(res.msg);
         }
-      })
+      });
     }
   },
   created() {

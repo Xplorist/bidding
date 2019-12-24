@@ -123,12 +123,12 @@ const creatRouter = () => {
         component: () => import('@/views/demand/Container'),
         children: [{
             path: 'order',
-            name: 'de-main',
+            name: 'de-order',
             component: () => import('@/views/demand/Main')
           },
           {
             path: 'information',
-            name: 'de-informaiton',
+            name: 'de-information',
             component: () => import('@/views/demand/Information')
           },
           {
@@ -157,6 +157,21 @@ const creatRouter = () => {
             component: () => import('@/views/demand/Setting')
           }
         ]
+      },
+      {
+        path: '/admin',
+        name: 'admin',
+        redirect: '/admin/audit',
+        meta: {
+          title: 'permission',
+          roles: ['system']
+        },
+        component: () => import('@/views/admin/Container'),
+        children: [{
+          path: 'audit',
+          name: 'sys-audit',
+          component: () => import('@/views/admin/Main')
+        }]
       }
     ]
   })
@@ -168,15 +183,24 @@ const router = creatRouter()
 // 導航守衛
 router.beforeEach((to, from, next) => {
   let token = sessionStorage.getItem('token')
-  const nextRoute = ['/personal', '/demand']
+  const nextRoute = ['/personal', '/demand', '/admin']
   var path = '/' + to.path.split('/')[1]
+  const type = store.state.userInfo ? store.state.userInfo.send_recv_type : '' // recv send system
 
+  // 管理員只能進入 admin 頁面
+  if (type === 'system' && to.path.slice(0, 6) !== '/admin') {
+    next({
+      path: '/admin'
+    })
+  }
+
+  // 404 頁面
   if (to.name === null) {
     console.log("這是錯誤的頁面")
     next({
       path: '/404'
     })
-  } else if(nextRoute.indexOf(path) >= 0){
+  } else if (nextRoute.indexOf(path) >= 0) {
     // 未登錄不能進入
     if (!token || token == null) {
       next({
@@ -184,18 +208,17 @@ router.beforeEach((to, from, next) => {
       })
     } else {
       // 權限
-      const type = store.state.userInfo.send_recv_type // recv send
       const flag = to.matched[0].meta.roles.includes(type)
       if (flag) {
         next()
       } else {
-        console.log("這是你不該來的頁面")
+        console.log("這是不該來的頁面")
         next({
           path: '/404'
         })
       }
     }
-  } else{
+  } else {
     next()
   }
 })

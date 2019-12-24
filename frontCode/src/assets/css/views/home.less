@@ -15,7 +15,6 @@
   }
 }
 .con-req {
-  // width: 100%;
   background: rgba(13, 28, 42, 0.4);
   margin-top: 14%;
   border: 1px solid rgba(0, 0, 0, 0);
@@ -24,9 +23,9 @@
 }
 // 標題
 .panel-title {
-  // margin-top: 27px;
   display: flex;
   justify-content: space-between;
+  user-select: none;
   // 左右線條
   .left-line,
   .right-line {
@@ -57,6 +56,7 @@
   color: #d7efff;
   font-size: 14px;
   margin-top: 30px;
+  user-select: none;
   .fil-scope,
   .fil-state,
   .fil-site,
@@ -67,7 +67,6 @@
     align-items: center;
     margin-right: 50px;
     select {
-      // width: 80px;
       height: 24px;
       margin-left: 6px;
       border: 0;
@@ -115,6 +114,7 @@
     justify-content: center;
     align-items: center;
     margin-right: 5px;
+    user-select: none;
   }
   // 具體信息
   .sin_l_info {
@@ -140,6 +140,7 @@
   // 狀態
   .state {
     display: flex;
+    user-select: none;
     div {
       min-width: 50px;
       padding: 0 10px;
@@ -191,9 +192,6 @@
     justify-content: space-between;
     align-items: center;
   }
-  // list 右側元素的居左元素
-  // .sin_r_left {
-  // }
   .sin_r_l_dep {
     display: flex;
     align-items: center;
@@ -231,7 +229,8 @@
       text-align: center;
       line-height: 30px;
       cursor: pointer;
-    }
+    user-select: none;
+  }
     a{
       display: block;
       width: 100%;
@@ -266,7 +265,6 @@
     align-items: center;
     cursor: pointer;
     &:hover {
-      // background-color: #0096ff;
       color: #0096ff;
     }
     .funcIcon {
@@ -306,8 +304,12 @@
   }
   // 返回頂部
   .backTop {
-    margin-top: 20px;
+    width: 100%;
     font-size: 14px;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
     cursor: pointer;
     .backTop-icon {
       background-repeat: no-repeat;
@@ -317,7 +319,6 @@
       margin: 0 auto 6px;
     }
     .backTop-text {
-      // color: #d3dfe7;
       color: #fff;
     }
   }

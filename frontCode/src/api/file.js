@@ -4,7 +4,6 @@ import $axios from './index'
 export function file_upload(data){
   const url = '/api/ftp_file/upload'
   const headers = 'multipart/form-data'
-  // console.log($axios)
   return $axios.post(url, data, headers)
 }
 

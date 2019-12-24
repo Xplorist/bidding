@@ -12,4 +12,5 @@ public class BaseInfoParam {
     private String dept_name;// 單位名稱
     private String dept_no;// 單位代碼
     private String fctry_zone;// 廠區
+    private String legal_person;// 法人
 }
